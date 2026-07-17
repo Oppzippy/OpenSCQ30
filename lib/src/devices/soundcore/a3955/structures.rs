@@ -28,3 +28,6 @@ pub enum ImmersiveExperience {
     GamingMode = 1,
     MovieMode = 2,
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy)]
+pub struct IsHearIdInitialized(pub bool);

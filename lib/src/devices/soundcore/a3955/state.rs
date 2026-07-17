@@ -24,6 +24,7 @@ pub struct A3955State {
     equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     age_range: AgeRange,
     gender: Gender,
+    is_hear_id_initialized: a3955::structures::IsHearIdInitialized,
     hear_id: CustomHearId<2, 10>,
     button_configuration: ButtonStatusCollection<8>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
@@ -52,6 +53,7 @@ impl A3955State {
             equalizer_configuration: packet.equalizer_configuration,
             age_range: packet.age_range,
             gender: packet.gender,
+            is_hear_id_initialized: packet.is_hear_id_initialized,
             hear_id: packet.hear_id,
             button_configuration: packet.button_configuration,
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
@@ -82,6 +84,7 @@ impl Update<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
             equalizer_configuration,
             age_range,
             gender,
+            is_hear_id_initialized,
             hear_id,
             button_configuration,
             ambient_sound_mode_cycle,
@@ -102,6 +105,7 @@ impl Update<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
         self.equalizer_configuration = equalizer_configuration;
         self.age_range = age_range;
         self.gender = gender;
+        self.is_hear_id_initialized = is_hear_id_initialized;
         self.hear_id = hear_id;
         self.button_configuration = button_configuration;
         self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;

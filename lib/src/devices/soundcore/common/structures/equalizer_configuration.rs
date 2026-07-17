@@ -128,6 +128,10 @@ impl<
         &self.volume_adjustments
     }
 
+    pub fn volume_adjustments_bytes(&self) -> impl Iterator<Item = u8> {
+        self.volume_adjustments.iter().flat_map(|v| v.bytes())
+    }
+
     pub fn channels(&self) -> usize {
         self.volume_adjustments.len()
     }

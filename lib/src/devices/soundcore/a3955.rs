@@ -43,9 +43,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3955_sound_modes();
-        builder
-            .equalizer_with_custom_hear_id_tws_force_supports_hear_id(equalizer::common_settings())
-            .await;
+        builder.a3955_equalizer(equalizer::common_settings()).await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3955StateUpdatePacket>(
@@ -277,5 +275,100 @@ mod tests {
             SoundcoreDeviceConfig::default(),
         )
         .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_equalizer_with_hear_id_uninitialized_byte_set() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3955,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 1, 4, 2, 0, 0, 48, 49, 46, 54, 55, 48, 49, 46, 54, 55, 51, 57, 53, 53,
+                        57, 56, 52, 55, 52, 52, 54, 54, 101, 102, 101, 51, 48, 46, 49, 46, 56, 1,
+                        254, 254, 180, 152, 140, 140, 120, 133, 136, 142, 120, 120, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 255, 1, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0,
+                        0, 0, 2, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 0, 0, 10, 0x11, 0xFF, 0x63, 0x66, 0x33,
+                        0x33, 0x44, 0x33, 0b110011, 0, 0x51, 0, 2, 1, 0, 1, 0, 0, 0, 0, 255, 255,
+                        1, 49, 1, 1, 1, 82, 2, 1, 3, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255,
+                        255, 25,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([(SettingId::ImmersiveExperience, "Disabled".into())]);
+        device
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::VolumeAdjustments,
+                    Value::I16Vec(vec![60, -60, 60, -60, 60, -60, 60, -60]),
+                )],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        254, 254, 0, 0, 180, 60, 180, 60, 180, 60, 180, 60, 120, 120, 180, 60, 180,
+                        60, 180, 60, 180, 60, 120, 120, 255, 255, 0, 255, 255, 255, 255, 255, 255,
+                        255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+                        0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 0, 133, 100, 141, 98, 142, 99, 140, 106, 120, 0,
+                        133, 100, 141, 98, 142, 99, 140, 106, 120, 0, 0,
+                    ],
+                )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_equalizer_with_hear_id_initialized() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3955,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 1, 4, 2, 0, 0, 48, 49, 46, 54, 55, 48, 49, 46, 54, 55, 51, 57, 53, 53,
+                        57, 56, 52, 55, 52, 52, 54, 54, 101, 102, 101, 51, 48, 46, 49, 46, 56, 1,
+                        254, 254, 180, 152, 140, 140, 120, 133, 136, 142, 120, 120, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 0, 1, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0,
+                        0, 2, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 0, 0, 10, 0x11, 0xFF, 0x63, 0x66, 0x33, 0x33,
+                        0x44, 0x33, 0b110011, 0, 0x51, 0, 2, 1, 0, 1, 0, 0, 0, 0, 255, 255, 1, 49,
+                        1, 1, 1, 82, 2, 1, 3, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                        25,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([(SettingId::ImmersiveExperience, "Disabled".into())]);
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::VolumeAdjustments, Value::I16Vec(vec![-60; 8]))],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        254, 254, 0, 0, 60, 60, 60, 60, 60, 60, 60, 60, 120, 120, 60, 60, 60, 60,
+                        60, 60, 60, 60, 120, 120, 0, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 2,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 115, 117, 116, 116, 116, 116, 116, 114, 120, 0,
+                        115, 117, 116, 116, 116, 116, 116, 114, 120, 0, 0,
+                    ],
+                )],
+            )
+            .await;
     }
 }

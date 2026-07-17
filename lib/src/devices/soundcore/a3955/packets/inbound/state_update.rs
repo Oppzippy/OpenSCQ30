@@ -6,6 +6,7 @@ use nom::{
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
+    number::complete::le_u8,
 };
 use tokio::sync::watch;
 
@@ -40,6 +41,7 @@ pub struct A3955StateUpdatePacket {
     pub equalizer_configuration: common::structures::CommonEqualizerConfiguration<2, 10>,
     pub age_range: common::structures::AgeRange,
     pub gender: common::structures::Gender,
+    pub is_hear_id_initialized: a3955::structures::IsHearIdInitialized,
     pub hear_id: common::structures::CustomHearId<2, 10>,
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
@@ -64,6 +66,7 @@ impl Default for A3955StateUpdatePacket {
             case_battery: Default::default(),
             equalizer_configuration: Default::default(),
             age_range: Default::default(),
+            is_hear_id_initialized: Default::default(),
             hear_id: Default::default(),
             button_configuration: a3955::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),
@@ -98,7 +101,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         take(5usize),
                         common::structures::CaseBatteryLevel::take,
                         common::structures::EqualizerConfiguration::take,
-                        take(1usize), // unknown
+                        le_u8, // if 255, treat hear id as uninitialized
                         common::structures::CustomHearId::take_with_music_genre_at_end,
                         take(1usize), // unknown
                         ButtonStatusCollection::take(
@@ -126,20 +129,20 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         _unknown0,
                         case_battery,
                         equalizer_configuration,
-                        _unknown1,
+                        hear_id_status,
                         hear_id,
-                        _unknown2,
+                        _unknown1,
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        _unknown3,
+                        _unknown2,
                         anc_personalized_to_ear_canal,
-                        _unknown4,
+                        _unknown3,
                         touch_tone,
                         dual_connections_enabled,
                         limit_high_volume,
                         auto_power_off,
-                        _unknown5,
+                        _unknown4,
                     ),
                     low_battery_prompt,
                 )| {
@@ -149,7 +152,21 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
-                        hear_id,
+                        is_hear_id_initialized: a3955::structures::IsHearIdInitialized(
+                            hear_id_status != 255,
+                        ),
+                        hear_id: if hear_id_status == 255 {
+                            common::structures::CustomHearId {
+                                is_enabled: false,
+                                volume_adjustments: [None; 2],
+                                time: 0,
+                                hear_id_type: common::structures::HearIdType::default(),
+                                favorite_music_genre: common::structures::HearIdMusicGenre(0),
+                                custom_volume_adjustments: [None; 2],
+                            }
+                        } else {
+                            hear_id
+                        },
                         case_battery,
                         button_configuration,
                         ambient_sound_mode_cycle,
