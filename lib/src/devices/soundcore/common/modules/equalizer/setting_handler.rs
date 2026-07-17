@@ -355,7 +355,10 @@ async fn set_inner<
                                     .copied()
                                     .unwrap_or_default()
                                     .adjustments()
-                                    .to_vec(),
+                                    .iter()
+                                    .copied()
+                                    .take(VISIBLE_BANDS)
+                                    .collect(),
                             )
                             .await?;
                     }
@@ -413,4 +416,62 @@ fn values_to_volume_adjustments<
             })
         })),
     }; CHANNELS]
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        DeviceModel,
+        devices::soundcore::common::{
+            modules::equalizer::common_settings, structures::CommonEqualizerConfiguration,
+        },
+        storage::OpenSCQ30Database,
+    };
+
+    use super::*;
+
+    #[derive(openscq30_lib_macros::Has)]
+    struct TestStateWithEq {
+        pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn custom_profiles_only_save_visible_bands() {
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let (change_notify_sender, _) = watch::channel(());
+        let profile_store = Arc::new(
+            CustomEqualizerProfileStore::new(
+                database.clone(),
+                DeviceModel::SoundcoreDevelopment, // doesn't matter
+                change_notify_sender,
+            )
+            .await,
+        );
+        let setting_handler =
+            EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
+                profile_store,
+                common_settings(),
+            );
+        let mut state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([0; 10]); 2],
+            ),
+        };
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::CustomEqualizerProfile,
+                Value::ModifiableSelectCommand(settings::ModifiableSelectCommand::Add(
+                    "test preset".into(),
+                )),
+            )
+            .await
+            .unwrap();
+        let custom_profile = database
+            .fetch_equalizer_profile(DeviceModel::SoundcoreDevelopment, "test preset".to_owned())
+            .await
+            .expect("we just created the custom profile, so it should exist");
+        assert_eq!(custom_profile, [0; 8])
+    }
 }
