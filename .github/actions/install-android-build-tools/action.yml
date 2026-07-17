@@ -31,7 +31,7 @@ runs:
         RUST_TOOLCHAIN_VERSION: ${{ steps.build_tool_versions.outputs.rust }}
         ANDROID_ARCH: ${{ inputs.arch }}
       run: |
-        case "$ANRDOID_ARCH" in
+        case "$ANDROID_ARCH" in
           armeabi-v7a)
             target="armv7-linux-androideabi"
             ;;
