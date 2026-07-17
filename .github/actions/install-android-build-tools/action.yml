@@ -43,6 +43,7 @@ runs:
             ;;
           x86_64)
             target="x86_64-linux-android"
+            ;;
           *)
             echo "invalid arch $ANDROID_ARCH"
             exit 1
