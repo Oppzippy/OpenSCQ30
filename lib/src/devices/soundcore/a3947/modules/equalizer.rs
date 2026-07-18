@@ -41,7 +41,7 @@ where
             device_model,
             change_notify,
             Box::new(state_modifier::EqualizerStateModifier::new(packet_io)),
-            modules::equalizer::common_settings(),
+            modules::equalizer::common_settings_type_2(),
         )
         .await;
     }

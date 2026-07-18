@@ -5,10 +5,7 @@ use crate::devices::soundcore::{
     common::{
         self,
         macros::soundcore_device,
-        modules::{
-            button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS, equalizer,
-            sound_modes::AvailableSoundModes,
-        },
+        modules::button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS,
         packet::{
             inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
             outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},
@@ -43,7 +40,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.sound_modes(AvailableSoundModes {
+        builder.sound_modes(common::modules::sound_modes::AvailableSoundModes {
             ambient_sound_modes: vec![
                 AmbientSoundMode::Normal,
                 AmbientSoundMode::Transparency,
@@ -61,7 +58,7 @@ soundcore_device!(
             ],
         });
         builder
-            .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
+            .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
             .await;
         builder.button_configuration(&BUTTON_SETTINGS);
         builder.reset_button_configuration::<A3951StateUpdatePacket>(RequestState.to_packet());

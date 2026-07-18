@@ -5,12 +5,9 @@ use crate::devices::soundcore::{
     common::{
         self,
         macros::soundcore_device,
-        modules::{
-            button_configuration::{
-                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-                COMMON_ACTIONS_MINIMAL, COMMON_ACTIONS_WITH_GAME_MODE,
-            },
-            equalizer,
+        modules::button_configuration::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS_MINIMAL,
+            COMMON_ACTIONS_WITH_GAME_MODE,
         },
         packet::{
             self,
@@ -49,7 +46,9 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.a3936_sound_modes();
         builder
-            .equalizer_with_custom_hear_id_tws_force_supports_hear_id(equalizer::common_settings())
+            .equalizer_with_custom_hear_id_tws_force_supports_hear_id(
+                common::modules::equalizer::common_settings_type_2(),
+            )
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();

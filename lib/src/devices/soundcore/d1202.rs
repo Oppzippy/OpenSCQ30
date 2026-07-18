@@ -11,7 +11,6 @@ use crate::devices::soundcore::{
             },
             case_battery_level::CaseBatteryLevelConfiguration,
             dual_battery::DualBatteryConfiguration,
-            equalizer,
         },
         packet::{
             inbound::TryToPacket,
@@ -51,7 +50,9 @@ soundcore_device!(
 
         builder.d1202_sound_modes();
 
-        builder.d1202_equalizer(equalizer::common_settings()).await;
+        builder
+            .d1202_equalizer(common::modules::equalizer::common_settings_type_2())
+            .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<packets::inbound::D1202StateUpdatePacket>(

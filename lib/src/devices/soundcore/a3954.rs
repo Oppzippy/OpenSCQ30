@@ -12,7 +12,6 @@ use crate::{
                     COMMON_ACTIONS,
                 },
                 case_battery_level::CaseBatteryLevelConfiguration,
-                equalizer,
             },
             packet::{
                 inbound::TryToPacket,
@@ -53,7 +52,9 @@ soundcore_device!(
 
         builder.a3954_sound_modes();
 
-        builder.a3954_equalizer(equalizer::common_settings()).await;
+        builder
+            .a3954_equalizer(common::modules::equalizer::common_settings_type_2())
+            .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();

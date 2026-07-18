@@ -11,14 +11,19 @@ use crate::{
                     COMMON_ACTIONS_WITHOUT_SOUND_MODES,
                 },
                 dual_battery_level::DualBatteryLevelConfiguration,
-                equalizer,
+                equalizer::{
+                    EqualizerModuleSettings, EqualizerPreset, common_settings_with_presets,
+                },
             },
             packet::{
                 inbound::TryToPacket,
                 outbound::{RequestState, ToPacket},
             },
-            structures::button_configuration::{
-                ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+            structures::{
+                VolumeAdjustments,
+                button_configuration::{
+                    ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+                },
             },
         },
         d1101::{packets::inbound::D1101StateUpdatePacket, state::D1101State},
@@ -49,7 +54,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
 
-        builder.equalizer(equalizer::common_settings()).await;
+        builder.equalizer(equalizer_settings()).await;
 
         builder.disable_all_buttons();
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
@@ -76,6 +81,49 @@ soundcore_device!(
         )])
     },
 );
+
+pub fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
+    common_settings_with_presets(vec![
+        EqualizerPreset {
+            name: "SoundcoreSignature",
+            localized_name: || fl!("soundcore-signature"),
+            id: 0,
+            volume_adjustments: VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0, 0, -120]),
+        },
+        EqualizerPreset {
+            name: "BassBooster",
+            localized_name: || fl!("bass-booster"),
+            id: 2,
+            volume_adjustments: VolumeAdjustments::new([40, 30, 10, 0, 0, 0, 0, 0, 0, -120]),
+        },
+        EqualizerPreset {
+            name: "Classical",
+            localized_name: || fl!("classical"),
+            id: 4,
+            volume_adjustments: VolumeAdjustments::new([30, 30, -20, -20, 0, 20, 30, 40, 0, -120]),
+        },
+        EqualizerPreset {
+            name: "Podcast",
+            localized_name: || fl!("podcast"),
+            id: 5,
+            volume_adjustments: VolumeAdjustments::new([-30, 20, 40, 40, 30, 20, 0, -20, 0, -120]),
+        },
+        EqualizerPreset {
+            name: "TrebleBooster",
+            localized_name: || fl!("treble-booster"),
+            id: 20,
+            volume_adjustments: VolumeAdjustments::new([
+                -20, -20, -20, -10, 10, 20, 20, 40, 0, -120,
+            ]),
+        },
+        EqualizerPreset {
+            name: "VolumeBooster",
+            localized_name: || fl!("volume-booster"),
+            id: 30,
+            volume_adjustments: VolumeAdjustments::new([20, 30, 40, 50, 60, 60, 50, 40, 0, -120]),
+        },
+    ])
+}
 
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {

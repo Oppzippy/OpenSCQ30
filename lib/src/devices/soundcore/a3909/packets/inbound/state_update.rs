@@ -95,7 +95,8 @@ impl FromPacketBody for A3909StateUpdatePacket {
 }
 
 fn guess_volume_adjustments(preset_id: u16) -> Option<VolumeAdjustments<8, -12, 12, 0>> {
-    a3909::modules::equalizer::PRESETS
+    a3909::modules::equalizer::equalizer_settings()
+        .presets
         .iter()
         .find(|preset| preset.id == preset_id)
         .map(|preset| preset.volume_adjustments)

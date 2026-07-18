@@ -3,11 +3,8 @@ use std::collections::HashMap;
 use crate::devices::soundcore::common::{
     self,
     macros::soundcore_device,
-    modules::{
-        button_configuration::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
-        },
-        equalizer,
+    modules::button_configuration::{
+        ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
     },
     packet::{
         inbound::TryToPacket,
@@ -44,7 +41,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.a3959_sound_modes();
         builder
-            .equalizer_with_drc_tws(equalizer::common_settings())
+            .equalizer_with_drc_tws(common::modules::equalizer::common_settings_type_2())
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();

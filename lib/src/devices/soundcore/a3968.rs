@@ -48,7 +48,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.a3968_sound_modes();
         builder
-            .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
+            .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings_type_2())
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle_tws();

@@ -189,177 +189,173 @@ pub fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
             EqualizerPreset {
                 name: "SoundcoreSignature",
                 localized_name: || fl!("soundcore-signature"),
-                id: 0x0000,
-                volume_adjustments: VolumeAdjustments::new([
-                    120, 120, 120, 120, 120, 120, 120, 120, 120, 0,
-                ]),
+                id: 0,
+                volume_adjustments: VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0, 0, -120]),
             },
             EqualizerPreset {
                 name: "Balanced",
                 localized_name: || fl!("balanced"),
-                id: 0x0001,
+                id: 1,
                 volume_adjustments: VolumeAdjustments::new([
-                    173, 99, 111, 104, 132, 81, 88, 122, 120, 0,
+                    53, -21, -9, -16, 12, -39, -32, 2, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "BassBooster",
                 localized_name: || fl!("bass-booster"),
-                id: 0x0002,
-                volume_adjustments: VolumeAdjustments::new([
-                    160, 150, 130, 120, 120, 120, 120, 120, 120, 0,
-                ]),
+                id: 2,
+                volume_adjustments: VolumeAdjustments::new([40, 30, 10, 0, 0, 0, 0, 0, 0, -120]),
             },
             EqualizerPreset {
                 name: "Classical",
                 localized_name: || fl!("classical"),
-                id: 0x0004,
+                id: 4,
                 volume_adjustments: VolumeAdjustments::new([
-                    150, 150, 100, 100, 120, 140, 150, 160, 120, 0,
+                    30, 30, -20, -20, 0, 20, 30, 40, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "SpokenWord",
                 localized_name: || fl!("spoken-word"),
-                id: 0x0005,
+                id: 5,
                 volume_adjustments: VolumeAdjustments::new([
-                    90, 140, 160, 160, 150, 140, 120, 100, 120, 0,
+                    -30, 20, 40, 40, 30, 20, 0, -20, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Dance",
                 localized_name: || fl!("dance"),
-                id: 0x0006,
+                id: 6,
                 volume_adjustments: VolumeAdjustments::new([
-                    140, 90, 110, 130, 140, 140, 130, 90, 120, 0,
+                    20, -30, -10, 10, 20, 20, 10, -30, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Deep",
                 localized_name: || fl!("deep"),
-                id: 0x0007,
+                id: 7,
                 volume_adjustments: VolumeAdjustments::new([
-                    140, 130, 150, 150, 140, 100, 80, 70, 120, 0,
+                    20, 10, 30, 30, 20, -20, -40, -50, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Electronic",
                 localized_name: || fl!("electronic"),
-                id: 0x0008,
+                id: 8,
                 volume_adjustments: VolumeAdjustments::new([
-                    150, 140, 100, 140, 130, 140, 150, 150, 120, 0,
+                    30, 20, -20, 20, 10, 20, 30, 30, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Flat",
                 localized_name: || fl!("flat"),
-                id: 0x0009,
+                id: 9,
                 volume_adjustments: VolumeAdjustments::new([
-                    100, 100, 110, 120, 120, 120, 100, 100, 120, 0,
+                    -20, -20, -10, 0, 0, 0, -20, -20, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "HipHop",
                 localized_name: || fl!("hip-hop"),
-                id: 0x000a,
+                id: 10,
                 volume_adjustments: VolumeAdjustments::new([
-                    140, 150, 110, 110, 140, 110, 140, 150, 120, 0,
+                    20, 30, -10, -10, 20, -10, 20, 30, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Jazz",
                 localized_name: || fl!("jazz"),
-                id: 0x000b,
+                id: 11,
                 volume_adjustments: VolumeAdjustments::new([
-                    140, 140, 100, 100, 120, 140, 150, 160, 120, 0,
+                    20, 20, -20, -20, 0, 20, 30, 40, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Latin",
                 localized_name: || fl!("latin"),
-                id: 0x000c,
+                id: 12,
                 volume_adjustments: VolumeAdjustments::new([
-                    120, 120, 100, 100, 100, 120, 150, 170, 120, 0,
+                    0, 0, -20, -20, -20, 0, 30, 50, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Lounge",
                 localized_name: || fl!("lounge"),
-                id: 0x000d,
+                id: 13,
                 volume_adjustments: VolumeAdjustments::new([
-                    110, 140, 160, 150, 120, 100, 140, 130, 120, 0,
+                    -10, 20, 40, 30, 0, -20, 20, 10, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Piano",
                 localized_name: || fl!("piano"),
-                id: 0x000e,
+                id: 14,
                 volume_adjustments: VolumeAdjustments::new([
-                    120, 150, 150, 140, 160, 170, 150, 160, 120, 0,
+                    0, 30, 30, 20, 40, 50, 30, 40, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Pop",
                 localized_name: || fl!("pop"),
-                id: 0x000f,
+                id: 15,
                 volume_adjustments: VolumeAdjustments::new([
-                    110, 130, 150, 150, 130, 110, 100, 90, 120, 0,
+                    -10, 10, 30, 30, 10, -10, -20, -30, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "RnB",
                 localized_name: || fl!("rnb"),
-                id: 0x0010,
+                id: 16,
                 volume_adjustments: VolumeAdjustments::new([
-                    180, 140, 100, 100, 140, 150, 150, 160, 120, 0,
+                    60, 20, -20, -20, 20, 30, 30, 40, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Rock",
                 localized_name: || fl!("rock"),
-                id: 0x0011,
+                id: 17,
                 volume_adjustments: VolumeAdjustments::new([
-                    150, 140, 110, 110, 130, 150, 160, 170, 120, 0,
+                    30, 20, -10, -10, 10, 30, 40, 50, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "SmallSpeakers",
                 localized_name: || fl!("small-speakers"),
-                id: 0x0012,
+                id: 18,
                 volume_adjustments: VolumeAdjustments::new([
-                    160, 150, 130, 120, 100, 90, 80, 80, 120, 0,
+                    40, 30, 10, 0, -20, -30, -40, -40, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "Podcast",
                 localized_name: || fl!("podcast"),
-                id: 0x0013,
+                id: 19,
                 volume_adjustments: VolumeAdjustments::new([
-                    90, 100, 130, 140, 140, 130, 120, 90, 120, 0,
+                    -30, -20, 10, 20, 20, 10, 0, -30, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "TrebleBooster",
                 localized_name: || fl!("treble-booster"),
-                id: 0x0014,
+                id: 20,
                 volume_adjustments: VolumeAdjustments::new([
-                    120, 120, 100, 120, 110, 70, 170, 130, 120, 0,
+                    0, 0, -20, 0, -10, -50, 50, 10, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "TrebleReducer",
                 localized_name: || fl!("treble-reducer"),
-                id: 0x0015,
+                id: 21,
                 volume_adjustments: VolumeAdjustments::new([
-                    120, 120, 120, 100, 90, 80, 80, 60, 120, 0,
+                    0, 0, 0, -20, -30, -40, -40, -60, 0, -120,
                 ]),
             },
             EqualizerPreset {
                 name: "VolumeBooster",
                 localized_name: || fl!("volume-booster"),
-                id: 0x001e,
+                id: 30,
                 volume_adjustments: VolumeAdjustments::new([
-                    140, 150, 160, 170, 180, 180, 170, 160, 120, 0,
+                    20, 30, 40, 50, 60, 60, 50, 40, 0, -120,
                 ]),
             },
         ],

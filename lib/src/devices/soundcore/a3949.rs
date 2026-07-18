@@ -3,14 +3,12 @@ use std::collections::HashMap;
 use crate::devices::soundcore::{
     a3949::{packets::inbound::A3949StateUpdatePacket, state::A3949State},
     common::{
+        self,
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::{
-            button_configuration::{
-                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-                COMMON_ACTIONS_WITHOUT_SOUND_MODES,
-            },
-            equalizer,
+        modules::button_configuration::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+            COMMON_ACTIONS_WITHOUT_SOUND_MODES,
         },
         packet::outbound::{RequestState, ToPacket},
         structures::button_configuration::{
@@ -30,7 +28,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder
-            .equalizer_with_drc_tws(equalizer::common_settings())
+            .equalizer_with_drc_tws(common::modules::equalizer::common_settings_type_2())
             .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
