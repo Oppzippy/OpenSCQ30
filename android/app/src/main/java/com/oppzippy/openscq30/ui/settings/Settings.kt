@@ -26,11 +26,14 @@ import com.oppzippy.openscq30.ui.utils.Select
 @Composable
 fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
     val autoConnect by viewModel.autoConnect.collectAsState()
+    val autoTransparencyDuringCalls by viewModel.autoTransparencyDuringCalls.collectAsState()
     val theme by viewModel.theme.collectAsState()
     val dynamicColorEnabled by viewModel.dynamicColorEnabled.collectAsState()
     Settings(
         autoConnect = autoConnect,
         onAutoConnectChange = { viewModel.setAutoConnect(it) },
+        autoTransparencyDuringCalls = autoTransparencyDuringCalls,
+        onAutoTransparencyDuringCallsChange = { viewModel.setAutoTransparencyDuringCalls(it) },
         theme = theme,
         onThemeChange = { viewModel.setTheme(it) },
         dynamicColorEnabled = dynamicColorEnabled,
@@ -44,6 +47,8 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
 private fun Settings(
     autoConnect: Boolean,
     onAutoConnectChange: (Boolean) -> Unit,
+    autoTransparencyDuringCalls: Boolean,
+    onAutoTransparencyDuringCallsChange: (Boolean) -> Unit,
     theme: ThemeType?,
     onThemeChange: (ThemeType?) -> Unit,
     dynamicColorEnabled: Boolean,
@@ -61,6 +66,12 @@ private fun Settings(
             label = stringResource(R.string.auto_connect),
             isChecked = autoConnect,
             onCheckedChange = { onAutoConnectChange(it) },
+        )
+
+        LabeledSwitch(
+            label = stringResource(R.string.auto_transparency_during_calls),
+            isChecked = autoTransparencyDuringCalls,
+            onCheckedChange = onAutoTransparencyDuringCallsChange,
         )
 
         val themes = listOf(
@@ -104,6 +115,8 @@ private fun PreviewSettings() {
         Settings(
             autoConnect = false,
             onAutoConnectChange = {},
+            autoTransparencyDuringCalls = false,
+            onAutoTransparencyDuringCallsChange = {},
             theme = null,
             onThemeChange = {},
             dynamicColorEnabled = true,

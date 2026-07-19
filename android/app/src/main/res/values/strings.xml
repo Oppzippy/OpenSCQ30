@@ -45,6 +45,7 @@
     <string name="awaiting_connection">Awaiting Connection</string>
     <string name="quick_presets">Quick Presets</string>
     <string name="auto_connect">Auto Connect</string>
+    <string name="auto_transparency_during_calls" translatable="false">Automatically use transparency mode during calls</string>
     <string name="settings">Settings</string>
     <string name="unpair_device">Unpair Device</string>
     <string name="unpairing_from_device_name">Unpairing From %s</string>
