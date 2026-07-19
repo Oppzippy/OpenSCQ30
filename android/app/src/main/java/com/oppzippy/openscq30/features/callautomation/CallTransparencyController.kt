@@ -8,15 +8,25 @@ import com.oppzippy.openscq30.lib.wrapper.toValue
 internal const val AMBIENT_SOUND_MODE_SETTING_ID = "ambientSoundMode"
 internal const val TRANSPARENCY_MODE = "Transparency"
 
+internal data class AmbientModeState(val currentMode: String, val transparencyMode: String)
+
 internal interface AmbientModeGateway {
-    fun currentMode(): String?
+    fun state(): AmbientModeState?
 
     suspend fun setMode(mode: String)
 }
 
 internal class OpenScq30AmbientModeGateway(private val device: OpenScq30Device) : AmbientModeGateway {
-    override fun currentMode(): String? =
-        (device.setting(AMBIENT_SOUND_MODE_SETTING_ID) as? Setting.SelectSetting)?.value
+    override fun state(): AmbientModeState? {
+        val setting = device.setting(AMBIENT_SOUND_MODE_SETTING_ID) as? Setting.SelectSetting ?: return null
+        val transparencyMode = setting.setting.options.firstOrNull {
+            it.equals(TRANSPARENCY_MODE, ignoreCase = true)
+        } ?: return null
+        return AmbientModeState(
+            currentMode = setting.value,
+            transparencyMode = transparencyMode,
+        )
+    }
 
     override suspend fun setMode(mode: String) {
         device.setSettingValues(
@@ -43,18 +53,19 @@ internal class CallTransparencyController(private val ambientModeGateway: Ambien
     }
 
     private suspend fun activateTransparency() {
-        val currentMode = ambientModeGateway.currentMode() ?: return
-        if (currentMode != TRANSPARENCY_MODE) {
-            ambientModeGateway.setMode(TRANSPARENCY_MODE)
-            previousMode = currentMode
+        val state = ambientModeGateway.state() ?: return
+        if (state.currentMode != state.transparencyMode) {
+            ambientModeGateway.setMode(state.transparencyMode)
+            previousMode = state.currentMode
             changedByAutomation = true
         }
         callActive = true
     }
 
     private suspend fun restorePreviousMode() {
+        val state = ambientModeGateway.state()
         val modeToRestore = previousMode?.takeIf {
-            changedByAutomation && ambientModeGateway.currentMode() == TRANSPARENCY_MODE
+            changedByAutomation && state != null && state.currentMode == state.transparencyMode
         }
         callActive = false
         previousMode = null

@@ -17,7 +17,7 @@ class CallTransparencyControllerTest {
         controller.onCallStateChanged(false)
 
         assertEquals(listOf("Transparency", "NoiseCanceling"), gateway.setModes)
-        assertEquals("NoiseCanceling", gateway.currentMode())
+        assertEquals("NoiseCanceling", gateway.mode)
     }
 
     @Test
@@ -41,7 +41,7 @@ class CallTransparencyControllerTest {
         controller.onCallStateChanged(false)
 
         assertEquals(listOf("Transparency"), gateway.setModes)
-        assertEquals("Normal", gateway.currentMode())
+        assertEquals("Normal", gateway.mode)
     }
 
     @Test
@@ -65,11 +65,30 @@ class CallTransparencyControllerTest {
         assertFalse(isCallAudioMode(AudioManager.MODE_RINGTONE))
     }
 
-    private class FakeAmbientModeGateway(initialMode: String?) : AmbientModeGateway {
+    @Test
+    fun `does nothing when the connected device has no transparency mode`() = runTest {
+        val gateway = FakeAmbientModeGateway("NoiseCanceling", transparencyMode = null)
+        val controller = CallTransparencyController(gateway)
+
+        controller.onCallStateChanged(true)
+        controller.onCallStateChanged(false)
+
+        assertTrue(gateway.setModes.isEmpty())
+        assertEquals("NoiseCanceling", gateway.mode)
+    }
+
+    private class FakeAmbientModeGateway(
+        initialMode: String?,
+        private val transparencyMode: String? = "Transparency",
+    ) : AmbientModeGateway {
         var mode = initialMode
         val setModes = mutableListOf<String>()
 
-        override fun currentMode(): String? = mode
+        override fun state(): AmbientModeState? {
+            val currentMode = mode ?: return null
+            val availableTransparencyMode = transparencyMode ?: return null
+            return AmbientModeState(currentMode, availableTransparencyMode)
+        }
 
         override suspend fun setMode(mode: String) {
             this.mode = mode

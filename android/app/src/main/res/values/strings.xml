@@ -45,7 +45,10 @@
     <string name="awaiting_connection">Awaiting Connection</string>
     <string name="quick_presets">Quick Presets</string>
     <string name="auto_connect">Auto Connect</string>
-    <string name="auto_transparency_during_calls" translatable="false">Automatically use transparency mode during calls</string>
+    <string name="call_transparency_automation">Call transparency automation</string>
+    <string name="call_transparency_automation_description">For supported Soundcore headphones, use transparency mode only while a phone or internet call is active, then restore the previous mode.</string>
+    <string name="call_transparency_automation_enabled">Enabled</string>
+    <string name="call_transparency_automation_disabled">Disabled</string>
     <string name="settings">Settings</string>
     <string name="unpair_device">Unpair Device</string>
     <string name="unpairing_from_device_name">Unpairing From %s</string>
