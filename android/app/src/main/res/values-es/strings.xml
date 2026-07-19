@@ -13,7 +13,7 @@
     <string name="delete_confirm">¿Estás seguro que deseas borrar \"%s\"?</string>
     <string name="delete">Eliminar</string>
     <string name="back">Atrás</string>
-    <string name="info">Información</string>
+    <string name="info">inf.</string>
     <string name="khz">%s kHz</string>
     <string name="replace">Reemplazar</string>
     <string name="connected_to">Conectado a %s</string>
@@ -24,7 +24,7 @@
     <string name="awaiting_connection">Esperando conexión</string>
     <string name="edit">Editar</string>
     <string name="auto_connect">Conectar automáticamente</string>
-    <string name="settings">Opciones</string>
+    <string name="settings">Ajustes</string>
     <string name="unpair_device">Desemparejar dispositivo</string>
     <string name="unpairing_from_device_name">Desemparejando de %s</string>
     <string name="unpair">Desemparejar</string>
