@@ -256,9 +256,7 @@ impl<const BANDS: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRA
         }
     }
 
-    fn apply_drc(
-        &self,
-    ) -> Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>> {
+    fn apply_drc(&self) -> Self {
         self.map(|v| v.apply_drc())
     }
 }
