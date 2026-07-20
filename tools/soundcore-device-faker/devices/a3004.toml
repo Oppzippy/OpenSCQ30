@@ -1,6 +1,6 @@
 name = "Soundcore Q20i"
 mac_address = "00:00:00:00:30:04"
-rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3004"
+rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
 
 [[responses]]
 # State update
