@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isToggleable
@@ -22,7 +21,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
 import com.oppzippy.openscq30.extensions.assertRangeValueApproxEquals
-import com.oppzippy.openscq30.lib.bindings.newSession
 import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.bindings.translateSettingId

@@ -1,21 +1,16 @@
 package com.oppzippy.openscq30
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.widget.Toast
+import android.view.accessibility.AccessibilityEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import dagger.hilt.android.testing.HiltAndroidRule
-import io.mockk.MockKAnnotations
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkStatic
-import kotlin.reflect.KFunction3
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -36,30 +31,29 @@ open class TestBase<A : ComponentActivity>(
     @get:Rule(order = 1)
     val hiltRule = HiltAndroidRule(this)
 
+    val toasts = mutableListOf<String>()
+
     @Before
     fun baseSetUp() {
-        MockKAnnotations.init(this)
         hiltRule.inject()
+
+        InstrumentationRegistry.getInstrumentation().uiAutomation.setOnAccessibilityEventListener { event ->
+            if (event.eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
+                if (event.className == "android.widget.Toast") {
+                    toasts.add(event.text.first().toString())
+                }
+            }
+        }
     }
 
     @After
     fun baseTearDown() {
         composeRule.activity.stopService(Intent(composeRule.activity, DeviceService::class.java))
-        clearAllMocks()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.setOnAccessibilityEventListener(null)
     }
 
     fun getString(id: Int): String = composeRule.activity.getString(id)
     fun getString(id: Int, vararg formatArgs: Any): String = composeRule.activity.getString(id, *formatArgs)
-
-    fun mockMakeToast() {
-        val text: KFunction3<Context, CharSequence, Int, Toast> = Toast::makeText
-        val resId: KFunction3<Context, Int, Int, Toast> = Toast::makeText
-        mockkStatic(text)
-        mockkStatic(resId)
-
-        every { text(any(), any(), any()) } answers { callOriginal() }
-        every { resId(any(), any(), any()) } answers { callOriginal() }
-    }
 }
 
 @Suppress("LeakingThis")

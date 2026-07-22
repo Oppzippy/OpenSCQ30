@@ -190,7 +190,7 @@ dependencies {
     testImplementation(libs.junit)
 
     testImplementation(libs.mockk)
-    androidTestImplementation(libs.mockk.android)
+//    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.core.ktx)
     androidTestImplementation(libs.androidx.rules)
