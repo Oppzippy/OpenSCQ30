@@ -3,7 +3,6 @@ import com.oppzippy.openscq30.gradle.GenerateUniffiBindingsTask
 import dagger.hilt.android.plugin.util.capitalize
 import java.io.FileInputStream
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.application)
@@ -32,12 +31,6 @@ val gradleToCargoProfiles = mapOf(
     "debug" to "debug",
     "release" to "release-android",
 )
-
-kotlin {
-    compilerOptions {
-        languageVersion = KotlinVersion.KOTLIN_2_4
-    }
-}
 
 android {
     signingConfigs {
