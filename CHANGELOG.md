@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore C50i
+
+#### Fixes
+
+- More closely match the official Soundcore app's behavior when modifying equalizer
+- Fix many devices having incorrect equalizer presets
+- Fix issue preventing connection with newer firmware versions for some devices
+
+### GUI
+
+#### Fixes
+
+- Equalizer sliders not showing negative sign in the exclusive range -1 to 0
+
+### Android
+
+#### Features
+
+- Add widget option for compact layout (WIP)
+
+#### Fixes
+
+- Use dynamic colors (Material You) for widget
+
 ## v2.10.1
 
 ### General
