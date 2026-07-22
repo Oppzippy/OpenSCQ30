@@ -113,4 +113,7 @@
     <string name="dynamic_color">Dynamic Color</string>
     <string name="in_effect">In Effect</string>
     <string name="copy_logs_to_clipboard_unfiltered">Copy Logs to Clipboard (Unfiltered)</string>
+    <string name="visible_settings">Visible Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="compact_layout">Compact Layout</string>
 </resources>

@@ -24,12 +24,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -48,6 +55,7 @@ import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.ui.DeviceServiceConnection
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +70,7 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
 
     private val deviceServiceConnection = DeviceServiceConnection()
     private val enabledSettingIds: MutableStateFlow<Set<String>?> = MutableStateFlow(null)
+    private val isCompactLayout: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +95,11 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
         val manager = GlanceAppWidgetManager(this)
         val glanceId = manager.getGlanceIdBy(appWidgetId)
         val widget = SettingWidget()
+
+        lifecycleScope.launch {
+            val preferences = widget.getAppWidgetState<Preferences>(this@SettingWidgetConfigurationActivity, glanceId)
+            isCompactLayout.value = preferences[SettingWidget.COMPACT_LAYOUT_KEY]
+        }
 
         lifecycleScope.launch {
             deviceServiceConnection.connectionStatusFlow.collectLatest { connectionStatus ->
@@ -134,6 +148,18 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
                         isEnabled,
                     )
                 },
+                isCompactLayout = isCompactLayout.collectAsState().value ?: false,
+                onCompactLayoutChange = { newValue ->
+                    val context = this
+                    lifecycleScope.launch {
+                        updateAppWidgetState(context, glanceId) { state ->
+                            state[SettingWidget.COMPACT_LAYOUT_KEY] = newValue
+                        }
+                        val preferences = widget.getAppWidgetState<Preferences>(context, glanceId)
+                        isCompactLayout.value = preferences[SettingWidget.COMPACT_LAYOUT_KEY]
+                        widget.update(context, glanceId)
+                    }
+                },
             )
         }
     }
@@ -173,7 +199,7 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
             val preferences = widget.getAppWidgetState<Preferences>(context, glanceId)
             enabledSettingIds.value = preferences[settingIdsKey] ?: emptySet()
 
-            SettingWidget().updateConnectionStatus(
+            widget.updateConnectionStatus(
                 context,
                 session,
                 deviceServiceConnection.connectionStatusFlow.value,
@@ -181,6 +207,11 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
             )
         }
     }
+}
+
+enum class Screen {
+    EnabledSettings,
+    Appearance,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -191,7 +222,11 @@ private fun Content(
     onCancel: () -> Unit,
     onFinish: () -> Unit,
     onSetSettingIdEnabled: (deviceModel: String, settingId: String, isEnabled: Boolean) -> Unit,
+    isCompactLayout: Boolean,
+    onCompactLayoutChange: (Boolean) -> Unit,
 ) {
+    var screen by remember { mutableStateOf(Screen.EnabledSettings) }
+    val isConnected = connectionStatus is ConnectionStatus.Connected
     OpenSCQ30Theme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -212,17 +247,67 @@ private fun Content(
                     },
                 )
             },
+            bottomBar = {
+                if (isConnected) {
+                    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                        NavigationBarItem(
+                            selected = screen == Screen.EnabledSettings,
+                            onClick = { screen = Screen.EnabledSettings },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.visibility_24px),
+                                    contentDescription = stringResource(R.string.visible_settings),
+                                )
+                            },
+                            label = { Text(stringResource(R.string.visible_settings)) },
+                        )
+                        NavigationBarItem(
+                            selected = screen == Screen.Appearance,
+                            onClick = { screen = Screen.Appearance },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.view_agenda_24px),
+                                    contentDescription = stringResource(R.string.appearance),
+                                )
+                            },
+                            label = { Text(stringResource(R.string.appearance)) },
+                        )
+                    }
+                }
+            },
         ) { contentPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding),
             ) {
-                when (connectionStatus) {
-                    ConnectionStatus.Disconnected,
-                    ConnectionStatus.AwaitingConnection,
-                    is ConnectionStatus.Connecting,
-                    -> Column(
+                if (isConnected) {
+                    when (screen) {
+                        Screen.EnabledSettings -> {
+                            if (enabledSettingIds != null) {
+                                val device = connectionStatus.deviceManager.device
+                                SettingToggles(
+                                    enabledSettingIds = enabledSettingIds,
+                                    settingCategories = device.categories()
+                                        .map { categoryId ->
+                                            Pair(categoryId, device.settingsInCategory(categoryId))
+                                        },
+                                    onToggle = { settingId, isEnabled ->
+                                        onSetSettingIdEnabled(device.model(), settingId, isEnabled)
+                                    },
+                                )
+                            } else {
+                                Box(contentAlignment = Alignment.Center) { Text(stringResource(R.string.loading)) }
+                            }
+                        }
+
+                        Screen.Appearance -> AppearanceSettings(
+                            isCompactLayout = isCompactLayout,
+                            onCompactLayoutChange = onCompactLayoutChange,
+                        )
+                    }
+                } else {
+                    Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -235,24 +320,6 @@ private fun Content(
                             Button(onClick = { onCancel() }) { Text(stringResource(R.string.cancel)) }
                             Spacer(Modifier.width(8.dp))
                             Button(onClick = { onFinish() }) { Text(stringResource(R.string.configure_later)) }
-                        }
-                    }
-
-                    is ConnectionStatus.Connected -> {
-                        if (enabledSettingIds != null) {
-                            val device = connectionStatus.deviceManager.device
-                            SettingToggles(
-                                enabledSettingIds = enabledSettingIds,
-                                settingCategories = device.categories()
-                                    .map { categoryId ->
-                                        Pair(categoryId, device.settingsInCategory(categoryId))
-                                    },
-                                onToggle = { settingId, isEnabled ->
-                                    onSetSettingIdEnabled(device.model(), settingId, isEnabled)
-                                },
-                            )
-                        } else {
-                            Box(contentAlignment = Alignment.Center) { Text(stringResource(R.string.loading)) }
                         }
                     }
                 }
@@ -319,5 +386,12 @@ private fun SettingToggle(name: String, isEnabled: Boolean, onChange: (Boolean) 
             checked = isEnabled,
             onCheckedChange = null,
         )
+    }
+}
+
+@Composable
+private fun AppearanceSettings(isCompactLayout: Boolean, onCompactLayoutChange: (Boolean) -> Unit) {
+    Column {
+        LabeledSwitch(stringResource(R.string.compact_layout), isCompactLayout, onCompactLayoutChange)
     }
 }

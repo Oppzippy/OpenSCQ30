@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.glance.Button
@@ -97,6 +98,7 @@ class SettingWidget : GlanceAppWidget() {
     companion object {
         const val TAG = "SettingWidget"
         val STATE_KEY = stringPreferencesKey("setting")
+        val COMPACT_LAYOUT_KEY = booleanPreferencesKey("compactLayout")
 
         fun settingIdsKey(deviceModel: String): Preferences.Key<Set<String>> =
             stringSetPreferencesKey("settingIds-$deviceModel")
@@ -121,11 +123,13 @@ class SettingWidget : GlanceAppWidget() {
             val state: SettingWidgetState? =
                 widgetPreferences[STATE_KEY]?.let { Json.decodeFromString<SettingWidgetState?>(it) }
             val prefersDynamicColor by applicationPreferences.dynamicColorFlow.collectAsState()
+            val isCompactLayout = widgetPreferences[COMPACT_LAYOUT_KEY] ?: false
 
             Content(
                 context = context,
                 state = state,
                 prefersDynamicColor = prefersDynamicColor,
+                isCompactLayout = isCompactLayout,
             )
         }
     }
@@ -229,7 +233,12 @@ class SettingWidget : GlanceAppWidget() {
 }
 
 @Composable
-private fun Content(context: Context, state: SettingWidgetState?, prefersDynamicColor: Boolean) {
+private fun Content(
+    context: Context,
+    state: SettingWidgetState?,
+    prefersDynamicColor: Boolean,
+    isCompactLayout: Boolean,
+) {
     OpenSCQ30GlanceTheme(dynamicColor = prefersDynamicColor) {
         Scaffold(
             modifier = GlanceModifier.fillMaxSize(),
@@ -313,8 +322,9 @@ private fun Content(context: Context, state: SettingWidgetState?, prefersDynamic
                     is SettingWidgetState.ConnectedUnconfigured -> ConnectedUnconfigured(context)
 
                     is SettingWidgetState.Connected -> Connected(
-                        context,
-                        state.settings,
+                        context = context,
+                        settings = state.settings,
+                        isCompactLayout = isCompactLayout,
                     )
                 }
             }
@@ -378,16 +388,22 @@ private fun ConnectedUnconfigured(context: Context) {
 }
 
 @Composable
-private fun Connected(context: Context, settings: List<Pair<String, Setting?>>) {
+private fun Connected(context: Context, settings: List<Pair<String, Setting?>>, isCompactLayout: Boolean) {
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
         items(settings.filter { it.second != null }) { (settingId, setting) ->
-            ShowSetting(context, settingId, setting!!)
+            Box(
+                modifier = GlanceModifier.let {
+                    if (!isCompactLayout) it.padding(bottom = 6.dp) else it
+                },
+            ) {
+                ShowSetting(context, settingId, setting!!, isCompactLayout)
+            }
         }
     }
 }
 
 @Composable
-private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
+private fun ShowSetting(context: Context, settingId: String, setting: Setting, isCompactLayout: Boolean) {
     when (setting) {
         is Setting.Action -> {
             Button(
@@ -413,7 +429,14 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
 
         is Setting.InformationSetting -> ReadOnlySettingValue(settingId, setting.value)
 
-        is Setting.SelectSetting -> Select(context, settingId, setting.setting, setting.value, isOptional = false)
+        is Setting.SelectSetting -> Select(
+            context,
+            settingId,
+            setting.setting,
+            setting.value,
+            isOptional = false,
+            isCompactLayout = isCompactLayout,
+        )
 
         is Setting.OptionalSelectSetting -> Select(
             context,
@@ -421,6 +444,7 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
             setting.setting,
             setting.value,
             isOptional = true,
+            isCompactLayout = isCompactLayout,
         )
 
         is Setting.ModifiableSelectSetting -> Select(
@@ -429,6 +453,7 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
             setting.setting,
             setting.value,
             isOptional = true,
+            isCompactLayout = isCompactLayout,
         )
 
         is Setting.MultiSelectSetting -> {
@@ -464,6 +489,10 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
                     checked = setting.value,
                     onCheckedChange = actionSetSettingValue(context, settingId, (!setting.value).toValue()),
                 )
+                // The scroll bar can get in the way of the switch, so the spacer moves it out of the way
+                if (!isCompactLayout) {
+                    Spacer(GlanceModifier.width(8.dp))
+                }
             }
         }
 
@@ -478,20 +507,29 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
 }
 
 @Composable
-private fun Select(context: Context, settingId: String, setting: Select, value: String?, isOptional: Boolean) {
+private fun Select(
+    context: Context,
+    settingId: String,
+    setting: Select,
+    value: String?,
+    isOptional: Boolean,
+    isCompactLayout: Boolean,
+) {
     val size = LocalSize.current
 
     Column(GlanceModifier.fillMaxWidth()) {
         Text(translateSettingId(settingId), style = defaultTextStyle())
         if (size.width >= 80.dp * setting.options.size) {
             Row(GlanceModifier.fillMaxWidth()) {
+                val buttonModifier = GlanceModifier.defaultWeight()
                 if (isOptional) {
                     SelectableButton(
-                        modifier = GlanceModifier.defaultWeight().clickable(
+                        modifier = buttonModifier.clickable(
                             actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
                         ),
                         text = context.getString(R.string.none),
                         isSelected = value == null,
+                        isCompactLayout = isCompactLayout,
                     )
                 }
                 var sawFirst = isOptional
@@ -502,10 +540,11 @@ private fun Select(context: Context, settingId: String, setting: Select, value: 
                         sawFirst = true
                     }
                     SelectableButton(
-                        modifier = GlanceModifier.defaultWeight()
+                        modifier = buttonModifier
                             .clickable(actionSetSettingValue(context, settingId, option.toValue())),
                         text = localizedOption,
                         isSelected = value == option,
+                        isCompactLayout = isCompactLayout,
                     )
                 }
             }
@@ -544,7 +583,12 @@ private fun Select(context: Context, settingId: String, setting: Select, value: 
  * Use GlanceModifier.clickable to specify the on click action
  */
 @Composable
-private fun SelectableButton(modifier: GlanceModifier = GlanceModifier, text: String, isSelected: Boolean) {
+private fun SelectableButton(
+    modifier: GlanceModifier = GlanceModifier,
+    text: String,
+    isSelected: Boolean,
+    isCompactLayout: Boolean,
+) {
     val backgroundColor =
         if (isSelected) GlanceTheme.colors.primary else GlanceTheme.colors.secondaryContainer
     val textStyle = if (isSelected) {
@@ -555,7 +599,7 @@ private fun SelectableButton(modifier: GlanceModifier = GlanceModifier, text: St
     Box(
         // Minimal horizontal padding to reduce the likelihood of truncation due to text wrapping
         modifier = modifier
-            .padding(horizontal = 2.dp, vertical = 8.dp)
+            .padding(horizontal = 2.dp, vertical = if (isCompactLayout) 4.dp else 8.dp)
             .cornerRadius(4.dp)
             .background(backgroundColor),
         contentAlignment = Alignment.Center,
