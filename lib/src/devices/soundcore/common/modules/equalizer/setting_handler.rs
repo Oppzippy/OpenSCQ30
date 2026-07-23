@@ -244,11 +244,12 @@ fn get_inner<
                         custom_profiles
                             .iter()
                             .find(|(_, v)| {
-                                v == equalizer_configuration
-                                    .volume_adjustments_channel_1()
-                                    .copied()
-                                    .unwrap_or_default()
-                                    .adjustments()
+                                v[..VISIBLE_BANDS]
+                                    == equalizer_configuration
+                                        .volume_adjustments_channel_1()
+                                        .copied()
+                                        .unwrap_or_default()
+                                        .adjustments()[..VISIBLE_BANDS]
                             })
                             .map(|(name, _)| name.clone().into())
                     })
@@ -547,5 +548,46 @@ mod tests {
                 [VolumeAdjustments::new([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]); 2]
             ),
         )
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn newly_created_custom_profile_is_immediately_active() {
+        let (_database, setting_handler, _) = set_up().await;
+        let mut state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([2; 10]); 2],
+            ),
+        };
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::VolumeAdjustments,
+                Value::I16Vec(vec![1, 2, 3, 4, 5, 6, 7, 8]),
+            )
+            .await
+            .unwrap();
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::CustomEqualizerProfile,
+                Value::ModifiableSelectCommand(settings::ModifiableSelectCommand::Add(
+                    "test profile".into(),
+                )),
+            )
+            .await
+            .unwrap();
+        let custom_profile_setting = setting_handler
+            .get(&state, &SettingId::CustomEqualizerProfile)
+            .unwrap();
+        let Setting::ModifiableSelect {
+            value: custom_profile,
+            ..
+        } = custom_profile_setting
+        else {
+            panic!("setting should be ModifiableSelect: {custom_profile_setting:?}");
+        };
+
+        assert_eq!(custom_profile, Some(Cow::from("test profile")));
     }
 }
