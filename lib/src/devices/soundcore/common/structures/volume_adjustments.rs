@@ -88,6 +88,8 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
         (byte as i16) + MIN_VOLUME
     }
 
+    /// For some devices, the raw equalizer values aren't used as is. They first go through this function
+    /// to get the effective values.
     pub fn apply_drc(&self) -> Self {
         let adjustments = self
             .inner
