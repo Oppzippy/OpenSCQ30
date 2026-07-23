@@ -106,6 +106,7 @@ impl PacketIOController {
         self.connection.connection_status()
     }
 
+    #[tracing::instrument(skip(self))]
     pub async fn send_with_response(
         &self,
         packet: &packet::Outbound,
@@ -115,11 +116,11 @@ impl PacketIOController {
 
         handle.wait_for_start().await;
 
+        let packet_bytes = packet.bytes(self.checksum_kind);
         // retry
         for i in 1..=3 {
-            self.connection
-                .write(&packet.bytes(self.checksum_kind))
-                .await?;
+            tracing::debug!("sending packet ({i})");
+            self.connection.write(&packet_bytes).await?;
 
             if tokio::time::timeout(Duration::from_millis(500 * i), handle.wait_for_end())
                 .await
