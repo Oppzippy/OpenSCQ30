@@ -263,4 +263,39 @@ mod tests {
             (SettingId::RightLongPress, Some("NextSong").into()),
         ]);
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn r50i_set_eq_matches_soundcore_app() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3949,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 1, 3, 3, 0, 0, 49, 57, 46, 52, 51, 49, 57, 46, 52, 51, 51, 57, 52, 57,
+                        51, 70, 50, 52, 57, 69, 50, 68, 66, 54, 70, 52, 0, 0, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 246, 1,
+                        246, 1, 98, 1, 99, 1, 51, 1, 51, 255, 255, 255, 49, 0, 0, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::PresetEqualizerProfile, "Piano".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([2, 131]),
+                    vec![
+                        14, 0, 120, 150, 150, 140, 160, 170, 150, 160, 120, 0, 119, 123, 122, 120,
+                        123, 124, 120, 125, 120, 0,
+                    ],
+                )],
+            )
+            .await;
+    }
 }
