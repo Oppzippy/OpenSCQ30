@@ -14,7 +14,7 @@ use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
-    iced::keyboard,
+    iced::{Length, keyboard},
     widget::{self, menu::KeyBind, nav_bar},
 };
 use legacy_migration::LegacyMigrationModel;
@@ -28,7 +28,7 @@ use tracing::{Instrument, debug};
 
 use crate::{
     app::DebugOpenSCQ30Device,
-    fl, handle_soft_error,
+    equalizer_line, fl, handle_soft_error,
     openscq30_v1_migration::{self, LegacyEqualizerProfile},
     throttle,
     utils::coalesce_result,
@@ -422,11 +422,28 @@ impl DeviceSettingsModel {
                 },
             )
             .into(),
-            Setting::Equalizer { setting, value } => {
-                equalizer::horizontal_equalizer(setting, value, move |index, value| {
-                    Message::SetEqualizerBand(setting_id, index, value)
-                })
-                .into()
+            Setting::Equalizer {
+                setting,
+                read_only,
+                value,
+            } => {
+                if !read_only {
+                    equalizer::horizontal_equalizer(setting, value, move |index, value| {
+                        Message::SetEqualizerBand(setting_id, index, value)
+                    })
+                    .into()
+                } else {
+                    // TODO reuse EqualizerLine so that the canvas cache is in effect
+                    Element::from(
+                        widget::canvas(equalizer_line::EqualizerLine::new(
+                            setting.min,
+                            setting.max,
+                            value.to_vec(),
+                        ))
+                        .width(Length::Fill),
+                    )
+                    .into()
+                }
             }
             Setting::Information {
                 value: _,
@@ -508,6 +525,7 @@ impl DeviceSettingsModel {
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 if let Some(Setting::Equalizer {
                     setting: _,
+                    read_only: _,
                     value: values,
                 }) = self.throttle.setting(&setting_id)
                 {

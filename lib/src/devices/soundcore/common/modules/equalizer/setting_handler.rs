@@ -13,7 +13,7 @@ use crate::{
             EqualizerModuleSettings, InvisibleBandsMode,
             custom_equalizer_profile_store::CustomEqualizerProfileStore,
         },
-        settings_manager::{SettingHandler, SettingHandlerResult},
+        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
     },
 };
@@ -225,6 +225,9 @@ fn get_inner<
             }
         }
         EqualizerSetting::CustomEqualizerProfile => {
+            let Some(custom_preset_id) = module_settings.custom_preset_id else {
+                return None;
+            };
             let custom_profiles = custom_profiles_receiver.borrow();
             Setting::ModifiableSelect {
                 setting: {
@@ -239,7 +242,7 @@ fn get_inner<
                             .collect(),
                     }
                 },
-                value: (equalizer_configuration.preset_id() == module_settings.custom_preset_id)
+                value: (equalizer_configuration.preset_id() == custom_preset_id)
                     .then(|| {
                         custom_profiles
                             .iter()
@@ -263,6 +266,7 @@ fn get_inner<
                 min: MIN_VOLUME,
                 max: MAX_VOLUME,
             },
+            read_only: module_settings.custom_preset_id.is_none(),
             value: equalizer_configuration
                 .volume_adjustments_channel_1()
                 .copied()
@@ -323,14 +327,13 @@ async fn set_inner<
                         &module_settings.invisible_bands_mode,
                     ),
                 );
-            } else {
-                *equalizer_configuration = EqualizerConfiguration::new(
-                    module_settings.custom_preset_id,
-                    *equalizer_configuration.volume_adjustments(),
-                );
             }
         }
         EqualizerSetting::CustomEqualizerProfile => {
+            let Some(custom_preset_id) = module_settings.custom_preset_id else {
+                // TODO return error
+                return Ok(());
+            };
             if let Ok(name) = value.try_as_str() {
                 if let Some(volume_adjustments) = custom_profiles_receiver
                     .borrow()
@@ -351,7 +354,7 @@ async fn set_inner<
                         .collect_array()
                         .expect("we made sure there are exactly VISIBLE_BANDS elements");
                     *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
-                        module_settings.custom_preset_id,
+                        custom_preset_id,
                         values_to_volume_adjustments(
                             &fixed_len_volume_adjustments,
                             &module_settings.invisible_bands_mode,
@@ -383,9 +386,14 @@ async fn set_inner<
             }
         }
         EqualizerSetting::VolumeAdjustments => {
+            let Some(custom_preset_id) = module_settings.custom_preset_id else {
+                // We want to display the equalizer but not accept any changes if custom profiles aren't supported,
+                // so don't error, just don't make any changes.
+                return Err(SettingHandlerError::ReadOnly);
+            };
             let volume_adjustments = value.try_as_i16_array::<VISIBLE_BANDS>()?;
             *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
-                module_settings.custom_preset_id,
+                custom_preset_id,
                 values_to_volume_adjustments(
                     volume_adjustments,
                     &module_settings.invisible_bands_mode,

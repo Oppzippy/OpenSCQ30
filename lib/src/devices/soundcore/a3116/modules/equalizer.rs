@@ -43,7 +43,7 @@ where
 
 pub fn module_settings() -> EqualizerModuleSettings<9, 9, -6, 6, 0> {
     EqualizerModuleSettings {
-        custom_preset_id: 0xf,
+        custom_preset_id: Some(0xf),
         band_hz: [80, 150, 300, 500, 700, 1000, 5000, 8000, 12000],
         invisible_bands_mode: InvisibleBandsMode::Fixed(Vec::new()),
         presets: vec![

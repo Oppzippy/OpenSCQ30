@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -46,6 +47,7 @@ import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.devicesettings.composables.Equalizer
+import com.oppzippy.openscq30.ui.devicesettings.composables.ReadOnlyEqualizer
 import com.oppzippy.openscq30.ui.devicesettings.screens.categoryoverrides.categoryScreenOverrides
 import com.oppzippy.openscq30.ui.utils.Labeled
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
@@ -225,24 +227,37 @@ private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int
 
 @Composable
 private fun Equalizer(name: String, setting: Setting.EqualizerSetting, onChange: (List<Short>) -> Unit) {
-    Equalizer(
-        bands = setting.setting.bandHz,
-        values = setting.value,
-        minValue = setting.setting.min,
-        maxValue = setting.setting.max,
-        fractionDigits = setting.setting.fractionDigits,
-        onValueChange = { changedIndex, newValue ->
-            onChange(
-                setting.value.mapIndexed { index, oldValue ->
-                    if (index == changedIndex) {
-                        newValue
-                    } else {
-                        oldValue
-                    }
-                },
-            )
-        },
-    )
+    if (!setting.readOnly) {
+        Equalizer(
+            bands = setting.setting.bandHz,
+            values = setting.value,
+            minValue = setting.setting.min,
+            maxValue = setting.setting.max,
+            fractionDigits = setting.setting.fractionDigits,
+            onValueChange = { changedIndex, newValue ->
+                onChange(
+                    setting.value.mapIndexed { index, oldValue ->
+                        if (index == changedIndex) {
+                            newValue
+                        } else {
+                            oldValue
+                        }
+                    },
+                )
+            },
+        )
+    } else {
+        ReadOnlyEqualizer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp),
+            bands = setting.setting.bandHz,
+            values = setting.value,
+            minValue = setting.setting.min,
+            maxValue = setting.setting.max,
+            fractionDigits = setting.setting.fractionDigits,
+        )
+    }
 }
 
 @Composable

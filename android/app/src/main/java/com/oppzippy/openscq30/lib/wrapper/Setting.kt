@@ -52,7 +52,7 @@ sealed class Setting {
 
     @Serializable
     @SerialName("equalizer")
-    data class EqualizerSetting(val setting: Equalizer, val value: List<Short>) : Setting() {
+    data class EqualizerSetting(val setting: Equalizer, val readOnly: Boolean, val value: List<Short>) : Setting() {
         override fun toValue() = value.toValue()
     }
 

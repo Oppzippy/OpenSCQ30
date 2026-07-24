@@ -28,7 +28,10 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder
-            .equalizer_with_drc_tws(common::modules::equalizer::common_settings_type_2())
+            .equalizer_with_drc_tws(common::modules::equalizer::EqualizerModuleSettings {
+                custom_preset_id: None, // device doesn't support custom presets
+                ..common::modules::equalizer::common_settings_type_2()
+            })
             .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);

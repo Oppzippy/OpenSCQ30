@@ -72,7 +72,7 @@ pub struct EqualizerModuleSettings<
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > {
-    pub custom_preset_id: u16,
+    pub custom_preset_id: Option<u16>,
     pub band_hz: [u16; VISIBLE_BANDS],
     pub presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
     pub invisible_bands_mode: InvisibleBandsMode,
@@ -420,7 +420,7 @@ pub fn common_settings_with_presets<
     FRACTION_DIGITS,
 > {
     EqualizerModuleSettings {
-        custom_preset_id: 0xfefe,
+        custom_preset_id: Some(0xfefe),
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
         invisible_bands_mode: InvisibleBandsMode::Fixed(vec![0, 0]),
         presets,

@@ -210,6 +210,7 @@ pub enum Setting {
     },
     Equalizer {
         setting: Equalizer,
+        read_only: bool,
         value: Vec<i16>,
     },
     Information {
