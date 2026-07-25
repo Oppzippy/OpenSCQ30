@@ -75,6 +75,8 @@ pub struct EqualizerModuleSettings<
     pub custom_preset_id: Option<u16>,
     pub band_hz: [u16; VISIBLE_BANDS],
     pub presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
+    pub preset_min_volume: i16,
+    pub preset_max_volume: i16,
     pub invisible_bands_mode: InvisibleBandsMode,
 }
 
@@ -405,24 +407,15 @@ pub fn common_settings_type_2() -> EqualizerModuleSettings<8, 10, -120, 134, 1> 
     ])
 }
 
-pub fn common_settings_with_presets<
-    const PRESET_BANDS: usize,
-    const MIN_VOLUME: i16,
-    const MAX_VOLUME: i16,
-    const FRACTION_DIGITS: u8,
->(
-    presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
-) -> EqualizerModuleSettings<
-    COMMON_VISIBLE_BANDS,
-    PRESET_BANDS,
-    MIN_VOLUME,
-    MAX_VOLUME,
-    FRACTION_DIGITS,
-> {
+pub fn common_settings_with_presets<const PRESET_BANDS: usize, const FRACTION_DIGITS: u8>(
+    presets: Vec<EqualizerPreset<PRESET_BANDS, -120, 134, FRACTION_DIGITS>>,
+) -> EqualizerModuleSettings<COMMON_VISIBLE_BANDS, PRESET_BANDS, -120, 134, FRACTION_DIGITS> {
     EqualizerModuleSettings {
         custom_preset_id: Some(0xfefe),
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
         invisible_bands_mode: InvisibleBandsMode::Fixed(vec![0, 0]),
+        preset_min_volume: -60,
+        preset_max_volume: 60,
         presets,
     }
 }

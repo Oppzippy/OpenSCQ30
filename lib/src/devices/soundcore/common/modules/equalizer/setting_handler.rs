@@ -212,8 +212,8 @@ fn get_inner<
                 equalizer: settings::Equalizer {
                     band_hz: Cow::Owned(module_settings.band_hz.to_vec()),
                     fraction_digits: FRACTION_DIGITS.into(),
-                    min: MIN_VOLUME,
-                    max: MAX_VOLUME,
+                    min: module_settings.preset_min_volume,
+                    max: module_settings.preset_max_volume,
                 },
                 select: settings::Select {
                     options: module_settings
