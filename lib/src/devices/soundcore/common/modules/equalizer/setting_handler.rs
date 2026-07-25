@@ -346,6 +346,17 @@ async fn set_inner<
                         &module_settings.invisible_bands_mode,
                     ),
                 );
+            } else if let Some(custom_preset_id) = module_settings.custom_preset_id
+                && let Some(volume_adjustments) =
+                    equalizer_configuration.volume_adjustments_channel_1()
+            {
+                *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
+                    custom_preset_id,
+                    values_to_volume_adjustments(
+                        volume_adjustments.adjustments(),
+                        &module_settings.invisible_bands_mode,
+                    ),
+                )
             }
         }
         EqualizerSetting::CustomEqualizerProfile => {
@@ -616,5 +627,32 @@ mod tests {
         };
 
         assert_eq!(custom_profile, Some(Cow::from("test profile")));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn switching_to_none_preset_keeps_volume_adjustments_as_is_but_changes_preset_id() {
+        let (_, setting_handler, _) = set_up().await;
+        let mut state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0x0000,
+                [VolumeAdjustments::new([0; 10]); 2],
+            ),
+        };
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::PresetEqualizerProfile,
+                Value::OptionalString(None),
+            )
+            .await
+            .unwrap();
+        let Setting::PresetEqualizerProfileSelect { value, .. } = setting_handler
+            .get(&mut state, &SettingId::PresetEqualizerProfile)
+            .unwrap()
+        else {
+            panic!("setting type should be PresetEqualizerProfileSelect")
+        };
+        assert_eq!(value, None);
+        assert_eq!(state.equalizer_configuration.preset_id(), 0xfefe);
     }
 }
