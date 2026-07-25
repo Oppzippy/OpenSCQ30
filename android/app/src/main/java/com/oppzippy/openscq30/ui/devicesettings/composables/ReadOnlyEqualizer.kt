@@ -8,9 +8,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,52 +69,39 @@ fun ReadOnlyEqualizer(
             }
         }
 
-        val points = equalizerLinePoints(
+        val unscaledPoints = equalizerLinePoints(
             minValue = minValue,
             maxValue = maxValue,
             values = values,
         )
-        points.zipWithNext().withIndex().forEach { (index, pointPair) ->
-            val left = pointPair.first * sizeWithoutPadding + padding
-            val right = pointPair.second * sizeWithoutPadding + padding
-            drawLine(
-                color = color,
-                start = left,
-                end = right,
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round,
-            )
-            // Shade the area below the line
-            drawPath(
-                Path().apply {
-                    moveTo(left.x, left.y)
-                    lineTo(right.x, right.y)
-                    lineTo(right.x, size.height)
-                    lineTo(left.x, size.height)
-                    close()
-                },
-                color = color,
-                alpha = 0.3f,
-            )
-            // Extend the shading to the edges of the stroke width
-            if (index == 0) {
-                drawRect(
-                    color = color,
-                    topLeft = Offset(left.x - strokeWidth, left.y),
-                    size = Size(strokeWidth, size.height - left.y),
-                    alpha = 0.3f,
-                )
-            }
-            // minus 1 to for size to index, minus 1 more due to zipWithNext
-            if (index == points.size - 2) {
-                drawRect(
-                    color = color,
-                    topLeft = right,
-                    size = Size(strokeWidth, size.height - right.y),
-                    alpha = 0.3f,
-                )
-            }
-        }
+        val canvasSpacePoints = unscaledPoints.map { it * sizeWithoutPadding + padding }
+        // line
+        drawPoints(
+            canvasSpacePoints.zipWithNext().flatMap { listOf(it.first, it.second) },
+            pointMode = PointMode.Lines,
+            color = color,
+            cap = StrokeCap.Round,
+            strokeWidth = strokeWidth,
+        )
+        // shading below the line
+        drawPath(
+            Path().apply {
+                val leftEdgeX = canvasSpacePoints.first().x - strokeWidth
+                val rightEdgeX = canvasSpacePoints.last().x + strokeWidth
+
+                // top line
+                moveTo(leftEdgeX, canvasSpacePoints.first().y)
+                canvasSpacePoints.forEach { lineTo(it.x, it.y) }
+                lineTo(rightEdgeX, canvasSpacePoints.last().y)
+
+                // bottom line
+                lineTo(rightEdgeX, size.height)
+                lineTo(leftEdgeX, size.height)
+                close()
+            },
+            color = color,
+            alpha = 0.3f,
+        )
     }
 }
 
