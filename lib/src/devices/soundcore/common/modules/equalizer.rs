@@ -408,8 +408,16 @@ pub fn common_settings_type_2() -> EqualizerModuleSettings<8, 10, -120, 134, 1> 
 }
 
 pub fn common_settings_with_presets<const PRESET_BANDS: usize, const FRACTION_DIGITS: u8>(
-    presets: Vec<EqualizerPreset<PRESET_BANDS, -120, 134, FRACTION_DIGITS>>,
-) -> EqualizerModuleSettings<COMMON_VISIBLE_BANDS, PRESET_BANDS, -120, 134, FRACTION_DIGITS> {
+    presets: Vec<
+        EqualizerPreset<PRESET_BANDS, COMMON_MIN_VOLUME, COMMON_MAX_VOLUME, FRACTION_DIGITS>,
+    >,
+) -> EqualizerModuleSettings<
+    COMMON_VISIBLE_BANDS,
+    PRESET_BANDS,
+    COMMON_MIN_VOLUME,
+    COMMON_MAX_VOLUME,
+    FRACTION_DIGITS,
+> {
     EqualizerModuleSettings {
         custom_preset_id: Some(0xfefe),
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
