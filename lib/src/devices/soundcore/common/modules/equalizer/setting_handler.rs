@@ -244,9 +244,7 @@ fn get_inner<
             }
         }
         EqualizerSetting::CustomEqualizerProfile => {
-            let Some(custom_preset_id) = module_settings.custom_preset_id else {
-                return None;
-            };
+            let custom_preset_id = module_settings.custom_preset_id?;
             let custom_profiles = custom_profiles_receiver.borrow();
             Setting::ModifiableSelect {
                 setting: {
@@ -356,7 +354,7 @@ async fn set_inner<
                         volume_adjustments.adjustments(),
                         &module_settings.invisible_bands_mode,
                     ),
-                )
+                );
             }
         }
         EqualizerSetting::CustomEqualizerProfile => {
