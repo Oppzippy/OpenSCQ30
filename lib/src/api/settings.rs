@@ -290,7 +290,13 @@ impl Setting {
             Self::ModifiableSelect { .. } => SettingMode::ReadWrite,
             Self::MultiSelect { .. } => SettingMode::ReadWrite,
             Self::MultiSelectWithRemove { .. } => SettingMode::ReadWrite,
-            Self::Equalizer { .. } => SettingMode::ReadWrite,
+            Self::Equalizer { read_only, .. } => {
+                if *read_only {
+                    SettingMode::ReadOnly
+                } else {
+                    SettingMode::ReadWrite
+                }
+            }
             Self::Information { .. } => SettingMode::ReadOnly,
             Self::ImportString { .. } => SettingMode::WriteOnly,
             Self::HueColorPicker { .. } => SettingMode::ReadWrite,

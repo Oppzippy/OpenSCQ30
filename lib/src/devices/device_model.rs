@@ -220,7 +220,9 @@ mod tests {
                             Setting::MultiSelectWithRemove { setting, .. } => {
                                 Some(setting.options.into())
                             }
-                            Setting::Equalizer { value, .. } => Some(value.into()),
+                            Setting::Equalizer {
+                                value, read_only, ..
+                            } => (!read_only).then_some(value.into()),
                             Setting::HueColorPicker { hue } => Some(hue.into()),
                             Setting::ModifiableSelect { .. }
                             | Setting::Information { .. }
