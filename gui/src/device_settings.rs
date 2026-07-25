@@ -383,15 +383,18 @@ impl DeviceSettingsModel {
                 })
                 .into()
             }
-            Setting::OptionalSelect { setting, value } => {
-                select::optional_select(setting_id, setting, value.as_deref(), move |value| {
-                    Message::SetSetting(
-                        setting_id,
-                        value.map(ToOwned::to_owned).map(Cow::from).into(),
-                    )
-                })
-                .into()
-            }
+            Setting::OptionalSelect { setting, value }
+            | Setting::PresetEqualizerProfileSelect {
+                select: setting,
+                value,
+                ..
+            } => select::optional_select(setting_id, setting, value.as_deref(), move |value| {
+                Message::SetSetting(
+                    setting_id,
+                    value.map(ToOwned::to_owned).map(Cow::from).into(),
+                )
+            })
+            .into(),
             Setting::ModifiableSelect { setting, value } => select::modifiable_select(
                 setting_id,
                 setting,

@@ -21,7 +21,10 @@ impl std::fmt::Display for CustomDisplaySetting {
                 setting.step,
             ),
             Setting::Select { setting, .. } => write!(f, "select ({:?})", setting.options),
-            Setting::OptionalSelect { setting, .. } => {
+            Setting::OptionalSelect { setting, .. }
+            | Setting::PresetEqualizerProfileSelect {
+                select: setting, ..
+            } => {
                 write!(f, "optional select ({:?})", setting.options)
             }
             Setting::ModifiableSelect { setting, .. } => {

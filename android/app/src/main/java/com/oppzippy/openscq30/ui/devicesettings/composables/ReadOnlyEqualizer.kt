@@ -8,9 +8,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
@@ -21,11 +25,14 @@ import kotlin.math.absoluteValue
 @Composable
 fun ReadOnlyEqualizer(
     modifier: Modifier,
+    color: Color,
     bands: List<UShort>,
     values: List<Short>,
     minValue: Short,
     maxValue: Short,
     fractionDigits: Short,
+    drawHorizontalGuide: Boolean = true,
+    strokeWidthDp: Dp = 2.dp,
 ) {
     val contentDescription = bands.take(values.size).map { bandHz ->
         if (bandHz < 1000.toUShort()) {
@@ -40,20 +47,18 @@ fun ReadOnlyEqualizer(
         "$bandHz: ${BigDecimal(values[index].toInt()).scaleByPowerOfTen(-fractionDigits)}"
     }
 
-    val color = MaterialTheme.colorScheme.onBackground
+    Canvas(modifier, contentDescription) {
+        val strokeWidth = strokeWidthDp.toPx()
+        val padding = Offset(strokeWidth, strokeWidth)
+        val sizeWithoutPadding = Offset(
+            x = size.width - padding.x * 2f,
+            y = size.height - padding.y * 2f,
+        )
 
-    Surface {
-        Canvas(modifier, contentDescription) {
-            val strokeWidth = size.height / 25f
-            val padding = Offset(strokeWidth, strokeWidth)
-            val sizeWithoutPadding = Offset(
-                x = size.width - padding.x * 2f,
-                y = size.height - padding.y * 2f,
-            )
+        val range = (maxValue - minValue).toFloat()
+        val zeroValueY = size.height - size.height * (minValue.toFloat().absoluteValue / range)
 
-            val range = (maxValue - minValue).toFloat()
-            val zeroValueY = size.height - size.height * (minValue.toFloat().absoluteValue / range)
-
+        if (drawHorizontalGuide) {
             listOf(strokeWidth, zeroValueY, size.height - strokeWidth).forEach { y ->
                 drawLine(
                     color = color.copy(alpha = 0.3f),
@@ -62,26 +67,58 @@ fun ReadOnlyEqualizer(
                     strokeWidth = strokeWidth,
                 )
             }
+        }
 
-            val points = linePoints(
-                minValue = minValue,
-                maxValue = maxValue,
-                values = values,
+        val points = equalizerLinePoints(
+            minValue = minValue,
+            maxValue = maxValue,
+            values = values,
+        )
+        points.zipWithNext().withIndex().forEach { (index, pointPair) ->
+            val left = pointPair.first * sizeWithoutPadding + padding
+            val right = pointPair.second * sizeWithoutPadding + padding
+            drawLine(
+                color = color,
+                start = left,
+                end = right,
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round,
             )
-            points.zipWithNext().forEach { (left, right) ->
-                drawLine(
+            // Shade the area below the line
+            drawPath(
+                Path().apply {
+                    moveTo(left.x, left.y)
+                    lineTo(right.x, right.y)
+                    lineTo(right.x, size.height)
+                    lineTo(left.x, size.height)
+                    close()
+                },
+                color = color,
+                alpha = 0.3f,
+            )
+            // Extend the shading to the edges of the stroke width
+            if (index == 0) {
+                drawRect(
                     color = color,
-                    start = left * sizeWithoutPadding + padding,
-                    end = right * sizeWithoutPadding + padding,
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round,
+                    topLeft = Offset(left.x - strokeWidth, left.y),
+                    size = Size(strokeWidth, size.height - left.y),
+                    alpha = 0.3f,
+                )
+            }
+            // minus 1 to for size to index, minus 1 more due to zipWithNext
+            if (index == points.size - 2) {
+                drawRect(
+                    color = color,
+                    topLeft = right,
+                    size = Size(strokeWidth, size.height - right.y),
+                    alpha = 0.3f,
                 )
             }
         }
     }
 }
 
-private fun linePoints(minValue: Short, maxValue: Short, values: List<Short>): List<Offset> {
+private fun equalizerLinePoints(minValue: Short, maxValue: Short, values: List<Short>): List<Offset> {
     val range = (maxValue - minValue).toFloat()
     return values.mapIndexed { index, value ->
         val x = index.toFloat() / (values.size - 1).toFloat()
@@ -102,6 +139,7 @@ private fun PreviewEqualizer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp),
+                color = MaterialTheme.colorScheme.onSurface,
                 bands = bands,
                 values = listOf(60, -60, 30, -30, 120, -120, 0, 0),
                 minValue = -120,

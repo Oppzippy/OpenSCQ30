@@ -223,6 +223,9 @@ mod tests {
                             Setting::Equalizer {
                                 value, read_only, ..
                             } => (!read_only).then_some(value.into()),
+                            Setting::PresetEqualizerProfileSelect { value, .. } => {
+                                Some(value.into())
+                            }
                             Setting::HueColorPicker { hue } => Some(hue.into()),
                             Setting::ModifiableSelect { .. }
                             | Setting::Information { .. }

@@ -33,6 +33,17 @@ sealed class Setting {
     }
 
     @Serializable
+    @SerialName("presetEqualizerProfileSelect")
+    data class PresetEqualizerProfileSelect(
+        val equalizer: Equalizer,
+        val select: Select,
+        val presets: List<List<Short>>,
+        val value: String?,
+    ) : Setting() {
+        override fun toValue() = value.toValue()
+    }
+
+    @Serializable
     @SerialName("modifiableSelect")
     data class ModifiableSelectSetting(val setting: Select, val value: String?) : Setting() {
         override fun toValue() = value.toValue()

@@ -13,9 +13,10 @@ pub fn setting_value(setting: &Setting, unparsed: Option<String>) -> anyhow::Res
             parse_i32_range(setting, &unparsed.ok_or(required_err)?)
         }
         Setting::Select { setting, .. } => parse_select(setting, &unparsed.ok_or(required_err)?),
-        Setting::OptionalSelect { setting, .. } => {
-            parse_optional_select(setting, &unparsed.ok_or(required_err)?)
-        }
+        Setting::OptionalSelect { setting, .. }
+        | Setting::PresetEqualizerProfileSelect {
+            select: setting, ..
+        } => parse_optional_select(setting, &unparsed.ok_or(required_err)?),
         Setting::ModifiableSelect { setting, .. } => {
             parse_modifiable_select(setting, unparsed.ok_or(required_err)?)
         }

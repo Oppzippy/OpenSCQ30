@@ -208,8 +208,14 @@ fn get_inner<
                 .iter()
                 .find(|preset| preset.id == equalizer_configuration.preset_id())
                 .copied();
-            Setting::OptionalSelect {
-                setting: settings::Select {
+            Setting::PresetEqualizerProfileSelect {
+                equalizer: settings::Equalizer {
+                    band_hz: Cow::Owned(module_settings.band_hz.to_vec()),
+                    fraction_digits: FRACTION_DIGITS.into(),
+                    min: MIN_VOLUME,
+                    max: MAX_VOLUME,
+                },
+                select: settings::Select {
                     options: module_settings
                         .presets
                         .iter()
@@ -221,6 +227,19 @@ fn get_inner<
                         .map(|preset| (preset.localized_name)())
                         .collect(),
                 },
+                presets: module_settings
+                    .presets
+                    .iter()
+                    .map(|preset| {
+                        preset
+                            .volume_adjustments
+                            .adjustments()
+                            .iter()
+                            .copied()
+                            .take(VISIBLE_BANDS)
+                            .collect()
+                    })
+                    .collect(),
                 value: maybe_preset.map(|preset| Cow::Borrowed(preset.name)),
             }
         }

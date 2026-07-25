@@ -21,7 +21,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -118,6 +120,12 @@ private fun FallbackSettingCategoryScreen(
                 is Setting.OptionalSelectSetting -> OptionalSelect(
                     name = name,
                     setting = setting,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
+
+                is Setting.PresetEqualizerProfileSelect -> OptionalSelect(
+                    name = name,
+                    setting = Setting.OptionalSelectSetting(setting = setting.select, value = setting.value),
                     onChange = { setSetting(settingId, it.toValue()) },
                 )
 
@@ -247,16 +255,19 @@ private fun Equalizer(name: String, setting: Setting.EqualizerSetting, onChange:
             },
         )
     } else {
-        ReadOnlyEqualizer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp),
-            bands = setting.setting.bandHz,
-            values = setting.value,
-            minValue = setting.setting.min,
-            maxValue = setting.setting.max,
-            fractionDigits = setting.setting.fractionDigits,
-        )
+        Surface {
+            ReadOnlyEqualizer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                bands = setting.setting.bandHz,
+                values = setting.value,
+                minValue = setting.setting.min,
+                maxValue = setting.setting.max,
+                fractionDigits = setting.setting.fractionDigits,
+            )
+        }
     }
 }
 

@@ -182,7 +182,10 @@ impl From<settings::Setting> for JsonSetting {
             settings::Setting::Toggle { .. } => Self::Toggle,
             settings::Setting::I32Range { setting, .. } => Self::I32Range { setting },
             settings::Setting::Select { setting, .. } => Self::Select { setting },
-            settings::Setting::OptionalSelect { setting, .. } => Self::OptionalSelect { setting },
+            settings::Setting::OptionalSelect { setting, .. }
+            | settings::Setting::PresetEqualizerProfileSelect {
+                select: setting, ..
+            } => Self::OptionalSelect { setting },
             settings::Setting::ModifiableSelect { setting, .. } => {
                 Self::ModifiableSelect { setting }
             }

@@ -33,26 +33,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
+import com.oppzippy.openscq30.lib.wrapper.Equalizer
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.devicesettings.composables.Equalizer
+import com.oppzippy.openscq30.ui.devicesettings.composables.ReadOnlyEqualizer
 import com.oppzippy.openscq30.ui.utils.ModifiableSelect
 import kotlin.math.cos
 import kotlin.math.sin
@@ -61,49 +57,38 @@ private const val SETTING_ID_PRESET_EQUALIZER_PROFILE = "presetEqualizerProfile"
 private const val SETTING_ID_CUSTOM_EQUALIZER_PROFILE = "customEqualizerProfile"
 private const val SETTING_ID_VOLUME_ADJUSTMENTS = "volumeAdjustments"
 
+val deviceBlacklist = hashSetOf(
+    "SoundcoreA3116", // volume adjustments are unknown, so they would be shown as all 0s
+)
+
 object SoundcoreEqualizerScreen : CategoryOverride {
     // Be overly cautious and ensure all settings are as expected. It's better to not use this override when we should
     // rather than the other way around.
     override fun shouldOverride(deviceModel: String, settings: List<Pair<String, Setting>>): Boolean {
         if (!deviceModel.startsWith("Soundcore")) return false
+        if (deviceModel in deviceBlacklist) return false
         if (settings.size != 3) return false
 
-        val preset = getSettingById<Setting.OptionalSelectSetting>(
+        getSettingById<Setting.PresetEqualizerProfileSelect>(
             settings,
-            "presetEqualizerProfile",
+            SETTING_ID_PRESET_EQUALIZER_PROFILE,
         ) ?: return false
         getSettingById<Setting.ModifiableSelectSetting>(
             settings,
-            "customEqualizerProfile",
+            SETTING_ID_CUSTOM_EQUALIZER_PROFILE,
         ) ?: return false
-        val volumeAdjustments = getSettingById<Setting.EqualizerSetting>(settings, "volumeAdjustments") ?: return false
+        getSettingById<Setting.EqualizerSetting>(settings, SETTING_ID_VOLUME_ADJUSTMENTS) ?: return false
 
-        if (
-            preset.setting.options.size != presetGradients.size ||
-            !preset.setting.options.all { presetGradients.contains(it) }
-        ) {
-            return false
-        }
-        return volumeAdjustments.setting.fractionDigits == 1.toShort() &&
-            volumeAdjustments.setting.min == (-120).toShort() &&
-            volumeAdjustments.setting.max == 134.toShort() &&
-            volumeAdjustments.setting.bandHz == listOf(
-                100.toUShort(),
-                200.toUShort(),
-                400.toUShort(),
-                800.toUShort(),
-                1600.toUShort(),
-                3200.toUShort(),
-                6400.toUShort(),
-                12800.toUShort(),
-            )
+        return true
     }
 
     @Composable
     override fun Screen(settings: List<Pair<String, Setting>>, setSettings: (List<Pair<String, Value>>) -> Unit) {
         val presetEqualizerProfile =
-            settings.find { it.first == SETTING_ID_PRESET_EQUALIZER_PROFILE }!!.second as Setting.OptionalSelectSetting
-        val selectedPresetIndex = presetEqualizerProfile.setting.options.indexOf(presetEqualizerProfile.value)
+            settings.find {
+                it.first == SETTING_ID_PRESET_EQUALIZER_PROFILE
+            }!!.second as Setting.PresetEqualizerProfileSelect
+        val selectedPresetIndex = presetEqualizerProfile.select.options.indexOf(presetEqualizerProfile.value)
             .let { if (it == -1) null else it }
         val customEqualizerProfile =
             settings.find {
@@ -164,11 +149,13 @@ object SoundcoreEqualizerScreen : CategoryOverride {
             if (selectedTabIndex == 0) {
                 Preset(
                     lazyListState = presetLazyListState,
-                    options = presetEqualizerProfile.setting.options,
-                    localizedOptions = presetEqualizerProfile.setting.localizedOptions,
+                    options = presetEqualizerProfile.select.options,
+                    localizedOptions = presetEqualizerProfile.select.localizedOptions,
+                    volumeAdjustments = presetEqualizerProfile.presets,
                     selectedIndex = selectedPresetIndex,
+                    equalizer = presetEqualizerProfile.equalizer,
                     onSelected = {
-                        val selectedOption = presetEqualizerProfile.setting.options[it]
+                        val selectedOption = presetEqualizerProfile.select.options[it]
                         setSettings(listOf(SETTING_ID_PRESET_EQUALIZER_PROFILE to selectedOption.toValue()))
                     },
                 )
@@ -219,6 +206,8 @@ private inline fun <reified T> getSettingById(settings: List<Pair<String, Settin
 private fun Preset(
     options: List<String>,
     localizedOptions: List<String>,
+    volumeAdjustments: List<List<Short>>,
+    equalizer: Equalizer,
     selectedIndex: Int?,
     onSelected: (Int) -> Unit,
     lazyListState: LazyListState,
@@ -227,7 +216,11 @@ private fun Preset(
         state = lazyListState,
         modifier = Modifier.padding(horizontal = 16.dp),
     ) {
-        itemsIndexed(options.zip(localizedOptions)) { index, (option, localizedOption) ->
+        itemsIndexed(
+            options.zip(localizedOptions).zip(volumeAdjustments),
+        ) { index, (optionAndLocalizedOption, volumeAdjustments) ->
+            val option = optionAndLocalizedOption.first
+            val localizedOption = optionAndLocalizedOption.second
             // we want spacing before the first item, so use a spacer rather than LazyColumn's verticalArrangement
             Spacer(Modifier.height(16.dp))
             PresetCard(
@@ -235,6 +228,8 @@ private fun Preset(
                 option = option,
                 localizedOption = localizedOption,
                 isSelected = index == selectedIndex,
+                volumeAdjustments = volumeAdjustments,
+                equalizer = equalizer,
                 onSelected = onSelected,
             )
         }
@@ -246,10 +241,12 @@ private fun PresetCard(
     index: Int,
     option: String,
     localizedOption: String,
+    equalizer: Equalizer,
+    volumeAdjustments: List<Short>,
     isSelected: Boolean,
     onSelected: (Int) -> Unit,
 ) {
-    val gradient = presetGradients[option]
+    val gradient = presetGradients.getOrDefault(option, fallbackPresetGradient)
     Card(
         Modifier
             .height(120.dp)
@@ -258,31 +255,25 @@ private fun PresetCard(
         colors = CardDefaults.cardColors(containerColor = gradient?.left ?: Color.Unspecified),
     ) {
         Box(
-            modifier = Modifier.let { modifier ->
-                if (gradient != null) {
-                    modifier.drawBehind {
-                        // hacky angled gradient. only works when the angle is close to 90 degrees,
-                        // since otherwise rightSideY will be extraordinarily high, leading to most of
-                        // the gradient being off the top of the screen
+            modifier = Modifier.drawBehind {
+                // hacky angled gradient. only works when the angle is close to 90 degrees,
+                // since otherwise rightSideY will be extraordinarily high, leading to most of
+                // the gradient being off the top of the screen
 
-                        val angle = Math.toRadians(90 - gradient.angleInDegrees * -1)
-                        val x = cos(angle)
-                        val y = sin(angle)
-                        val slope = y / x
-                        val rightSideY = size.width * slope
+                val angle = Math.toRadians(90 - gradient.angleInDegrees * -1)
+                val x = cos(angle)
+                val y = sin(angle)
+                val slope = y / x
+                val rightSideY = size.width * slope
 
-                        drawRect(
-                            brush = Brush.linearGradient(
-                                colors = listOf(gradient.left, gradient.right),
-                                start = Offset(0f, 0f),
-                                end = Offset(size.width, rightSideY.toFloat()),
-                            ),
-                            size = size,
-                        )
-                    }
-                } else {
-                    modifier
-                }
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(gradient.left, gradient.right),
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, rightSideY.toFloat()),
+                    ),
+                    size = size,
+                )
             },
         ) {
             if (isSelected) {
@@ -302,16 +293,21 @@ private fun PresetCard(
                     )
                 }
             }
-            presetVolumeAdjustments[option]?.let {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                    EqualizerLine(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(85.dp)
-                            .padding(16.dp),
-                        it,
-                    )
-                }
+
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                ReadOnlyEqualizer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(85.dp)
+                        .padding(16.dp),
+                    color = Color.White,
+                    bands = equalizer.bandHz,
+                    values = volumeAdjustments,
+                    minValue = equalizer.min,
+                    maxValue = equalizer.max,
+                    fractionDigits = equalizer.fractionDigits,
+                    drawHorizontalGuide = false,
+                )
             }
             Box(
                 Modifier
@@ -331,11 +327,14 @@ private fun PresetCard(
     }
 }
 
+val fallbackPresetGradient = Gradient(84.31, Color(0xFF666666), Color(0xFFAAAAAA))
 val presetGradients = hashMapOf(
     "SoundcoreSignature" to Gradient(84.31, Color(0xFFF066CD), Color(0xFF98D3FA)),
     "Acoustic" to Gradient(84.31, Color(0xFFAE6F13), Color(0xFFFEBF63)),
+    "Balanced" to Gradient(84.31, Color(0xFFAE6F13), Color(0xFFFEBF63)),
     "BassBooster" to Gradient(84.31, Color(0xFF5320F1), Color(0xFFA370FF)),
     "BassReducer" to Gradient(84.31, Color(0xFF4283F6), Color(0xFF60DCDF)),
+    "VolumeBooster" to Gradient(84.31, Color(0xFF4283F6), Color(0xFF60DCDF)),
     "Classical" to Gradient(95.69, Color(0xFF111B2B), Color(0xFFE69E52)),
     "Podcast" to Gradient(84.31, Color(0xFFC33231), Color(0xFFF98D34)),
     "Dance" to Gradient(95.69, Color(0xFFE7407B), Color(0xFF733BE0)),
@@ -357,85 +356,6 @@ val presetGradients = hashMapOf(
 )
 
 data class Gradient(val angleInDegrees: Double, val left: Color, val right: Color)
-
-val presetVolumeAdjustments = hashMapOf(
-    "SoundcoreSignature" to listOf(0, 0, 0, 0, 0, 0, 0, 0),
-    "Acoustic" to listOf(40, 10, 20, 20, 40, 40, 40, 20),
-    "BassBooster" to listOf(40, 30, 10, 0, 0, 0, 0, 0),
-    "BassReducer" to listOf(-40, -30, -10, 0, 0, 0, 0, 0),
-    "Classical" to listOf(30, 30, -20, -20, 0, 20, 30, 40),
-    "Podcast" to listOf(-30, 20, 40, 40, 30, 20, 0, -20),
-    "Dance" to listOf(20, -30, -10, 10, 20, 20, 10, -30),
-    "Deep" to listOf(20, 10, 30, 30, 20, -20, -40, -50),
-    "Electronic" to listOf(30, 20, -20, 20, 10, 20, 30, 30),
-    "Flat" to listOf(-20, -20, -10, 0, 0, 0, -20, -20),
-    "HipHop" to listOf(20, 30, -10, -10, 20, -10, 20, 30),
-    "Jazz" to listOf(20, 20, -20, -20, 0, 20, 30, 40),
-    "Latin" to listOf(0, 0, -20, -20, -20, 0, 30, 50),
-    "Lounge" to listOf(-10, 20, 40, 30, 0, -20, 20, 10),
-    "Piano" to listOf(0, 30, 30, 20, 40, 50, 30, 40),
-    "Pop" to listOf(-10, 10, 30, 30, 10, -10, -20, -30),
-    "RnB" to listOf(60, 20, -20, -20, 20, 30, 30, 40),
-    "Rock" to listOf(30, 20, -10, -10, 10, 30, 30, 30),
-    "SmallSpeakers" to listOf(40, 30, 10, 0, -20, -30, -40, -40),
-    "SpokenWord" to listOf(-30, -20, 10, 20, 20, 10, 0, -30),
-    "TrebleBooster" to listOf(-20, -20, -20, -10, 10, 20, 20, 40),
-    "TrebleReducer" to listOf(0, 0, 0, -20, -30, -40, -40, -60),
-)
-
-@Composable
-private fun EqualizerLine(modifier: Modifier = Modifier, volumeAdjustments: List<Int>) {
-    Spacer(
-        modifier.drawWithCache {
-            val strokeSize = 2.dp.toPx()
-            val points =
-                equalizerLinePoints(size.width, size.height, strokeSize, volumeAdjustments)
-            val filledPath = Path().apply {
-                moveTo(0f, size.height)
-                lineTo(0f, points.first().y)
-                points.forEach {
-                    lineTo(it.x, it.y)
-                }
-                lineTo(size.width, points.last().y)
-                lineTo(size.width, size.height)
-                close()
-            }
-            onDrawBehind {
-                drawPath(
-                    path = filledPath,
-                    color = Color.White,
-                    style = Fill,
-                    alpha = 0.5f,
-                )
-                drawPoints(
-                    points = points,
-                    color = Color.White,
-                    pointMode = PointMode.Polygon,
-                    strokeWidth = strokeSize,
-                    cap = StrokeCap.Round,
-                    pathEffect = PathEffect.cornerPathEffect(strokeSize),
-                )
-            }
-        },
-    )
-}
-
-private fun equalizerLinePoints(width: Float, height: Float, padding: Float, values: List<Int>): List<Offset> {
-    val widthWithoutPadding = width - padding * 2
-    val heightWithoutPadding = height - padding * 2
-    val minVolume = -60
-    val maxVolume = 60
-    val range = maxVolume - minVolume
-
-    val points = values.mapIndexed { index, value ->
-        val normalizedX = index.toFloat() / (values.size - 1).toFloat()
-        val x = normalizedX * widthWithoutPadding + padding
-        val normalizedY = 1F - ((value - minVolume) / range.toFloat())
-        val y = normalizedY * heightWithoutPadding + padding
-        Offset(x, y)
-    }
-    return points
-}
 
 @Composable
 fun Custom(

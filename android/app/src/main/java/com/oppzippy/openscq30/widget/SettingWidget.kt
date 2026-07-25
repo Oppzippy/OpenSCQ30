@@ -447,6 +447,15 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting, i
             isCompactLayout = isCompactLayout,
         )
 
+        is Setting.PresetEqualizerProfileSelect -> Select(
+            context,
+            settingId,
+            setting.select,
+            setting.value,
+            isOptional = true,
+            isCompactLayout = isCompactLayout,
+        )
+
         is Setting.ModifiableSelectSetting -> Select(
             context,
             settingId,

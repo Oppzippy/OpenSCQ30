@@ -213,6 +213,13 @@ pub enum Setting {
         read_only: bool,
         value: Vec<i16>,
     },
+    PresetEqualizerProfileSelect {
+        equalizer: Equalizer,
+        select: Select,
+        /// Each index corresponds to the same index in select.options
+        presets: Vec<Vec<i16>>,
+        value: Option<Cow<'static, str>>,
+    },
     Information {
         value: String,
         translated_value: String,
@@ -235,6 +242,7 @@ impl From<Setting> for Value {
             Setting::Select { value, .. } => value.into(),
             Setting::OptionalSelect { value, .. } => value.into(),
             Setting::Equalizer { value, .. } => value.into(),
+            Setting::PresetEqualizerProfileSelect { value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
             Setting::Information {
                 value,
@@ -297,6 +305,7 @@ impl Setting {
                     SettingMode::ReadWrite
                 }
             }
+            Self::PresetEqualizerProfileSelect { .. } => SettingMode::ReadWrite,
             Self::Information { .. } => SettingMode::ReadOnly,
             Self::ImportString { .. } => SettingMode::WriteOnly,
             Self::HueColorPicker { .. } => SettingMode::ReadWrite,

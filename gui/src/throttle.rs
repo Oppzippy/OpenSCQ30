@@ -70,6 +70,7 @@ impl Throttle {
                     *value = v.try_into_i16_vec().unwrap();
                 }
             }
+            Setting::PresetEqualizerProfileSelect { .. } => (),
             Setting::Information { .. } => (),
             Setting::ImportString { .. } => (),
             Setting::HueColorPicker { hue } => {
