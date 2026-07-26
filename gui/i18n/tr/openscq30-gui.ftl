@@ -45,3 +45,4 @@ remove-item-confirm = { $name } profilini kaldırmak istediğine emin misin?
 default = Varsayılan
 settings = Ayarlar
 preferred-language = Tercih Edilen Dil
+color-hue-in-degrees = Dereceler ile Renk Tonu

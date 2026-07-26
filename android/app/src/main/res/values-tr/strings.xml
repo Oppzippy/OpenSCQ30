@@ -82,4 +82,7 @@
     <string name="configure_widget">Ekran Bileşenini Ayarla</string>
     <string name="connect_to_a_device_to_configure_the_widget">Ekran Bileşenini Ayarlamak için Cihaza Bağlanın</string>
     <string name="configure_later">Daha sonra Ayarla</string>
+    <string name="appearance">Görünüm</string>
+    <string name="compact_layout">Kompakt Düzen</string>
+    <string name="visible_settings">Görünebilir Ayarlar</string>
 </resources>
