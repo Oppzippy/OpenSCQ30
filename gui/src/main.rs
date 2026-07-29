@@ -15,6 +15,7 @@ pub mod icons;
 mod openscq30_v1_migration;
 mod throttle;
 mod utils;
+mod warning;
 
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()

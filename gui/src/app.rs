@@ -266,9 +266,9 @@ impl Application for AppModel {
     fn view(&self) -> cosmic::Element<'_, Self::Message> {
         widget::Column::with_capacity(2)
             .push_maybe(
-                self.warnings
-                    .front()
-                    .map(|message| widget::warning(message).on_close(Message::CloseWarning)),
+                self.warnings.front().map(|message| {
+                    crate::warning::warning(message).on_close(Message::CloseWarning)
+                }),
             )
             .push(match &self.screen {
                 Screen::DeviceSelection(device_selection_model) => cosmic::Element::from(
