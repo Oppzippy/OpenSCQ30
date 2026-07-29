@@ -67,7 +67,6 @@ impl<'a, Message: 'static + Clone> From<Warning<'a, Message>> for Element<'a, Me
 #[must_use]
 pub fn warning_container(theme: &Theme) -> widget::container::Style {
     let cosmic = theme.cosmic();
-    println!("text color: {:?}", theme.cosmic().warning.on);
     widget::container::Style {
         icon_color: Some(theme.cosmic().warning.on.into()),
         text_color: Some(theme.cosmic().warning.on.into()),
