@@ -1,0 +1,9 @@
+* Features
+  - Add support for Soundcore C50i
+  - Add widget option for compact layout (WIP)
+
+* Fixes
+  - More closely match the official Soundcore app's behavior when modifying equalizer
+  - Fix many devices having incorrect equalizer presets
+  - Fix issue preventing connection with newer firmware versions for some devices
+  - Use dynamic colors (Material You) for widget

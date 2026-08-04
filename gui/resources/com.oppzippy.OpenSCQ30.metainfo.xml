@@ -41,6 +41,21 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.11.0" date="2026-08-04">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore C50i</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>More closely match the official Soundcore app's behavior when modifying equalizer</li>
+                    <li>Fix many devices having incorrect equalizer presets</li>
+                    <li>Fix issue preventing connection with newer firmware versions for some devices</li>
+                    <li>Equalizer sliders not showing negative sign in the exclusive range -1 to 0</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.10.1" date="2026-07-10">
             <description>
                 <p>Fixes</p>
