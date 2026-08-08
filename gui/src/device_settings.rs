@@ -20,6 +20,7 @@ use cosmic::{
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
 use openscq30_lib::{
+    DeviceModel,
     connection::ConnectionStatus,
     quick_presets::QuickPresetsHandler,
     settings::{self, CategoryId, Setting, SettingId, Value},
@@ -367,9 +368,17 @@ impl DeviceSettingsModel {
         setting: &'a Setting,
     ) -> SettingDisplayKind<'a, Message> {
         match setting {
-            Setting::Toggle { value } => toggle::toggle(setting_id, *value, move |new_value| {
-                Message::SetSetting(setting_id, new_value.into())
-            })
+            Setting::Toggle { value } => toggle::toggle_with_label(
+                if setting_id == SettingId::SurroundSound
+                    && self.device.model() == DeviceModel::SoundcoreA3959
+                {
+                    Cow::Owned(fl!("sound-3d"))
+                } else {
+                    Cow::Owned(setting_id.translate())
+                },
+                *value,
+                move |new_value| Message::SetSetting(setting_id, new_value.into()),
+            )
             .into(),
             Setting::I32Range { setting, value } => {
                 range::i32_range(setting_id, setting.clone(), *value, move |new_value| {

@@ -1,14 +1,14 @@
-use cosmic::widget;
-use openscq30_i18n::Translate;
-use openscq30_lib::settings::SettingId;
+use std::borrow::Cow;
 
-pub fn toggle<'a, M>(
-    setting_id: SettingId,
+use cosmic::widget;
+
+pub fn toggle_with_label<'a, M>(
+    label: Cow<'static, str>,
     value: bool,
     on_change: impl Fn(bool) -> M + 'static,
 ) -> widget::list::ListButton<'a, M>
 where
     M: Clone + 'static,
 {
-    widget::settings::item::builder(setting_id.translate()).toggler(value, on_change)
+    widget::settings::item::builder(label).toggler(value, on_change)
 }

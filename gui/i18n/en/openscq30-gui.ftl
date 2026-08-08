@@ -46,3 +46,4 @@ default = Default
 settings = Settings
 preferred-language = Preferred Language
 color-hue-in-degrees = Color Hue in Degrees
+sound-3d = 3D Sound
