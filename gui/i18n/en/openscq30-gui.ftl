@@ -46,3 +46,4 @@ default = Default
 settings = Settings
 preferred-language = Preferred Language
 color-hue-in-degrees = Color Hue in Degrees
+gaming-mode-on-connect = Gaming Mode on Connect

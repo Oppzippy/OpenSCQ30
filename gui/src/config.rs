@@ -19,6 +19,9 @@ pub struct Config {
 #[serde(default)]
 pub struct ConfigInner {
     pub preferred_language: Option<String>,
+    /// When enabled, Gaming Mode is activated automatically whenever a
+    /// connected device supports it.
+    pub gaming_mode_on_connect: bool,
 }
 
 impl Config {

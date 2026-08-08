@@ -17,7 +17,9 @@ use cosmic::{
 use i18n_embed::unic_langid::LanguageIdentifier;
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
-use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
+use openscq30_lib::{
+    OpenSCQ30Session, device::OpenSCQ30Device, settings::SettingId, storage::PairedDevice,
+};
 use tokio::{select, sync::Semaphore};
 
 use crate::{
@@ -80,6 +82,7 @@ pub enum Message {
     ToggleSettings,
     None,
     SetPreferredLanguage(usize),
+    SetGamingModeOnConnect(bool),
     KeyPressed {
         modifiers: keyboard::Modifiers,
         key: keyboard::Key,
@@ -326,33 +329,41 @@ impl Application for AppModel {
                 )),
                 ContextDrawerScreen::Settings => Some(
                     cosmic::app::context_drawer::context_drawer(
-                        widget::column![
-                            widget::settings::item::builder(fl!("preferred-language"))
-                                .flex_control(widget::dropdown(
-                                    &self.available_language_names,
-                                    Some(
-                                        self.config
-                                            .get()
-                                            .preferred_language
-                                            .as_ref()
-                                            .and_then(|preferred_language| {
-                                                LanguageIdentifier::from_str(preferred_language)
-                                                    .ok()
-                                            })
-                                            .and_then(|preferred_language| {
-                                                self.available_languages
-                                                    .iter()
-                                                    .skip(1)
-                                                    .position(|l| {
-                                                        l.as_ref() == Some(&preferred_language)
-                                                    })
-                                                    .map(|index| index + 1)
-                                            })
-                                            .unwrap_or_default(),
+                        widget::settings::section()
+                            .add(
+                                widget::settings::item::builder(fl!("preferred-language"))
+                                    .flex_control(widget::dropdown(
+                                        &self.available_language_names,
+                                        Some(
+                                            self.config
+                                                .get()
+                                                .preferred_language
+                                                .as_ref()
+                                                .and_then(|preferred_language| {
+                                                    LanguageIdentifier::from_str(preferred_language)
+                                                        .ok()
+                                                })
+                                                .and_then(|preferred_language| {
+                                                    self.available_languages
+                                                        .iter()
+                                                        .skip(1)
+                                                        .position(|l| {
+                                                            l.as_ref() == Some(&preferred_language)
+                                                        })
+                                                        .map(|index| index + 1)
+                                                })
+                                                .unwrap_or_default(),
+                                        ),
+                                        Message::SetPreferredLanguage,
+                                    )),
+                            )
+                            .add(
+                                widget::settings::item::builder(fl!("gaming-mode-on-connect"))
+                                    .toggler(
+                                        self.config.get().gaming_mode_on_connect,
+                                        Message::SetGamingModeOnConnect,
                                     ),
-                                    Message::SetPreferredLanguage,
-                                )),
-                        ],
+                            ),
                         Message::CloseContextDrawer,
                     )
                     .title(fl!("settings")),
@@ -422,6 +433,7 @@ impl Application for AppModel {
                     match screen.update(message) {
                         device_selection::Action::ConnectToDevice(paired_device) => {
                             let session = self.session.clone();
+                            let auto_gaming_mode = self.config.get().gaming_mode_on_connect;
                             let canceled = Arc::new(Semaphore::new(0));
                             self.screen = Screen::Connecting {
                                 canceled: canceled.clone(),
@@ -435,6 +447,21 @@ impl Application for AppModel {
 
                                 match connect_result {
                                     Ok(device) => {
+                                        if auto_gaming_mode
+                                            && device
+                                                .setting(&SettingId::GamingMode)
+                                                .is_some()
+                                            && let Err(err) = device
+                                                .set_setting_values(vec![(
+                                                    SettingId::GamingMode,
+                                                    true.into(),
+                                                )])
+                                                .await
+                                        {
+                                            tracing::warn!(
+                                                "failed to auto enable gaming mode: {err:?}"
+                                            );
+                                        }
                                         Ok(Message::ActivateConnectToDeviceScreen(DebugOpenSCQ30Device(
                                             device,
                                         ))
@@ -582,6 +609,21 @@ impl Application for AppModel {
                     inner.preferred_language = self.available_languages[language_index]
                         .as_ref()
                         .map(ToString::to_string);
+                });
+
+                return Task::future(async move {
+                    if let Err(err) = result_receiver.await.unwrap() {
+                        tracing::error!("error writing to config file: {err:?}");
+                        Message::Warning(err.to_string())
+                    } else {
+                        Message::None
+                    }
+                })
+                .map(Into::into);
+            }
+            Message::SetGamingModeOnConnect(value) => {
+                let result_receiver = self.config.modify(|inner| {
+                    inner.gaming_mode_on_connect = value;
                 });
 
                 return Task::future(async move {
