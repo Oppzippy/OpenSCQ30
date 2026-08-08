@@ -49,6 +49,7 @@ soundcore_device!(
             RequestState.to_packet(),
         );
         builder.dual_connections();
+        builder.surround_sound();
         builder.auto_power_off(
             common::modules::auto_power_off::AutoPowerOffDuration::ten_twenty_thirty_sixty(),
         );
@@ -181,8 +182,42 @@ mod tests {
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::AutoPowerOff, "10m".into()),
+            (SettingId::SurroundSound, false.into()),
             (SettingId::DualConnections, true.into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_surround_sound() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3959,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
+                        57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
+                        161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+                        241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
+                        0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SurroundSound, true.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([0x02, 0x86]),
+                    vec![1],
+                )],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]

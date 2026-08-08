@@ -23,7 +23,7 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                FirmwareVersion, GamingMode, LowBatteryPrompt,
+                FirmwareVersion, GamingMode, LowBatteryPrompt, SurroundSound,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -43,6 +43,7 @@ pub struct A3959StateUpdate {
     pub touch_tone: common::structures::TouchTone,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: LowBatteryPrompt,
+    pub surround_sound: SurroundSound,
     pub gaming_mode: Option<GamingMode>,
     pub dual_connections_enabled: bool,
 }
@@ -61,6 +62,7 @@ impl Default for A3959StateUpdate {
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
             low_battery_prompt: Default::default(),
+            surround_sound: Default::default(),
             gaming_mode: Default::default(),
             dual_connections_enabled: Default::default(),
         }
@@ -92,7 +94,7 @@ impl FromPacketBody for A3959StateUpdate {
                     take(1usize),
                     common::structures::TouchTone::take,
                     take_bool,
-                    take(1usize),
+                    SurroundSound::take,
                     common::structures::AutoPowerOff::take,
                     LowBatteryPrompt::take,
                     GamingMode::take, // requires firmware version >= 01.60, but we can just parse and check that later
@@ -112,7 +114,7 @@ impl FromPacketBody for A3959StateUpdate {
                     _unknown3,
                     touch_tone,
                     dual_connections_enabled,
-                    _unknown4,
+                    surround_sound,
                     auto_power_off,
                     low_battery_prompt,
                     gaming_mode,
@@ -130,6 +132,7 @@ impl FromPacketBody for A3959StateUpdate {
                         touch_tone,
                         auto_power_off,
                         low_battery_prompt,
+                        surround_sound,
                         dual_connections_enabled,
                         gaming_mode: (dual_firmware_version.min() >= FirmwareVersion::new(1, 60))
                             .then_some(gaming_mode),
@@ -166,7 +169,8 @@ impl ToPacket for A3959StateUpdate {
             .chain(self.sound_modes.bytes())
             .chain([0])
             .chain([self.touch_tone.0.into()])
-            .chain([self.dual_connections_enabled.into(), 0])
+            .chain([self.dual_connections_enabled.into()])
+            .chain(self.surround_sound.bytes())
             .chain(self.auto_power_off.bytes())
             .chain(self.low_battery_prompt.bytes())
             .chain(self.gaming_mode.unwrap_or_default().bytes())
