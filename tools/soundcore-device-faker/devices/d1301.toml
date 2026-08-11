@@ -5,21 +5,21 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7D1301"
 [[responses]]
 command = [1, 1]
 response = [
-    1,
-    1,
-    9,
-    9,
-    48,  # left FW start
+    1,    # host device
+    1,    # tws connected
+    9,    # left battery (0-9, 0=10%)
+    9,    # right battery
+    56,   # left FW start
     49,
     46,
     48,
-    48,  # left FW end
-    48,  # right FW start
+    48,   # left FW end
+    56,   # right FW start
     49,
     46,
     48,
-    48,  # right FW end
-    49,  # SN start
+    48,   # right FW end
+    49,   # SN start
     51,
     48,
     49,
@@ -34,27 +34,27 @@ response = [
     48,
     48,
     48,
-    48,  # SN end
+    48,   # SN end
     223,
     186,
     112,
     217,
     191,
     144,
-    48,
+    48,   # charging case FW start
     49,
     46,
     48,
-    48,
+    48,   # charging case FW end
     0,
     0,
     0,
     0,
-    6,
-    221,
-    102,
-    17,
-    0,
+    6,    # maybe auto switch once asleep, unsure how this works: 0=keep, 1=keep, 2=keep, 3 has error connecting, 4=pause, 5=keep, 6=play local audio anc off, 7=keep, 8=keep, 9=keep, 10=keep, 11=keep, 12=keep, 13=keep, 14=pause, 15=keep, 16=keep, 17=keep
+    0xdd, # left double tap
+    0x66, # right double tap
+    0x00, # left tap 3 times
+    0x00, # right tap 3 times
     255,
     255,
     255,
@@ -70,11 +70,11 @@ response = [
     255,
     255,
     255,
+    0,    # listening mode (0=bluetooth, 1=local)
+    0,    # default listening mode (0=bluetooth, 1=local)
     0,
     0,
-    1,
-    0,
-    0,
+    0,    # low battery prompt
     50,
     17,
     1,
@@ -142,32 +142,60 @@ response = [
     4,
     1,
     0,
-    0,
-    1,
+    0,    # auto-off prompt tone (sound when earbuds auto power off)
+    1,    # listening mode (Bluetooth/Local) change voice prompt
     8,
-    0,
-    0,
-    0,
-    1,
-    1,
-    0,
+    0,    # Active noise canceling
+    0,    # enable incoming calls during bluetooth mode
     0,
     1,
+    1,
+    0,
+    0,    # tap controls DISABLED (0=tap controls enabled, 1=tap controls disabled)
+    1,    # ANC on/off prompt tone
     1,
     0,
 ]
 
 [[responses]]
+# get earbuds auto stop timer
 command = [21, 3]
-response = [0, 30, 0, 1, 0, 0, 0, 0]
+response = [
+    0,  # auto stop timer enabled
+    30, # duration in minutes (i16), app allows up to 4h (240m)
+    0,  # duration in minutes second byte
+    1,  # unknown
+    60, # time left (i32)
+    0,
+    0,
+    0,  # time left end
+]
 
 [[responses]]
 command = [1, 166]
 response = [249, 243, 79, 106, 14, 112, 227, 230, 106, 12]
 
 [[responses]]
+# get alarms
 command = [20, 1]
-response = [0, 0, 149, 1, 0, 2, 50, 10]
+response = [
+    0,          # alarm 1 id
+    0,          # alarm 1 enabled
+    149,        # alarm 1 time (in minutes since 00:00, little endian)
+    1,          # alarm 1 time (in minutes since 00:00, little endian)
+    0b00000000, # alarm 1 repeat (sun, mon, tues, wed, thurs, fri, sat, unused) 0=no repeat
+    3,          # alarm 1 wake up tune (0=nature, 1=glow, 2=rhythm, 3=bloom)
+    50,         # alarm 1 volume
+    10,         # alarm 1 snooze duration in minutes (app allows 0=off, 5m, and 10m)
+    1,          # alarm 2 id
+    1,          # alarm 2 enabled
+    149,        # alarm 2 time (in minutes since 00:00, little endian)
+    2,          # alarm 2 time (in minutes since 00:00, little endian)
+    0b10000000, # alarm 2 repeat (sun, mon, tues, wed, thurs, fri, sat, unused) 0=no repeat
+    0,          # alarm 2 wake up tune (0=nature, 1=glow, 2=rhythm, 3=bloom)
+    75,         # alarm 2 volume
+    5,          # alarm 2 snooze duration in minutes (app allows 0=off, 5m, and 10m)
+]
 
 [[responses]]
 command = [20, 2]
