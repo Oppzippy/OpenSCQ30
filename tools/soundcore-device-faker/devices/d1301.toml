@@ -152,7 +152,7 @@ response = [
     1,
     0,
     0,    # tap controls DISABLED (0=tap controls enabled, 1=tap controls disabled)
-    1,    # ANC on/off prompt tone
+    1,    # Noise canceling on/off prompt tone
     1,
     0,
 ]
