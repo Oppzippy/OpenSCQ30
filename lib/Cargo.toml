@@ -43,6 +43,7 @@ indexmap = { workspace = true }
 paste = { workspace = true }
 pathfinding = { workspace = true }
 palette = { workspace = true }
+bitflags = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bluer = { workspace = true, features = ["bluetoothd", "rfcomm"] }
