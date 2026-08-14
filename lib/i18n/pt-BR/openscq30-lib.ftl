@@ -1,3 +1,8 @@
+equalizer = Equalizador
+none = Nenhum
+disconnected = Desconectado
+connected = Conectado
+custom = Personalizado
 soundcore-a3004 = Soundcore Q20I
 soundcore-a3027 = Soundcore Life Q35
 soundcore-a3028 = Soundcore Q30 / Life Q30
@@ -6,6 +11,10 @@ soundcore-a3030 = Soundcore Life Tune Pro
 soundcore-a3031 = Soundcore Vortex
 soundcore-a3033 = Soundcore Life 2 Neo
 soundcore-a3035 = Soundcore Space One
+soundcore-development = Informação de Desenvolvimento Soundcore
+general = Geral
+sound-modes = Modo de Som
+equalizer-import-export = Importar/Exportar Equalizador
 soundcore-a3040 = Soundcore Space Q45
 soundcore-a3062 = Soundcore Space One Pro
 soundcore-a3116 = Soundcore Motion+
@@ -32,233 +41,201 @@ soundcore-a3957 = Soundcore Liberty 5
 soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
-soundcore-development = Informações de Desenvolvimento Soundcore
-
-general = Geral
-sound-modes = Modos de Som
-equalizer = Equalizador
-equalizer-import-export = Importar/Exportar Equalizador
 device-information = Informações do Dispositivo
-miscellaneous = Diversos
-
-ambient-sound-mode = Modo de Som Ambiente
+miscellaneous = Miscelânea
+ambient-sound-mode = Modo Som Ambiente
 transparency-mode = Modo Transparência
 noise-canceling-mode = Modo Cancelamento de Ruído
 custom-noise-canceling = Cancelamento de Ruído Personalizado
-preset-profile = Perfil de Preset
+preset-profile = Prefil de Predefinição
 custom-profile = Perfil Personalizado
 volume-adjustments = Ajustes de Volume
 import-custom-equalizer-profiles = Importar Perfis Personalizados
-import-custom-equalizer-profiles-confirm = Isso vai sobrescrever os perfis existentes que tenham os mesmos nomes.
+import-custom-equalizer-profiles-confirm = Isto substituirá perfis existentes que tenham o mesmo nome.
 export-custom-equalizer-profiles = Exportar Perfis Personalizados
-export-custom-equalizer-profiles-output = Saída de Perfis Personalizados Exportados
-
+export-custom-equalizer-profiles-output = Exportar Perfis Personalizados gerados
 volume = Volume
-
 noise-canceling = Cancelamento de Ruído
 transparency = Transparência
 normal = Normal
-indoor = Interno
-outdoor = Externo
+indoor = Interior
+outdoor = Ar Livre
 transport = Transporte
-custom = Personalizado
-vocal-mode = Modo Vocal
+vocal-mode = Modo de Voz
 fully-transparent = Totalmente Transparente
 adaptive = Adaptativo
 manual = Manual
 adaptive-noise-canceling = Cancelamento de Ruído Adaptativo
-low-noise = Ruído Baixo
-medium-noise = Ruído Médio
+low-noise = Ruído baixo
+medium-noise = Ruído moderado
 high-noise = Ruído Alto
 manual-noise-canceling = Cancelamento de Ruído Manual
 manual-transparency = Transparência Manual
 weak = Fraco
 moderate = Moderado
 strong = Forte
-wind-noise-suppression = Supressão de Ruído do Vento
-wind-noise-detected = Ruído do Vento Detectado
-adaptive-noise-canceling-sensitivity-level = Nível de Sensibilidade do Cancelamento de Ruído Adaptativo
-multi-scene = Multi-Cena
-multi-scene-noise-canceling = Cancelamento de Ruído Multi-Cena
+wind-noise-suppression = Supressão de Ruído de Vento
+wind-noise-detected = Ruído de Vento Detectado
+adaptive-noise-canceling-sensitivity-level = Nível de sensibilidade do Cancelamento de Ruído Adaptativo
+multi-scene = Múltiplos Ambientes
+multi-scene-noise-canceling = Cancelamento de Ruído em Múltiplos Ambientes
 environment-detection = Detecção de Ambiente
 transportation = Transporte
 transportation-mode = Modo Transporte
 plane = Avião
-train = Trem
+train = Trêm
 bus = Ônibus
 car = Carro
-talk-mode = Modo Conversa
-anc-personalized-to-ear-canal = ANC Personalizado ao Canal Auditivo
+talk-mode = Modo Conversação
+anc-personalized-to-ear-canal = Cancelamento de Ruído Personalizado ao Canal Auricular
 manual-update = Atualização Manual
 automatic-update = Atualização Automática
 airplane-mode = Modo Avião
 real-time-adaptive-noise-canceling = Cancelamento de Ruído Adaptativo em Tempo Real
-
 soundcore-signature = Assinatura Soundcore
 acoustic = Acústico
-bass-booster = Reforço de Graves
-bass-reducer = Redução de Graves
+bass-booster = Amplificador de Graves
+bass-reducer = Redutor de Graves
 classical = Clássico
 podcast = Podcast
-dance = Dance
-deep = Profundo
-electronic = Eletrônico
-flat = Plano
-hip-hop = Hip Hop
+dance = Dança
+deep = Deep
+electronic = Eletrônica
+flat = Flat
+hip-hop = Hip-Hop
 jazz = Jazz
-latin = Latino
+latin = Latina
 lounge = Lounge
 piano = Piano
 pop = Pop
-rnb = RnB
+rnb = R&B
 rock = Rock
-small-speakers = Caixas Pequenas
-spoken-word = Fala
-treble-booster = Reforço de Agudos
-treble-reducer = Redução de Agudos
-bass-up = BassUp
-bass-off = BassOff
+small-speakers = Pequenos Alto-Falantes
+spoken-word = Palavra
+treble-booster = Amplificador de Agudos
+treble-reducer = Redutor de Agudos
+bass-up = Mais Grave
+bass-off = Sem Graves
 voice = Voz
-heavy = Pesado
-classic = Clássico
+heavy = Heavy
+classic = Clássica
 original = Original
-balanced = Balanceado
-volume-booster = Reforço de Volume
-
-button-configuration = Configuração dos Botões
+balanced = Equilibrado
+volume-booster = Aumento de Volume
+button-configuration = Configuração de Botões
 buttons-enabled = Botões Ativados
-reset-buttons-to-default = Restaurar Botões ao Padrão
-single-press = Toque Único
-double-press = Toque Duplo
-left-single-press = Toque Único (Esquerdo)
-left-double-press = Toque Duplo (Esquerdo)
-left-triple-press = Toque Triplo (Esquerdo)
-left-long-press = Toque Longo (Esquerdo)
-left-slide-up = Deslizar para Cima (Esquerdo)
-left-slide-down = Deslizar para Baixo (Esquerdo)
-right-single-press = Toque Único (Direito)
-right-double-press = Toque Duplo (Direito)
-right-triple-press = Toque Triplo (Direito)
-right-long-press = Toque Longo (Direito)
-right-slide-up = Deslizar para Cima (Direito)
-right-slide-down = Deslizar para Baixo (Direito)
+reset-buttons-to-default = Redefinir a configuração de botões
+single-press = Toque simples
+double-press = Toque duplo
+left-single-press = Toque simples na esquerda
+left-double-press = Toque duplo na esquerda
+left-triple-press = Toque triplo na esquerda
+left-long-press = Toque longo na esquerda
+left-slide-up = Deslizar para cima na esquerda
+left-slide-down = Deslizar para baixo na esquerda
+right-single-press = Toque simples na direita
+right-double-press = Toque duplo na direita
+right-triple-press = Toque triplo na direita
+right-long-press = Toque longo na direita
+right-slide-up = Deslizar para cima na direita
+right-slide-down = Deslizar para baixo na direita
 volume-up = Aumentar Volume
 volume-down = Diminuir Volume
-previous-song = Música Anterior
-next-song = Próxima Música
+previous-song = Faixa Anterior
+next-song = Próxima Faixa
 voice-assistant = Assistente de Voz
-play-pause = Reproduzir Pausar
-normal-mode-in-cycle = Modo Normal no Ciclo
-transparency-mode-in-cycle = Modo Transparência no Ciclo
-noise-canceling-mode-in-cycle = Modo Cancelamento de Ruído no Ciclo
-
-is-charging = Carregando
+play-pause = Pausar
+normal-mode-in-cycle = Modo Normal em ciclo
+transparency-mode-in-cycle = Modo Transparência em ciclo
+noise-canceling-mode-in-cycle = Modo Cancelamento de Ruido em ciclo
+is-charging = Está carregando
 battery-level = Nível da Bateria
-is-charging-left = Carregando (Esquerdo)
-battery-level-left = Nível da Bateria (Esquerdo)
-is-charging-right = Carregando (Direito)
-battery-level-right = Nível da Bateria (Direito)
-case-battery-level = Nível da Bateria do Case
+is-charging-left = Está carregando (esquerda)
+battery-level-left = Nível da bateria (esquerda)
+is-charging-right = Está carregando (direita)
+battery-level-right = Nível da bateria (direita)
+case-battery-level = Bateria da caixa
 charging = Carregando
-not-charging = Não Carregando
-
+not-charging = Sem carregar
 serial-number = Número de Série
 firmware-version = Versão do Firmware
-firmware-version-left = Versão do Firmware (Esquerdo)
-firmware-version-right = Versão do Firmware (Direito)
-
-tws-status = Status True Wireless (TWS)
+firmware-version-left = Versão do Firmware (esquerda)
+firmware-version-right = Versão do Firmware (direita)
+tws-status = Status do Wireless (TWS)
 host-device = Dispositivo Host
-connected = Conectado
-disconnected = Desconectado
-left = Esquerdo
-right = Direito
-
-none = Nenhum
-
+left = Esquerda
+right = Direita
 state-update-packet = Pacote de Atualização de Estado
-send-packet = Enviar Pacote
-
+send-packet = Enviar pacote de informação
 yes = Sim
 no = Não
-
-power-off = Desligar
+power-off = Desligado
 auto-power-off = Desligamento Automático
-x-minutes = { $minutes ->
-    [one] { $minutes } minuto
-    *[other] { $minutes } minutos
-}
-x-seconds = { $seconds ->
-    [one] { $seconds } segundo
-    *[other] { $seconds } segundos
-}
+x-minutes =
+    { $minutes ->
+        [one] { $minutes } minuto
+       *[other] { $minutes } minutos
+    }
+x-seconds =
+    { $seconds ->
+        [one] { $seconds } segundo
+       *[other] { $seconds } segundos
+    }
 disabled = Desativado
-
-touch-tone = Tom de Toque
+touch-tone = Tons de toque
 gaming-mode = Modo Jogo
 sound-leak-compensation = Compensação de Vazamento de Som
 surround-sound = Som Surround
-auto-play-pause = Reprodução/Pausa Automática
-wearing-tone = Tom de Uso
-touch-lock = Trava de Toque
-low-battery-prompt = Aviso de Bateria Fraca
-wearing-detection = Detecção de Uso
-voice-prompt = Avisos de Voz
-side-tone = Tom de Retorno
-dolby-audio = Áudio Dolby
+auto-play-pause = Reprodução/Pausa automáticas
+wearing-tone = Tom de uso
+touch-lock = Bloqueio de toque
+low-battery-prompt = Aviso de bateria baixa
+wearing-detection = Detecção de uso
+voice-prompt = Mensagem de Voz
+side-tone = Tom lateral
+dolby-audio = Dolby Audio
 ldac = LDAC
-
-limit-high-volume = Limitar Volume Alto
-db-limit = Limite de dB
+limit-high-volume = Limitar volume máximo
+db-limit = Limite de Decibéis
 db-refresh-rate = Taxa de Atualização de dB
 real-time = Tempo Real
-
 percent = { $percent }%
-
-immersive-experience = Experiência Imersiva
+immersive-experience = Experiência imersiva
 movie-mode = Modo Filme
 enabled = Ativado
-pressure-sensitivity = Sensibilidade à Pressão
-softest = Mais Suave
-medium = Médio
-firmest = Mais Firme
-
-dual-connections = Conexões Duplas
-dual-connections-devices = Dispositivos de Conexão Dupla
-
+pressure-sensitivity = Sensibilidade à pressão
+softest = Mais suave
+medium = Média
+firmest = Firme
+dual-connections = Conexão dupla
+dual-connections-devices = Dispositivos de conexão dupla
 fixed = Fixo
-head-tracking = Rastreamento de Cabeça
-
+head-tracking = Detecção de cabeça
 music = Música
 movie = Filme
 gaming = Jogo
-
-case = Case
-case-language = Idioma do Case
+case = Caixa
+case-language = Idioma da Caixa
 atmospheric = Atmosférico
-remote-camera = Câmera Remota
-find-device = Encontrar Dispositivo
-spatial-audio = Áudio Espacial
+remote-camera = Câmera remota
+find-device = Encontrar dispositivo
+spatial-audio = Audio Espacial
 spatial-audio-mode = Modo de Áudio Espacial
-spatial-audio-music-mode = Modo de Música com Áudio Espacial
-case-serial-number = Número de Série do Case
-case-firmware-version = Versão do Firmware do Case
-
-air-pressure = Pressão do Ar
+spatial-audio-music-mode = Música com Áudio Espacial
+case-serial-number = Numero de Série da Caixa
+case-firmware-version = Versão de Firmware da Caixa
+air-pressure = Pressão Atmosférica
 x-standard-atmospheres = { $pressure } Atm
-
-easy-chat = Conversa Fácil
-easy-chat-wait-time = Tempo de Espera da Conversa Fácil
-
+easy-chat = Easy Chat
+easy-chat-wait-time = Tempo de espera Easy Chat
 volume-balance = Balanço de Volume
-
 lights = Luzes
 lights-enabled = Luzes Coloridas Ativadas
 lights-brightness = Brilho das Luzes Coloridas
 lights-color = Cor das Luzes Coloridas
-lights-mode = Modo das Luzes Coloridas
-auto-lights-off-minutes = Desligar Luzes Automaticamente (minutos)
-light-on = Luz Acesa
+lights-mode = Modo de Luzes Coloridas
+auto-lights-off-minutes = Desligamento Automático das Luzes (minutos)
+light-on = Luz acesa
 breathing = Respiração
 flash = Flash
-music-follows = Seguir Música
+music-follows = Acompanha a música
