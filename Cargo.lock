@@ -4145,6 +4145,7 @@ name = "openscq30-lib"
 version = "2.11.0"
 dependencies = [
  "async-trait",
+ "bitflags 2.13.1",
  "bluer",
  "futures",
  "hex",

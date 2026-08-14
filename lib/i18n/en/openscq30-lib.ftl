@@ -32,6 +32,7 @@ soundcore-a3957 = Soundcore Liberty 5
 soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
+soundcore-d1301 = Soundcore Sleep A30
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -262,3 +263,34 @@ light-on = Light On
 breathing = Breathing
 flash = Flash
 music-follows = Music Follows
+
+bluetooth = Bluetooth
+local = Local
+
+nature = Nature
+glow = Glow
+rhythm = Rhythm
+bloom = Bloom
+
+sunday = Sunday
+monday = Monday
+tuesday = Tuesday
+wednesday = Wednesday
+thursday = Thursday
+friday = Friday
+saturday = Saturday
+
+change-mode = Change Mode
+
+auto-power-off-prompt = Auto Power Off Prompt
+listening-mode-prompt = Listening Mode Prompt
+incoming-calls-during-bluetooth-mode = Incoming Calls During Bluetooth Mode
+noise-canceling-prompt = Noise Canceling Prompt
+
+auto-stop-timer = Auto Stop Timer
+auto-stop-timer-duration = Auto Stop Timer Duration
+
+alarms = Alarms
+
+listening-mode = Listening Mode
+default-listening-mode = Default Listening Mode

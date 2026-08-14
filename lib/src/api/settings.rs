@@ -169,6 +169,16 @@ pub enum SettingId {
     LightsMode,
     AutoLightsOffMinutes,
     ButtonsEnabled,
+    AutoPowerOffPrompt,
+    ListeningModePrompt,
+    NoiseCanceling,
+    IncomingCallsDuringBluetoothMode,
+    NoiseCancelingPrompt,
+    AutoStopTimer,
+    AutoStopTimerDuration,
+    Alarms,
+    ListeningMode,
+    DefaultListeningMode,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
