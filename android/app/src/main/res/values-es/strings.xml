@@ -82,4 +82,7 @@
     <string name="dynamic_color">Color dinámico</string>
     <string name="in_effect">En vigor</string>
     <string name="copy_logs_to_clipboard_unfiltered">Copiar registros al portapapeles (sin filtrar)</string>
+    <string name="visible_settings">Parámetros visibles</string>
+    <string name="appearance">Apariencia</string>
+    <string name="compact_layout">Diseño reducido</string>
 </resources>
