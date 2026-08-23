@@ -1,4 +1,4 @@
-language-name = Anglais
+language-name = Français
 openscq30 = OpenSCQ30
 device-selection = Sélection de l'appareil
 select-device = Sélectione un appareil
