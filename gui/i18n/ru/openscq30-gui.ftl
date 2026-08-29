@@ -1,0 +1,10 @@
+none = Нет
+create = Создать
+cancel = Отменить
+name = Название
+delete = Удалить
+settings = Настройки
+activate = Активировать
+edit = Редактировать
+migrate = Перенос
+confirm = Подтвердить
