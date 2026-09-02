@@ -48,6 +48,7 @@ pub struct D1301StateUpdatePacket {
     pub incoming_calls_during_bluetooth_mode: d1301::structures::IncomingCallsDuringBluetoothMode,
     pub tap_controls_disabled: d1301::structures::TapControlsDisabled,
     pub noise_canceling_prompt: d1301::structures::NoiseCancelingPrompt,
+    pub auto_switch_once_asleep: d1301::structures::AutoSwitchOnceAsleep,
 }
 
 impl Default for D1301StateUpdatePacket {
@@ -68,6 +69,7 @@ impl Default for D1301StateUpdatePacket {
             incoming_calls_during_bluetooth_mode: Default::default(),
             tap_controls_disabled: Default::default(),
             noise_canceling_prompt: Default::default(),
+            auto_switch_once_asleep: Default::default(),
         }
     }
 }
@@ -90,7 +92,10 @@ impl FromPacketBody for D1301StateUpdatePacket {
                         take(6usize),
                         FirmwareVersion::take, // case firmware version
                         take(4usize),
-                        le_u8, // auto switch once asleep, but unknown how it works
+                        // Not auto switch once asleep, despite appearances:
+                        // reads 6 on every device seen so far and never changed
+                        // when that setting changed. Still unidentified.
+                        le_u8,
                         ButtonStatusCollection::take(
                             d1301::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                         ),
@@ -110,6 +115,7 @@ impl FromPacketBody for D1301StateUpdatePacket {
                         take(4usize),
                         d1301::structures::TapControlsDisabled::take,
                         d1301::structures::NoiseCancelingPrompt::take,
+                        d1301::structures::AutoSwitchOnceAsleep::take,
                     ),
                 ),
                 |(
@@ -135,7 +141,12 @@ impl FromPacketBody for D1301StateUpdatePacket {
                         noise_canceling,
                         incoming_calls_during_bluetooth_mode,
                     ),
-                    (_unknown7, tap_controls_disabled, noise_canceling_prompt),
+                    (
+                        _unknown7,
+                        tap_controls_disabled,
+                        noise_canceling_prompt,
+                        auto_switch_once_asleep,
+                    ),
                 )| Self {
                     tws_status,
                     dual_battery_level,
@@ -152,6 +163,7 @@ impl FromPacketBody for D1301StateUpdatePacket {
                     incoming_calls_during_bluetooth_mode,
                     tap_controls_disabled,
                     noise_canceling_prompt,
+                    auto_switch_once_asleep,
                 },
             ),
         )
@@ -176,7 +188,7 @@ impl ToPacket for D1301StateUpdatePacket {
             .chain(iter::repeat_n(0, 6))
             .chain(self.case_firmware_version.bytes())
             .chain(iter::repeat_n(0, 4))
-            .chain(iter::once(6)) // auto switch once asleep but unknown how it works
+            .chain(iter::once(6)) // see the matching comment in take()
             .chain(
                 self.button_configuration
                     .bytes(d1301::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
@@ -195,6 +207,7 @@ impl ToPacket for D1301StateUpdatePacket {
             .chain(iter::repeat_n(0, 4))
             .chain(self.tap_controls_disabled.bytes())
             .chain(self.noise_canceling_prompt.bytes())
+            .chain(self.auto_switch_once_asleep.bytes())
             .collect()
     }
 }

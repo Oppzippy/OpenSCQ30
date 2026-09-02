@@ -31,6 +31,7 @@ pub struct D1301State {
     incoming_calls_during_bluetooth_mode: d1301::structures::IncomingCallsDuringBluetoothMode,
     tap_controls_disabled: d1301::structures::TapControlsDisabled,
     noise_canceling_prompt: d1301::structures::NoiseCancelingPrompt,
+    auto_switch_once_asleep: d1301::structures::AutoSwitchOnceAsleep,
     button_reset_pending: ResetButtonConfigurationPending,
 
     auto_stop_timer: d1301::structures::AutoStopTimer,
@@ -60,6 +61,7 @@ impl D1301State {
                 .incoming_calls_during_bluetooth_mode,
             tap_controls_disabled: state_update_packet.tap_controls_disabled,
             noise_canceling_prompt: state_update_packet.noise_canceling_prompt,
+            auto_switch_once_asleep: state_update_packet.auto_switch_once_asleep,
             button_reset_pending: ResetButtonConfigurationPending::default(),
             auto_stop_timer,
             alarms,
@@ -85,6 +87,7 @@ impl Update<D1301StateUpdatePacket> for D1301State {
             incoming_calls_during_bluetooth_mode,
             tap_controls_disabled,
             noise_canceling_prompt,
+            auto_switch_once_asleep,
         } = partial;
         self.tws_status = tws_status;
         self.dual_battery_level = dual_battery_level;
@@ -101,5 +104,6 @@ impl Update<D1301StateUpdatePacket> for D1301State {
         self.incoming_calls_during_bluetooth_mode = incoming_calls_during_bluetooth_mode;
         self.tap_controls_disabled = tap_controls_disabled;
         self.noise_canceling_prompt = noise_canceling_prompt;
+        self.auto_switch_once_asleep = auto_switch_once_asleep;
     }
 }

@@ -289,6 +289,10 @@ noise-canceling-prompt = Noise Canceling Prompt
 
 auto-stop-timer = Auto Stop Timer
 auto-stop-timer-duration = Auto Stop Timer Duration
+auto-switch-once-asleep = Auto-Switch Once Asleep
+keep-audio = Keep Audio
+pause-audio = Pause Audio
+play-local-audio = Play Local Audio, ANC Off
 
 alarms = Alarms
 
