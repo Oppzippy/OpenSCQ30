@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.12.0
+
+### General
+
+#### Features
+
+- Add support for Soundcore Sleep A30
+- Add support for Soundcore Life P2 Mini
+- Add surround sound for Soundcore P30i
+
+#### Fixes
+
+- Disabling Soundcore P31i spatial audio messes up EQ
+
 ## v2.11.0
 
 ### General

@@ -41,6 +41,20 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.12.0" date="2026-09-02">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Sleep A30</li>
+                    <li>Add support for Soundcore Life P2 Mini</li>
+                    <li>Add surround sound for Soundcore P30i</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Disabling Soundcore P31i spatial audio messes up EQ</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.11.0" date="2026-08-04">
             <description>
                 <p>Features</p>
