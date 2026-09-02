@@ -165,7 +165,7 @@ mod tests {
     async fn settings_match_soundcore_app() {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
-            DeviceModel::SoundcoreA3959,
+            DeviceModel::SoundcoreD1202,
             HashMap::from([(
                 packet::Command([1, 1]),
                 packet::Inbound::new(
@@ -234,5 +234,132 @@ mod tests {
             (SettingId::SpatialAudio, false.into()),
             (SettingId::SpatialAudioMode, "Music".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn enable_spatial_audio() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1202,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 9, 9, 0, 0, 48, 49, 46, 56, 51, 48, 49, 46, 56, 51, 49, 50, 48, 50,
+                        51, 52, 48, 57, 67, 57, 66, 52, 48, 51, 67, 69, 48, 49, 46, 56, 51, 3, 0,
+                        0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 2,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 0, 0, 10, 0xff, 0xff, 0x63, 0x66, 0xff, 0xff,
+                        0x44, 0x44, 51, 0, 0x50, 0, 2, 0, 0, 0, 0, 50, 1, 1, 0, 1, 1, 2, 0, 90, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SpatialAudio, true.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([16, 129]),
+                    vec![1, 0, 0],
+                )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_preset_eq() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1202,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 9, 9, 0, 0, 48, 49, 46, 56, 51, 48, 49, 46, 56, 51, 49, 50, 48, 50,
+                        51, 52, 48, 57, 67, 57, 66, 52, 48, 51, 67, 69, 48, 49, 46, 56, 51, 3, 0,
+                        0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 2,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 0, 0, 10, 0xff, 0xff, 0x63, 0x66, 0xff, 0xff,
+                        0x44, 0x44, 51, 0, 0x50, 0, 2, 0, 0, 0, 0, 50, 1, 1, 0, 1, 1, 2, 0, 90, 0,
+                        1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::PresetEqualizerProfile, "Acoustic".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        1, 0, 0, 0, 160, 130, 140, 140, 160, 160, 160, 140, 120, 0, 160, 130, 140,
+                        140, 160, 160, 160, 140, 120, 0, 0, 0, 0, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0,
+                        0, 0, 2, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 160, 0, 130, 0, 140, 0, 140, 0, 160, 0,
+                        160, 0, 160, 0, 140, 0, 120, 0, 0, 0, 160, 0, 130, 0, 140, 0, 140, 0, 160,
+                        0, 160, 0, 160, 0, 140, 0, 120, 0, 0, 0, 0, 0,
+                    ],
+                )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn disable_spatial_audio() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1202,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 9, 9, 0, 0, 48, 49, 46, 56, 51, 48, 49, 46, 56, 51, 49, 50, 48, 50,
+                        51, 52, 48, 57, 67, 57, 66, 52, 48, 51, 67, 69, 48, 49, 46, 56, 51, 3, 0,
+                        0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 2,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 0, 0, 10, 0xff, 0xff, 0x63, 0x66, 0xff, 0xff,
+                        0x44, 0x44, 51, 0, 0x50, 0, 2, 0, 0, 0, 0, 50, 1, 1, 0, 1, 1, 2, 0, 90, 0,
+                        1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SpatialAudio, false.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        0, 0, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0,
+                        0, 0, 2, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                        120, 120, 120, 120, 120, 120, 120, 120, 0, 120, 0, 120, 0, 120, 0, 120, 0,
+                        120, 0, 120, 0, 120, 0, 120, 0, 0, 0, 120, 0, 120, 0, 120, 0, 120, 0, 120,
+                        0, 120, 0, 120, 0, 120, 0, 120, 0, 0, 0, 0, 0,
+                    ],
+                )],
+            )
+            .await;
     }
 }

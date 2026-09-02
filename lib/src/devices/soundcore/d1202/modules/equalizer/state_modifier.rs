@@ -8,8 +8,9 @@ use crate::{
     devices::soundcore::{
         common::{
             self,
-            packet::{PacketIOController, outbound::ToPacket},
+            packet::PacketIOController,
             state_modifier::StateModifier,
+            structures::{EqualizerConfiguration, VolumeAdjustments},
         },
         d1202,
     },
@@ -173,17 +174,34 @@ where
                     ))
                     .await?;
             }
+            // Since the equalizer configuration may not have been touched by the common EqualizerSettingHandler,
+            // the InvisibleBandsMode may not be in effect. As a workaround, we re-implement how that's handled here.
+            // In the future, applying InvisibleBandsMode in the parser would probably be a good idea.
+            let equalizer_configuration: &EqualizerConfiguration<_, _, _, _, _> =
+                target_state.get();
+            let mut volume_adjustments = *equalizer_configuration
+                .volume_adjustments_channel_1()
+                .copied()
+                .unwrap_or_default()
+                .adjustments();
+            const {
+                assert!(
+                    BANDS == 10,
+                    "We should have enough bands to assign to index 8 and 9",
+                );
+            }
+            volume_adjustments[8] = 0;
+            volume_adjustments[9] = MIN_VOLUME;
             self.packet_io
-                .send_with_response(
-                    &common::packet::outbound::SetEqualizerAndCustomHearId {
-                        equalizer_configuration: target_state.get(),
-                        gender: common::structures::Gender::default(),
-                        age_range: common::structures::AgeRange::default(),
-                        custom_hear_id: target_state.get(),
-                        force_supports_hear_id: true,
-                    }
-                    .to_packet(),
-                )
+                .send_with_response(&d1202::packets::outbound::set_equalizer_configuration(
+                    &EqualizerConfiguration::new_all_bands_present(
+                        equalizer_configuration.preset_id(),
+                        [VolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::new(
+                            volume_adjustments,
+                        ); CHANNELS],
+                    ),
+                    target_state.get(),
+                ))
                 .await?;
         }
         state_sender.send_modify(|state| *state.get_mut() = *target);
