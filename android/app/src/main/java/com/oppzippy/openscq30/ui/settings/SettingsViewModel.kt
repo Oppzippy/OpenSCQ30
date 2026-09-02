@@ -27,6 +27,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     val autoConnect = preferences.autoConnectFlow
+    val autoTransparencyDuringCalls = preferences.autoTransparencyDuringCallsFlow
     val theme = preferences.themeFlow
     val dynamicColorEnabled = preferences.dynamicColorFlow
 
@@ -38,6 +39,10 @@ class SettingsViewModel @Inject constructor(
         } else {
             context.stopService(intent)
         }
+    }
+
+    fun setAutoTransparencyDuringCalls(value: Boolean) {
+        preferences.autoTransparencyDuringCalls = value
     }
 
     fun setTheme(theme: ThemeType?) {
