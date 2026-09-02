@@ -14,6 +14,7 @@ pub mod a3930;
 pub mod a3931;
 pub mod a3933;
 pub mod a3936;
+pub mod a3944;
 pub mod a3945;
 pub mod a3947;
 pub mod a3948;

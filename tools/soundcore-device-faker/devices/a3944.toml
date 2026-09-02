@@ -40,7 +40,7 @@ response = [
     67,  # SN end
     0,   # eq preset
     0,   # eq preset
-    120, # left eq start
+    120, # eq start
     120,
     120,
     120,
@@ -49,8 +49,7 @@ response = [
     120,
     120,
     120,
-    0,   # left eq end
-    0,   # right eq start
+    0,   # eq end
     0,
     0,
     0,
@@ -59,7 +58,8 @@ response = [
     0,
     0,
     0,
-    0,   # right eq end
+    0,
+    0,
     14,
     1,   # left single tap enabled
     0,   # left single tap
