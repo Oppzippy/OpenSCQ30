@@ -1,0 +1,97 @@
+name = "Soundcore Life P2 Mini"
+mac_address = "00:00:00:00:39:44"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B394C"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    0,   # host device
+    1,   # tws connected
+    5,   # left battery level (1-5)
+    5,   # right battery level (1-5)
+    0,   # left charging
+    0,   # right charging
+    48,  # left FW start
+    50,
+    46,
+    50,
+    55,  # left FW end
+    48,  # right FW start
+    50,
+    46,
+    50,
+    55,  # right FW end
+    51,  # SN start
+    57,
+    52,
+    52,
+    70,
+    53,
+    52,
+    68,
+    49,
+    56,
+    67,
+    65,
+    66,
+    65,
+    50,
+    67,  # SN end
+    0,   # eq preset
+    0,   # eq preset
+    120, # left eq start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    0,   # left eq end
+    0,   # right eq start
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,   # right eq end
+    14,
+    1,   # left single tap enabled
+    0,   # left single tap
+    1,   # right single tap enabled
+    0,   # right single tap
+    1,   # left double tap enabled
+    102, # left double tap
+    1,   # right double tap enabled
+    102, # right double tap
+    1,   # left long press enabled
+    50,  # left long press
+    1,   # right long press enabled
+    51,  # right long press
+    255,
+    255,
+    255,
+    54,
+    0,
+    1,   # touch tone
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+]
