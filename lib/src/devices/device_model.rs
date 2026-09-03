@@ -31,6 +31,7 @@ use crate::{
 )]
 pub enum DeviceModel {
     SoundcoreA3004,
+    SoundcoreA3005,
     SoundcoreA3027,
     SoundcoreA3028,
     SoundcoreA3029,
@@ -86,6 +87,7 @@ impl DeviceModel {
         }
         match self {
             Self::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
+            Self::SoundcoreA3005 => new_soundcore_device!(soundcore::a3005),
             Self::SoundcoreA3027 | Self::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)
             }
@@ -140,6 +142,7 @@ impl DeviceModel {
         }
         match self {
             Self::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
+            Self::SoundcoreA3005 => new_soundcore_device!(soundcore::a3005),
 
             Self::SoundcoreA3027 | Self::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)

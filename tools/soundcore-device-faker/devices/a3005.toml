@@ -1,0 +1,64 @@
+name = "Soundcore Q11i"
+mac_address = "00:00:00:00:30:05"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3005"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    7,   # battery level (0=10%, 9=100%)
+    0,   # battery charging?
+    48,  # FW start
+    49,
+    46,
+    50,
+    49,  # FW end
+    51,  # SN start
+    48,
+    48,
+    53,
+    66,
+    65,
+    66,
+    65,
+    70,
+    66,
+    50,
+    67,
+    57,
+    67,
+    49,
+    56,  # SN end
+    0,   # EQ preset
+    0,   # EQ preset
+    120, # eq start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    0,   # EQ end
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    1,   # dual connections enabled
+    49,
+    0,
+    0,
+    0,
+    1,   # auto power off
+    1,   # auto power off duration (30m, 60m, 90m, 120m)
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+]
