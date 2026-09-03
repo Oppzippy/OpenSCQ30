@@ -149,11 +149,11 @@ response = [
     0,    # enable incoming calls during bluetooth mode
     0,
     1,
-    1,
+    1,    # auto switch once asleep action (0=pause audio, 1=play local audio, anc off)
     0,
     0,    # tap controls DISABLED (0=tap controls enabled, 1=tap controls disabled)
     1,    # Noise canceling on/off prompt tone
-    1,
+    1,    # auto switch once asleep enabled
     0,
 ]
 
