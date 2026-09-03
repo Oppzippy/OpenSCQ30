@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
-import pathlib
+from pathlib import Path
 
 device_model = input("Device Model: ")
+device_model = device_model.upper()
 
-lib_dir = pathlib.Path(__file__).parent.parent
+localized_device_model = input("Localized Device Model: ")
+
+lib_dir = Path(__file__).parent.parent
 devices_dir = lib_dir / "src" / "devices"
 soundcore_dir = devices_dir / "soundcore"
 new_device_dir = soundcore_dir / device_model.lower()
@@ -14,11 +17,38 @@ packets_dir.mkdir()
 inbound_dir = packets_dir / "inbound"
 inbound_dir.mkdir()
 
-print("""
-Add the device manually to:
-- lib/src/devices/device_model.rs
-- lib/i18n/en/openscq30-lib.ftl
-""")
+# Partial file updates
+
+def prepend_text_to_file(path: Path, text: str):
+    path.write_text(text+path.read_text())
+
+# rustfmt will sort the mod statements, so we can just put it at the beginning
+prepend_text_to_file(devices_dir / "soundcore.rs", f"pub mod {device_model.lower()};\n")
+
+prepend_text_to_file(lib_dir / "i18n" / "en" / "openscq30-lib.ftl", f"soundcore-{device_model.lower()} = {localized_device_model}\n")
+
+def add_device_model_to_enum(device_model: str):
+    path = devices_dir / "device_model.rs"
+    lines = path.read_text().splitlines()
+
+    new_enum_variant= f"    Soundcore{device_model},"
+
+    # insert the variant at a location to ensure things remain sorted
+    enum_line_number = lines.index("pub enum DeviceModel {")
+    enum_end_line_number = lines.index("}", enum_line_number)
+    target_line_number = enum_line_number + 1
+    for i in range(target_line_number, enum_end_line_number):
+        if lines[i] < new_enum_variant:
+            target_line_number = i + 1
+        else:
+            break
+
+    lines.insert(target_line_number, new_enum_variant)
+    path.write_text('\n'.join(lines))
+
+add_device_model_to_enum(device_model)
+
+# Full files
 
 (new_device_dir / "packets.rs").write_text(f"""
 pub mod inbound;
