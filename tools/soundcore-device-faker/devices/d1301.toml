@@ -50,7 +50,7 @@ response = [
     0,
     0,
     0,
-    6,    # maybe auto switch once asleep, unsure how this works: 0=keep, 1=keep, 2=keep, 3 has error connecting, 4=pause, 5=keep, 6=play local audio anc off, 7=keep, 8=keep, 9=keep, 10=keep, 11=keep, 12=keep, 13=keep, 14=pause, 15=keep, 16=keep, 17=keep
+    6,
     0xdd, # left double tap
     0x66, # right double tap
     0x00, # left tap 3 times
