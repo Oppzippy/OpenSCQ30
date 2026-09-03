@@ -133,3 +133,37 @@ macro_rules! sound_mode_enum {
 }
 
 pub(crate) use sound_mode_enum;
+
+/// Generates a `ModuleCollection<StateT>::add_state_update` for the given state type
+macro_rules! state_update_packet_module {
+    ($state:ty, $state_update_packet:ty) => {
+        struct StateUpdatePacketHandler;
+
+        #[async_trait::async_trait]
+        impl $crate::devices::soundcore::common::packet_manager::PacketHandler<$state>
+            for StateUpdatePacketHandler
+        {
+            async fn handle_packet(
+                &self,
+                state: &::tokio::sync::watch::Sender<$state>,
+                packet: &$crate::devices::soundcore::common::packet::Inbound,
+            ) -> $crate::device::Result<()> {
+                use $crate::devices::soundcore::common::packet::inbound::TryToPacket;
+                use $crate::devices::soundcore::common::state::Update;
+                let packet: $state_update_packet = packet.try_to_packet()?;
+                state.send_modify(|state| state.update(packet));
+                Ok(())
+            }
+        }
+
+        impl $crate::devices::soundcore::common::modules::ModuleCollection<$state> {
+            pub fn add_state_update(&mut self) {
+                self.packet_handlers.set_handler(
+                    packet::inbound::STATE_COMMAND,
+                    Box::new(StateUpdatePacketHandler),
+                );
+            }
+        }
+    };
+}
+pub(crate) use state_update_packet_module;

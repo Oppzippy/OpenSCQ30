@@ -1,27 +1,17 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3033::state::A3033State,
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            structures::{
-                CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
-                WearingDetection,
-            },
+use crate::devices::soundcore::{
+    a3033::state::A3033State,
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
+            WearingDetection,
         },
     },
 };
@@ -91,29 +81,7 @@ impl ToPacket for A3033StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3033State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3033State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3033StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3033State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3033State, A3033StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

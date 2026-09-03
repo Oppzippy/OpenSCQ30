@@ -1,6 +1,5 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
@@ -9,27 +8,16 @@ use nom::{
     multi::count,
     number::complete::be_u32,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3040,
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
-                CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicGenre,
-                HearIdType, Ldac, LimitHighVolume, SerialNumber,
-            },
+use crate::devices::soundcore::{
+    a3040::{self, state::A3040State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
+            CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicGenre, HearIdType,
+            Ldac, LimitHighVolume, SerialNumber,
         },
     },
 };
@@ -208,29 +196,7 @@ impl ToPacket for A3040StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<a3040::state::A3040State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<a3040::state::A3040State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3040StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<a3040::state::A3040State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3040State, A3040StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

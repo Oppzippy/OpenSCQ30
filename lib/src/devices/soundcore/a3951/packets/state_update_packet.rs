@@ -1,33 +1,20 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::opt,
     error::{ContextError, ParseError, context},
     number::complete::{le_u8, le_u16},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3951::{self, state::A3951State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, Gender,
-                SoundModes, TouchTone, TwsStatus, WearingDetection,
-                button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3951::{self, state::A3951State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, Gender, SoundModes,
+            TouchTone, TwsStatus, WearingDetection, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -177,29 +164,7 @@ impl ToPacket for A3951StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3951State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3951State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3951StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3951State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3951State, A3951StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

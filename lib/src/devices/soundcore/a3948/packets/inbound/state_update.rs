@@ -1,28 +1,18 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    device,
-    devices::soundcore::{
-        a3948::{self, state::A3948State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            structures::{
-                CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
-                TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3948::{self, state::A3948State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
+            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -130,29 +120,7 @@ impl ToPacket for A3948StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3948State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3948State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3948StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3948State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3948State, A3948StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

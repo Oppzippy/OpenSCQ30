@@ -1,32 +1,19 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3968::{self, state::A3968State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel,
-                CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
-                SerialNumber, SurroundSound, TouchTone, TwsStatus,
-                button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3968::{self, state::A3968State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration,
+            CustomHearId, DualBattery, DualFirmwareVersion, SerialNumber, SurroundSound, TouchTone,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -194,26 +181,4 @@ impl ToPacket for A3968StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3968State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3968State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3968StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3968State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3968State, A3968StateUpdatePacket);

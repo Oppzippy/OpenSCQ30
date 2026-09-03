@@ -1,30 +1,18 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::{map, opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u16,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3930::{self, state::A3930State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, Gender,
-                SoundModes, TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3930::{self, state::A3930State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, Gender, SoundModes,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -153,29 +141,7 @@ impl ToPacket for A3930StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3930State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3930State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3930StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3930State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3930State, A3930StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

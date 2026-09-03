@@ -53,27 +53,23 @@ impl From<{device_model}StateUpdatePacket> for {device_model}State {{
 """.lstrip())
 
 (inbound_dir / "state_update.rs").write_text(f"""
-use async_trait::async_trait;
 use nom::{{
     IResult, Parser,
     combinator::{{map, opt}},
     error::{{ContextError, ParseError, context}},
 }};
-use tokio::sync::watch;
 
 use crate::{{
     api::device,
     devices::soundcore::{{
         {device_model.lower()}::state::{device_model}State,
         common::{{
-            modules::ModuleCollection,
+            macros::state_update_packet_module,
             packet::{{
                 self, Command,
-                inbound::{{FromPacketBody, TryToPacket}},
+                inbound::FromPacketBody,
                 outbound::ToPacket,
-                parsing::take_bool,
             }},
-            packet_manager::PacketHandler,
             structures::SerialNumber,
         }},
     }},
@@ -117,33 +113,11 @@ impl ToPacket for {device_model}StateUpdatePacket {{
     }}
 
     fn body(&self) -> Vec<u8> {{
-        self.serial_number.as_str().as_bytes().iter().copied().collect()
+        self.serial_number.bytes().into_iter().collect()
     }}
 }}
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<{device_model}State> for StateUpdatePacketHandler {{
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<{device_model}State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {{
-        let packet: {device_model}StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }}
-}}
-
-impl ModuleCollection<{device_model}State> {{
-    pub fn add_state_update(&mut self) {{
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }}
-}}
+state_update_packet_module!({device_model}State, {device_model}StateUpdatePacket);
 """.lstrip())
 
 (soundcore_dir / f"{device_model.lower()}.rs").write_text(f"""

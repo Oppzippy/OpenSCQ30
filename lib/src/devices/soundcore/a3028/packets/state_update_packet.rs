@@ -1,29 +1,18 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::{map, map_opt, opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3028::state::A3028State,
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            structures::{
-                AgeRange, AutoPowerOff, BasicHearId, CommonEqualizerConfiguration, FirmwareVersion,
-                Gender, SerialNumber, SingleBattery, SoundModes,
-            },
+use crate::devices::soundcore::{
+    a3028::state::A3028State,
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AgeRange, AutoPowerOff, BasicHearId, CommonEqualizerConfiguration, FirmwareVersion,
+            Gender, SerialNumber, SingleBattery, SoundModes,
         },
     },
 };
@@ -193,38 +182,19 @@ impl ExtraFields {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3028State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3028State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3028StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3028State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3028State, A3028StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::common::structures::{
-        AmbientSoundMode, CommonEqualizerConfiguration, CommonVolumeAdjustments,
-        CustomNoiseCanceling, NoiseCancelingMode, SoundModes, TransparencyMode,
+    use crate::devices::soundcore::common::{
+        packet::inbound::TryToPacket,
+        structures::{
+            AmbientSoundMode, CommonEqualizerConfiguration, CommonVolumeAdjustments,
+            CustomNoiseCanceling, NoiseCancelingMode, SoundModes, TransparencyMode,
+        },
     };
 
     #[test]

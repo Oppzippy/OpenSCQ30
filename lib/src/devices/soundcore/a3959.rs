@@ -23,7 +23,7 @@ mod structures;
 soundcore_device!(
     state::A3959State,
     async |packet_io| {
-        let state_update_packet: packets::inbound::A3959StateUpdate = packet_io
+        let state_update_packet: packets::inbound::A3959StateUpdatePacket = packet_io
             .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
@@ -45,7 +45,7 @@ soundcore_device!(
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
-        builder.reset_button_configuration::<packets::inbound::A3959StateUpdate>(
+        builder.reset_button_configuration::<packets::inbound::A3959StateUpdatePacket>(
             RequestState.to_packet(),
         );
         builder.dual_connections();
@@ -64,7 +64,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            packets::inbound::A3959StateUpdate::default().to_packet(),
+            packets::inbound::A3959StateUpdatePacket::default().to_packet(),
         )])
     },
 );

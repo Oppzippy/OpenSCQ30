@@ -1,31 +1,20 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3116::{self, packets::outbound::REQUEST_VOICE_PROMPT_COMMAND, state::A3116State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                BatteryLevel, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
-                OptionalVolumeAdjustmentsExt, SerialNumber, SingleBattery, VoicePrompt,
-            },
+use crate::devices::soundcore::{
+    a3116::{self, packets::outbound::REQUEST_VOICE_PROMPT_COMMAND, state::A3116State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            BatteryLevel, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
+            OptionalVolumeAdjustmentsExt, SerialNumber, SingleBattery, VoicePrompt,
         },
     },
 };
@@ -129,29 +118,7 @@ impl ToPacket for A3116StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3116State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3116State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3116StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3116State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3116State, A3116StateUpdatePacket);
 
 #[derive(Default)]
 pub struct VoicePromptUpdatePacket {

@@ -1,28 +1,17 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3926::{self, state::A3926State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AgeRange, BasicHearId, CommonEqualizerConfiguration, DualBattery, Gender,
-                TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3926::{self, state::A3926State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            AgeRange, BasicHearId, CommonEqualizerConfiguration, DualBattery, Gender, TwsStatus,
+            button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -121,29 +110,7 @@ impl ToPacket for A3926StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3926State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3926State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3926StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3926State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3926State, A3926StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

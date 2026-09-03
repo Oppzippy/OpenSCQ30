@@ -1,29 +1,18 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u16,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3909::{self, state::A3909State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AgeRange, DualBattery, Gender, TwsStatus, VolumeAdjustments,
-                button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3909::{self, state::A3909State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            AgeRange, DualBattery, Gender, TwsStatus, VolumeAdjustments,
+            button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -125,26 +114,4 @@ impl ToPacket for A3909StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3909State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3909State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3909StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3909State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }
-}
+state_update_packet_module!(A3909State, A3909StateUpdatePacket);

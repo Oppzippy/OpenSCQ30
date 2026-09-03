@@ -1,29 +1,17 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3931::{self, state::A3931State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AutoPowerOff, CommonEqualizerConfiguration, DualBattery, SoundModes, TouchTone,
-                TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3931::{self, state::A3931State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AutoPowerOff, CommonEqualizerConfiguration, DualBattery, SoundModes, TouchTone,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -127,29 +115,7 @@ impl ToPacket for A3931StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3931State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3931State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3931StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3931State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3931State, A3931StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

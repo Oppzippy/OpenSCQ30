@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3959::{self, packets::inbound::A3959StateUpdate},
+    a3959::{self, packets::inbound::A3959StateUpdatePacket},
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         state::Update,
@@ -36,7 +36,7 @@ pub struct A3959State {
 
 impl A3959State {
     pub fn new(
-        packet: a3959::packets::inbound::A3959StateUpdate,
+        packet: a3959::packets::inbound::A3959StateUpdatePacket,
         dual_connections_devices: Vec<DualConnectionsDevice>,
     ) -> Self {
         Self {
@@ -62,9 +62,9 @@ impl A3959State {
     }
 }
 
-impl Update<A3959StateUpdate> for A3959State {
-    fn update(&mut self, partial: A3959StateUpdate) {
-        let A3959StateUpdate {
+impl Update<A3959StateUpdatePacket> for A3959State {
+    fn update(&mut self, partial: A3959StateUpdatePacket) {
+        let A3959StateUpdatePacket {
             tws_status,
             dual_battery,
             dual_firmware_version,

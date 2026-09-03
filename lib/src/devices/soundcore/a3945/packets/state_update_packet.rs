@@ -1,30 +1,19 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3945::{self, state::A3945State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            structures::{
-                CaseBatteryLevel, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion,
-                GamingMode, SerialNumber, TouchTone, TwsStatus, WearingDetection,
-                button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3945::{self, state::A3945State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            CaseBatteryLevel, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion,
+            GamingMode, SerialNumber, TouchTone, TwsStatus, WearingDetection,
+            button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -157,29 +146,7 @@ impl ToPacket for A3945StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3945State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3945State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3945StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3945State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3945State, A3945StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

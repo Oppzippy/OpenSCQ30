@@ -1,30 +1,20 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3944::{self, state::A3944State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            structures::{
-                CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
-                TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    a3944::{self, state::A3944State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
+            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -129,26 +119,4 @@ impl ToPacket for A3944StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3944State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3944State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3944StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3944State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }
-}
+state_update_packet_module!(A3944State, A3944StateUpdatePacket);

@@ -1,6 +1,5 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
@@ -8,25 +7,14 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3955,
-        common::{
-            self,
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::button_configuration::ButtonStatusCollection,
-        },
+use crate::devices::soundcore::{
+    a3955::{self, state::A3955State},
+    common::{
+        self,
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -232,26 +220,4 @@ impl ToPacket for A3955StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<a3955::state::A3955State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<a3955::state::A3955State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3955StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<a3955::state::A3955State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3955State, A3955StateUpdatePacket);

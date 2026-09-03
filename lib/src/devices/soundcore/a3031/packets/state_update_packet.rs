@@ -1,22 +1,14 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
 use crate::devices::soundcore::{
     a3031::{self, state::A3031State},
     common::{
-        modules::ModuleCollection,
-        packet::{
-            self, Command,
-            inbound::{FromPacketBody, TryToPacket},
-            outbound::ToPacket,
-            parsing::take_bool,
-        },
-        packet_manager::PacketHandler,
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
         structures::{
             AutoPowerOff, CommonEqualizerConfiguration, DualBattery, SoundModes, TouchTone,
             TwsStatus, button_configuration::ButtonStatusCollection,
@@ -123,29 +115,7 @@ impl ToPacket for A3031StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3031State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3031State>,
-        packet: &packet::Inbound,
-    ) -> crate::api::device::Result<()> {
-        let packet: A3031StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update_from_state_update_packet(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3031State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler {}),
-        );
-    }
-}
+state_update_packet_module!(A3031State, A3031StateUpdatePacket);
 
 #[cfg(test)]
 mod tests {

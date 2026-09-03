@@ -1,6 +1,5 @@
 use std::iter;
 
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
@@ -8,27 +7,17 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                DualBatteryLevel, DualFirmwareVersion, FirmwareVersion, LowBatteryPrompt,
-                SerialNumber, TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
+        structures::{
+            DualBatteryLevel, DualFirmwareVersion, FirmwareVersion, LowBatteryPrompt, SerialNumber,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
-        d1301::{self, state::D1301State},
     },
+    d1301::{self, state::D1301State},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -199,26 +188,4 @@ impl ToPacket for D1301StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<D1301State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<D1301State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: D1301StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<D1301State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }
-}
+state_update_packet_module!(D1301State, D1301StateUpdatePacket);

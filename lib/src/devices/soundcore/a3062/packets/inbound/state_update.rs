@@ -1,31 +1,19 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        a3062::{self, state::A3062State},
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, CustomHearId,
-                EqualizerConfiguration, FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
-                SerialNumber, SingleBattery,
-            },
+use crate::devices::soundcore::{
+    a3062::{self, state::A3062State},
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, CustomHearId,
+            EqualizerConfiguration, FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
+            SerialNumber, SingleBattery,
         },
     },
 };
@@ -157,26 +145,4 @@ impl ToPacket for A3062StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<A3062State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<A3062State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: A3062StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<A3062State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }
-}
+state_update_packet_module!(A3062State, A3062StateUpdatePacket);

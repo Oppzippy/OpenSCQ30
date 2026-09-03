@@ -1,33 +1,21 @@
-use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use tokio::sync::watch;
 
-use crate::{
-    api::device,
-    devices::soundcore::{
-        common::{
-            modules::ModuleCollection,
-            packet::{
-                self, Command,
-                inbound::{FromPacketBody, TryToPacket},
-                outbound::ToPacket,
-                parsing::take_bool,
-            },
-            packet_manager::PacketHandler,
-            state::Update,
-            structures::{
-                AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId,
-                DualBattery, DualFirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
-                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
-            },
+use crate::devices::soundcore::{
+    common::{
+        macros::state_update_packet_module,
+        packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
+        structures::{
+            AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId,
+            DualBattery, DualFirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
+            SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
-        d1202::{self, state::D1202State},
     },
+    d1202::{self, state::D1202State},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -191,26 +179,4 @@ impl ToPacket for D1202StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler;
-
-#[async_trait]
-impl PacketHandler<D1202State> for StateUpdatePacketHandler {
-    async fn handle_packet(
-        &self,
-        state: &watch::Sender<D1202State>,
-        packet: &packet::Inbound,
-    ) -> device::Result<()> {
-        let packet: D1202StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update(packet));
-        Ok(())
-    }
-}
-
-impl ModuleCollection<D1202State> {
-    pub fn add_state_update(&mut self) {
-        self.packet_handlers.set_handler(
-            packet::inbound::STATE_COMMAND,
-            Box::new(StateUpdatePacketHandler),
-        );
-    }
-}
+state_update_packet_module!(D1202State, D1202StateUpdatePacket);
