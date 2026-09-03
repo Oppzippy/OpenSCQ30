@@ -176,6 +176,7 @@ pub enum SettingId {
     NoiseCancelingPrompt,
     AutoStopTimer,
     AutoStopTimerDuration,
+    AutoSwitchOnceAsleep,
     Alarms,
     ListeningMode,
     DefaultListeningMode,

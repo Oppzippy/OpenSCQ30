@@ -1,3 +1,4 @@
+mod packet_handler;
 mod setting_handler;
 mod state_modifier;
 
@@ -37,5 +38,9 @@ where
             .push(Box::new(state_modifier::AutoStopTimerStateModifier::new(
                 packet_io,
             )));
+        self.packet_handlers.set_handler(
+            packet_handler::AutoStopTimerPacketHandler::COMMAND,
+            Box::new(packet_handler::AutoStopTimerPacketHandler),
+        );
     }
 }

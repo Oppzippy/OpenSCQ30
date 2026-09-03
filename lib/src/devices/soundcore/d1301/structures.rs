@@ -18,6 +18,17 @@ flag!(NoiseCanceling);
 flag!(IncomingCallsDuringBluetoothMode);
 flag!(TapControlsDisabled);
 flag!(NoiseCancelingPrompt);
+flag!(AutoSwitchOnceAsleep);
+
+/// What the earbuds do with audio once they detect you are asleep. Only
+/// meaningful while [`AutoSwitchOnceAsleep`] is enabled.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, strum::FromRepr)]
+#[repr(u8)]
+pub enum PostSleepAudio {
+    Pause = 0,
+    #[default]
+    PlayLocal = 1,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct DefaultListeningMode(pub ListeningMode);
@@ -45,7 +56,9 @@ sound_mode_enum!(
 pub struct AutoStopTimer {
     pub is_enabled: bool,
     pub duration_in_minutes: i16,
-    pub unknown: u8,
+    /// The "Auto-Switch Once Asleep" action. Shares this packet with the timer
+    /// but is independent of it. Raw so an unknown value cannot fail the parse.
+    pub post_sleep_audio: u8,
     pub time_left_in_seconds: i32,
 }
 
@@ -57,10 +70,10 @@ impl AutoStopTimer {
             "auto stop timer",
             map(
                 (take_bool, le_i16, le_u8, le_i32),
-                |(is_enabled, duration_in_minutes, unknown, time_left_in_seconds)| Self {
+                |(is_enabled, duration_in_minutes, post_sleep_audio, time_left_in_seconds)| Self {
                     is_enabled,
                     duration_in_minutes,
-                    unknown,
+                    post_sleep_audio,
                     time_left_in_seconds,
                 },
             ),
@@ -71,7 +84,7 @@ impl AutoStopTimer {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         iter::once(u8::from(self.is_enabled))
             .chain(self.duration_in_minutes.to_le_bytes())
-            .chain(iter::once(self.unknown))
+            .chain(iter::once(self.post_sleep_audio))
             .chain(self.time_left_in_seconds.to_le_bytes())
     }
 }

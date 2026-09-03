@@ -2,7 +2,7 @@ use std::iter;
 
 use crate::devices::soundcore::{
     common::packet,
-    d1301::structures::{AutoStopTimer, DefaultListeningMode, ListeningMode},
+    d1301::structures::{AutoStopTimer, AutoSwitchOnceAsleep, DefaultListeningMode, ListeningMode},
 };
 
 pub fn request_auto_stop_timer() -> packet::Outbound {
@@ -19,7 +19,7 @@ pub fn set_auto_stop_timer(auto_stop_timer: &AutoStopTimer) -> packet::Outbound 
         // does not include time left
         iter::once(u8::from(auto_stop_timer.is_enabled))
             .chain(auto_stop_timer.duration_in_minutes.to_le_bytes())
-            .chain(iter::once(auto_stop_timer.unknown))
+            .chain(iter::once(auto_stop_timer.post_sleep_audio))
             .collect(),
     )
 }
@@ -32,6 +32,21 @@ pub fn set_auto_stop_timer(auto_stop_timer: &AutoStopTimer) -> packet::Outbound 
 // pub fn delete_alarm(alarm_id: u8) -> packet::Outbound {
 //     packet::Outbound::new(packet::Command([20, 130]), vec![alarm_id])
 // }
+
+pub fn set_auto_switch_once_asleep(enabled: AutoSwitchOnceAsleep) -> packet::Outbound {
+    packet::Outbound::new(packet::Command([21, 143]), enabled.bytes().to_vec())
+}
+
+/// Set only the post-sleep audio action.
+///
+/// Same command as [`set_auto_stop_timer`], but with the 0xFF sentinels the
+/// official app uses to leave the timer fields alone.
+pub fn set_post_sleep_audio(post_sleep_audio: u8) -> packet::Outbound {
+    packet::Outbound::new(
+        packet::Command([21, 133]),
+        vec![0xFF, 0xFF, 0xFF, post_sleep_audio],
+    )
+}
 
 pub fn set_listening_mode(listening_mode: ListeningMode) -> packet::Outbound {
     packet::Outbound::new(packet::Command([1, 169]), listening_mode.bytes().collect())

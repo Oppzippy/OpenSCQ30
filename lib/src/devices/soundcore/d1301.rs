@@ -60,6 +60,7 @@ soundcore_device!(
 
         // misc
         builder.d1301_auto_stop_timer();
+        builder.d1301_auto_switch_once_asleep();
         builder.d1301_listening_mode();
         builder.d1301_noise_canceling();
 
