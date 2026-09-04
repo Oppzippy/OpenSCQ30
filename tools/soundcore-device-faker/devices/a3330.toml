@@ -35,11 +35,11 @@ response = [
     54,
     50,
     57,   # serial number end
-    48,   # unknown start
+    48,   # maybe case firmware version? start
     46,
     49,
     46,
-    51,   # unknown end
+    51,   # maybe case firmware version? end
     2,    # case battery
     7,    # unknown
     0x61, # left double tap
@@ -68,7 +68,7 @@ response = [
     120,
     120,  # EQ end
     4,    # unknown
-    1,    # call left double tap
+    1,    # call left double tap (0=decline, 1=answer, 15=disabled)
     1,    # call right double tap
     0,    # call left long press
     0,    # call right long press

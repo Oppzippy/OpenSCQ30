@@ -10,6 +10,7 @@ soundcore-a3035 = Soundcore Space One
 soundcore-a3040 = Soundcore Space Q45
 soundcore-a3062 = Soundcore Space One Pro
 soundcore-a3116 = Soundcore Motion+
+soundcore-a3330 = Soundcore C30i
 soundcore-a3876 = Soundcore V20i
 soundcore-a3909 = Soundcore Liberty 2 Pro
 soundcore-a3926 = Soundcore Life Dot 2S
@@ -296,3 +297,10 @@ alarms = Alarms
 
 listening-mode = Listening Mode
 default-listening-mode = Default Listening Mode
+
+decline-call = Decline Call
+answer-call = Answer Call
+left-double-press-during-call = Left Double Press (During Call)
+right-double-press-during-call = Right Double Press (During Call)
+left-long-press-during-call = Left Long Press (During Call)
+right-long-press-during-call = Right Long Press (During Call)
