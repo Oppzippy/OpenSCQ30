@@ -21,6 +21,7 @@ pub struct ButtonConfigurationStateModifier<const NUM_BUTTONS: usize, const NUM_
     packet_io: Arc<PacketIOController>,
     supports_set_all_packet: bool,
     button_data: [ButtonData; NUM_BUTTONS],
+    set_button_action_command_override: Option<packet::Command>,
 }
 
 #[derive(Copy, Clone)]
@@ -43,6 +44,7 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
                 button,
                 button_settings: settings.button_settings(button).unwrap(),
             }),
+            set_button_action_command_override: settings.set_button_action_command_override,
         }
     }
 }
@@ -112,6 +114,7 @@ where
                         self.packet_io
                             .send_with_response(
                                 &packet::outbound::SetButtonConfiguration {
+                                    command_override: self.set_button_action_command_override,
                                     button_id: button_settings.button_id,
                                     side: button.side(),
                                     action_id: target

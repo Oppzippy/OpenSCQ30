@@ -103,6 +103,8 @@ const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false, // unknown so false to be safe
         ignore_enabled_flag: false,
+        set_button_action_command_override: None,
+        setting_id_override: None,
         order: [
             Button::LeftDoublePress,
             Button::LeftLongPress,

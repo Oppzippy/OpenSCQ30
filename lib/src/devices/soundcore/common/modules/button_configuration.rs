@@ -8,10 +8,11 @@ use crate::{
     api::settings::CategoryId,
     devices::soundcore::common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
-        packet::PacketIOController,
+        packet::{self, PacketIOController},
         structures::{TwsStatus, button_configuration::*},
     },
     i18n::fl,
+    settings::SettingId,
 };
 
 use super::ModuleCollection;
@@ -31,7 +32,14 @@ pub struct ButtonConfigurationSettings<const NUM_BUTTONS: usize, const NUM_PRESS
 
     /// Parse order in state update packet
     pub order: [Button; NUM_BUTTONS],
+    /// Override the SettingId of buttons from the order field. The values here correspond to the
+    /// same index in the order field.
+    pub setting_id_override: Option<[SettingId; NUM_BUTTONS]>,
+
     pub settings: [ButtonSettings; NUM_PRESS_KINDS],
+
+    /// If unspecified, the default will be used
+    pub set_button_action_command_override: Option<packet::Command>,
 }
 
 impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
@@ -108,6 +116,8 @@ pub enum ButtonDisableMode {
 pub const COMMON_SETTINGS: ButtonConfigurationSettings<6, 3> = ButtonConfigurationSettings {
     supports_set_all_packet: true,
     ignore_enabled_flag: false,
+    set_button_action_command_override: None,
+    setting_id_override: None,
     order: [
         Button::LeftDoublePress,
         Button::LeftLongPress,

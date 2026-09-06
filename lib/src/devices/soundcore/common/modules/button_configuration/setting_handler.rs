@@ -38,14 +38,14 @@ where
     T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
-        self.settings_inner(self.settings)
+        self.settings_inner()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let tws_status: TwsStatus = *state.get();
         let statuses: &ButtonStatusCollection<_> = state.get();
 
-        self.get_inner(tws_status, statuses, setting_id)
+        self.get_inner(tws_status, statuses, *setting_id)
     }
 
     async fn set(
@@ -57,7 +57,7 @@ where
         let tws_status: TwsStatus = *state.get();
         let statuses: &mut ButtonStatusCollection<_> = state.get_mut();
 
-        self.set_inner(tws_status, statuses, setting_id, value)
+        self.set_inner(tws_status, statuses, *setting_id, value)
     }
 }
 
@@ -65,11 +65,12 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
     ButtonConfigurationSettingHandler<NUM_BUTTONS, NUM_PRESS_KINDS>
 {
     #[inline(never)]
-    fn settings_inner(
-        &self,
-        settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
-    ) -> Vec<SettingId> {
-        settings.order.map(|button| button.into()).to_vec()
+    fn settings_inner(&self) -> Vec<SettingId> {
+        if let Some(setting_id_override) = self.settings.setting_id_override {
+            setting_id_override.to_vec()
+        } else {
+            self.settings.order.map(|button| button.into()).to_vec()
+        }
     }
 
     #[inline(never)]
@@ -77,9 +78,9 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
         &self,
         tws_status: TwsStatus,
         statuses: &ButtonStatusCollection<NUM_BUTTONS>,
-        setting_id: &SettingId,
+        setting_id: SettingId,
     ) -> Option<Setting> {
-        let button = Button::try_from(*setting_id).ok()?;
+        let button = self.button_by_setting_id(setting_id)?;
 
         let position = self.settings.position(button)?;
         let status = statuses.0[position];
@@ -140,10 +141,11 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
         &self,
         tws_status: TwsStatus,
         statuses: &mut ButtonStatusCollection<NUM_BUTTONS>,
-        setting_id: &SettingId,
+        setting_id: SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let button = Button::try_from(*setting_id)
+        let button = self
+            .button_by_setting_id(setting_id)
             .expect("already filtered to valid values only by SettingsManager");
 
         let position = self
@@ -213,5 +215,17 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
         }
 
         Ok(())
+    }
+
+    fn button_by_setting_id(&self, setting_id: SettingId) -> Option<Button> {
+        if let Some(overrides) = self.settings.setting_id_override {
+            overrides
+                .iter()
+                .position(|id| *id == setting_id)
+                // order and overrides both are NUM_BUTTONS length, so this won't ever panic
+                .map(|index| self.settings.order[index])
+        } else {
+            Button::try_from(setting_id).ok()
+        }
     }
 }

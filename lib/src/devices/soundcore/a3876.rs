@@ -91,6 +91,8 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
         ignore_enabled_flag: true,
+        set_button_action_command_override: None,
+        setting_id_override: None,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,

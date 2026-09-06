@@ -5,6 +5,7 @@ use crate::devices::soundcore::common::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SetButtonConfiguration {
+    pub command_override: Option<packet::Command>,
     pub button_id: u8,
     pub side: ButtonSide,
     pub action_id: u8,
@@ -14,7 +15,8 @@ impl ToPacket for SetButtonConfiguration {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
-        packet::Command([0x04, 0x81])
+        self.command_override
+            .unwrap_or(packet::Command([0x04, 0x81]))
     }
 
     fn body(&self) -> Vec<u8> {

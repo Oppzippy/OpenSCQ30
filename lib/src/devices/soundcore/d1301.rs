@@ -102,6 +102,8 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<4, 2> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
         ignore_enabled_flag: false,
+        set_button_action_command_override: None,
+        setting_id_override: None,
         order: [
             Button::LeftDoublePress,
             Button::RightDoublePress,
