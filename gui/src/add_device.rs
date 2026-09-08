@@ -5,6 +5,7 @@ use cosmic::{
     iced::{Length, alignment, keyboard},
     widget::{self, menu::KeyBind},
 };
+use itertools::Itertools;
 use openscq30_i18n::Translate;
 use openscq30_lib::{
     DeviceModel, OpenSCQ30Session, connection::ConnectionDescriptor, storage::PairedDevice,
@@ -29,6 +30,8 @@ enum Stage {
 struct ModelSelectionModel {
     search_query: String,
     search_widget_id: widget::Id,
+    device_models_localized_lowercase: Vec<String>,
+    device_models_lowercase: Vec<String>,
 }
 struct SelectDeviceModel {
     search_query: String,
@@ -63,6 +66,12 @@ impl AddDeviceModel {
             stage: Stage::ModelSelection(ModelSelectionModel {
                 search_query: String::new(),
                 search_widget_id: widget::Id::unique(),
+                device_models_localized_lowercase: DeviceModel::iter()
+                    .map(|model| model.translate().to_lowercase())
+                    .collect(),
+                device_models_lowercase: DeviceModel::iter()
+                    .map(|model| <&'static str>::from(model).to_lowercase())
+                    .collect(),
             }),
             key_binds: key_binds(),
         }
@@ -77,6 +86,8 @@ impl AddDeviceModel {
     }
 
     fn device_model_selection(ui_model: &ModelSelectionModel) -> Element<'_, Message> {
+        let search_query_lowercase = ui_model.search_query.to_lowercase();
+
         widget::column![
             widget::column![
                 widget::text::title2(fl!("select-device-model")),
@@ -89,13 +100,26 @@ impl AddDeviceModel {
             .padding([0, 10]),
             widget::scrollable(widget::column(
                 DeviceModel::iter()
-                    .filter(|device_model| {
-                        device_model
-                            .translate()
-                            .to_lowercase()
-                            .contains(&ui_model.search_query.to_lowercase())
+                    .zip(&ui_model.device_models_lowercase)
+                    .zip(&ui_model.device_models_localized_lowercase)
+                    .map(|tuple| (tuple.0.0, tuple.0.1, tuple.1))
+                    .filter_map(|(device_model, model_name, localized_name)| {
+                        let maybe_index = localized_name.find(&search_query_lowercase);
+                        // Only search by model name if the search query is long enough to prevent including,
+                        // for example, all a30* devices when someone searches "30" to find "Soundcore Q30"
+                        if maybe_index.is_some()
+                            || (search_query_lowercase.len() >= 4
+                                && model_name.contains(&search_query_lowercase))
+                        {
+                            // put model_name matches after localized_name matches. we use a stable sort,
+                            // so giving them all usize::MAX won't affect the ordering
+                            Some((device_model, maybe_index.unwrap_or(usize::MAX)))
+                        } else {
+                            None
+                        }
                     })
-                    .map(|device_model| {
+                    .sorted_by(|(_, left), (_, right)| left.cmp(right))
+                    .map(|(device_model, _)| {
                         // custom button with ButtonClass::Text because button::text ignores width(Length::Fill)
                         widget::button::custom(widget::text(device_model.translate()))
                             .class(widget::button::ButtonClass::Text)
