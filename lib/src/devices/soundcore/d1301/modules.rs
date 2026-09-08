@@ -2,6 +2,7 @@ use crate::devices::soundcore::{common::device::SoundcoreDeviceBuilder, d1301::s
 
 mod alarms;
 mod auto_stop_timer;
+mod auto_switch_once_asleep;
 mod flags;
 mod listening_mode;
 
@@ -33,6 +34,12 @@ impl SoundcoreDeviceBuilder<D1301State> {
         let packet_io = self.packet_io_controller().clone();
         self.module_collection()
             .add_d1301_auto_stop_timer(packet_io);
+    }
+
+    pub fn d1301_auto_switch_once_asleep(&mut self) {
+        let packet_io = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_d1301_auto_switch_once_asleep(packet_io);
     }
 
     pub fn d1301_listening_mode(&mut self) {
