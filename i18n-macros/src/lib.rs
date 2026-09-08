@@ -1,7 +1,7 @@
 use heck::ToKebabCase;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
 use quote::{ToTokens, quote};
-use syn::{Attribute, DeriveInput, LitStr, parse_macro_input};
+use syn::{Attribute, DeriveInput, parse_macro_input};
 
 #[proc_macro_derive(Translate, attributes(translate))]
 pub fn derive_translate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -25,17 +25,24 @@ impl TranslatableEnum {
             syn::Data::Enum(data_enum) => data_enum
                 .variants
                 .iter()
-                .map(|variant| TranslatableEnumVariant {
-                    enum_ident: enum_ident.to_owned(),
-                    variant_ident: variant.ident.to_owned(),
-                    translation_key: variant
+                .map(|variant| {
+                    let attribute = variant
                         .attrs
                         .iter()
                         .find_map(TranslatableEnumAttribute::from_attribute)
-                        .map_or_else(
-                            || format!("{}", variant.ident).to_kebab_case(),
-                            |attr| attr.key,
+                        .take();
+
+                    TranslatableEnumVariant {
+                        enum_ident: enum_ident.to_owned(),
+                        variant_ident: variant.ident.to_owned(),
+                        fl_args: attribute.map_or_else(
+                            || {
+                                let fallback_fl_args = variant.ident.to_string().to_kebab_case();
+                                quote! { #fallback_fl_args }.into_token_stream()
+                            },
+                            |attr| attr.fl_args,
                         ),
+                    }
                 })
                 .collect::<Vec<_>>(),
             _ => panic!("expected enum"),
@@ -48,14 +55,19 @@ impl TranslatableEnum {
 }
 
 struct TranslatableEnumAttribute {
-    key: String,
+    fl_args: TokenStream,
 }
 
 impl TranslatableEnumAttribute {
     pub fn from_attribute(attribute: &Attribute) -> Option<Self> {
         if attribute.path().is_ident("translate") {
-            let key = attribute.parse_args::<LitStr>().unwrap();
-            return Some(Self { key: key.value() });
+            let meta_list = attribute
+                .meta
+                .require_list()
+                .expect("translate attribute should be syn::Meta::List");
+            return Some(Self {
+                fl_args: meta_list.tokens.to_owned(),
+            });
         }
         None
     }
@@ -79,7 +91,7 @@ impl ToTokens for TranslatableEnum {
 struct TranslatableEnumVariant {
     enum_ident: Ident,
     variant_ident: Ident,
-    translation_key: String,
+    fl_args: TokenStream,
 }
 
 impl ToTokens for TranslatableEnumVariant {
@@ -87,10 +99,10 @@ impl ToTokens for TranslatableEnumVariant {
         let Self {
             enum_ident,
             variant_ident,
-            translation_key,
+            fl_args,
         } = self;
         tokens.extend(quote! {
-            #enum_ident::#variant_ident => crate::i18n::fl!(#translation_key),
+            #enum_ident::#variant_ident => crate::i18n::fl!(#fl_args),
         });
     }
 }
