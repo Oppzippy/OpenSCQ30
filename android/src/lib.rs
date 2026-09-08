@@ -27,7 +27,6 @@ pub fn init_native_logging() {
 #[uniffi::export]
 #[instrument]
 pub fn init_native_i18n(languages: Vec<serializable::LanguageIdentifier>) {
-    openscq30_lib::i18n::langs();
     let languages = languages
         .into_iter()
         .filter_map(|language| match LanguageIdentifier::try_from(&language) {
