@@ -18,6 +18,27 @@ flag!(NoiseCanceling);
 flag!(IncomingCallsDuringBluetoothMode);
 flag!(TapControlsDisabled);
 flag!(NoiseCancelingPrompt);
+flag!(AutoSwitchOnceAsleep);
+
+/// What the earbuds do with audio once they detect you are asleep. Only
+/// meaningful while [`AutoSwitchOnceAsleep`] is enabled.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct PostSleepAudio(pub u8);
+
+impl PostSleepAudio {
+    pub const PAUSE: Self = Self(0);
+    pub const PLAY_LOCAL: Self = Self(1);
+
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context("post sleep audio", map(le_u8, Self)).parse_complete(input)
+    }
+
+    pub fn bytes(&self) -> [u8; 1] {
+        [self.0]
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct DefaultListeningMode(pub ListeningMode);
