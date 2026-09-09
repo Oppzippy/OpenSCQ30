@@ -18,6 +18,10 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.callautomation.AudioCallStateMonitor
+import com.oppzippy.openscq30.features.callautomation.CallTransparencyController
+import com.oppzippy.openscq30.features.callautomation.OpenScq30AmbientModeGateway
+import com.oppzippy.openscq30.features.preferences.Preferences
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
@@ -40,6 +44,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -88,6 +93,9 @@ class DeviceService : LifecycleService() {
 
     @Inject
     lateinit var featuredSettingSlotDao: FeaturedSettingSlotDao
+
+    @Inject
+    lateinit var preferences: Preferences
 
     val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
@@ -194,6 +202,32 @@ class DeviceService : LifecycleService() {
 
         lifecycleScope.launch { quickPresetNames.collectLatest { sendNotification() } }
         lifecycleScope.launch { featuredSettingIds.collectLatest { sendNotification() } }
+
+        lifecycleScope.launch {
+            connectionStatusFlow.collectLatest { connectionStatus ->
+                if (connectionStatus is ConnectionStatus.Connected) {
+                    val controller = CallTransparencyController(
+                        OpenScq30AmbientModeGateway(connectionStatus.deviceManager.device),
+                    )
+                    preferences.autoTransparencyDuringCallsFlow
+                        .flatMapLatest { enabled ->
+                            if (enabled) {
+                                AudioCallStateMonitor(applicationContext).states()
+                            } else {
+                                flowOf(false)
+                            }
+                        }.collect { callActive ->
+                            try {
+                                controller.onCallStateChanged(callActive)
+                            } catch (ex: OpenScq30Exception) {
+                                Log.e(TAG, "failed to update ambient sound mode for call state", ex)
+                            } catch (ex: IllegalStateException) {
+                                Log.e(TAG, "failed to update ambient sound mode for call state", ex)
+                            }
+                        }
+                }
+            }
+        }
 
         ContextCompat.registerReceiver(
             this,
