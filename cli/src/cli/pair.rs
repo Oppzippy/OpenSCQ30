@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 use macaddr::MacAddr6;
 use openscq30_lib::{DeviceModel, OpenSCQ30Session, storage::PairedDevice};
+use serde::Serialize;
 use tabled::{Table, Tabled};
 
 use crate::{fmt::YesOrNo, openscq30_session};
@@ -17,31 +18,46 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
 }
 
 async fn handle_add(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
-    session
-        .pair(PairedDevice {
-            mac_address: matches
-                .get_one::<MacAddr6>("mac-address")
-                .unwrap()
-                .to_owned(),
-            model: matches.get_one::<DeviceModel>("model").unwrap().to_owned(),
-            is_demo: matches.get_flag("demo"),
-        })
-        .await?;
-    println!("Paired");
+    let paired_device = PairedDevice {
+        mac_address: matches
+            .get_one::<MacAddr6>("mac-address")
+            .unwrap()
+            .to_owned(),
+        model: matches.get_one::<DeviceModel>("model").unwrap().to_owned(),
+        is_demo: matches.get_flag("demo"),
+    };
+    session.pair(paired_device).await?;
+    if matches.get_flag("json") {
+        println!("{}", serde_json::to_string_pretty(&paired_device)?);
+    } else {
+        println!("Paired");
+    }
     Ok(())
 }
 
 async fn handle_remove(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
-    session
-        .unpair(
-            matches
-                .get_one::<MacAddr6>("mac-address")
-                .unwrap()
-                .to_owned(),
-        )
-        .await?;
-    println!("Unpaired");
+    let mac_address = matches
+        .get_one::<MacAddr6>("mac-address")
+        .unwrap()
+        .to_owned();
+    session.unpair(mac_address).await?;
+    if matches.get_flag("json") {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&JsonRemoveResult {
+                mac_address: mac_address.to_string(),
+            })?
+        );
+    } else {
+        println!("Unpaired");
+    }
     Ok(())
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct JsonRemoveResult {
+    mac_address: String,
 }
 
 async fn handle_list(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
