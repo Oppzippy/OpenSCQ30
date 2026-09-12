@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.oppzippy.openscq30.R
@@ -46,6 +47,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             }
 
             if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                 ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.BLUETOOTH_CONNECT,
@@ -83,7 +85,8 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
         serviceSelectionStrategy: RfcommServiceSelectionStrategy,
         outputBox: ManualRfcommConnectionBox,
     ) {
-        if (ActivityCompat.checkSelfPermission(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_CONNECT,
             ) != PackageManager.PERMISSION_GRANTED
