@@ -46,3 +46,7 @@ default = Default
 settings = Settings
 preferred-language = Preferred Language
 color-hue-in-degrees = Color Hue in Degrees
+am = AM
+pm = PM
+hour = Hour
+minute = Minute

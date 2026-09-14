@@ -309,3 +309,12 @@ left-double-press-during-call = Left Double Press (During Call)
 right-double-press-during-call = Right Double Press (During Call)
 left-long-press-during-call = Left Long Press (During Call)
 right-long-press-during-call = Right Long Press (During Call)
+
+create-alarm = Create Alarm
+delete-alarm-n = Delete Alarm { $number }
+alarm-n-enabled = Alarm { $number } Enabled
+alarm-n-time = Alarm { $number } Time
+alarm-n-repeat = Alarm { $number } Repeat
+alarm-n-wake-up-tune = Alarm { $number } Wake Up Tune
+alarm-n-volume = Alarm { $number } Volume
+alarm-n-snooze-duration-minutes = Alarm { $number } Snooze Duration (minutes)

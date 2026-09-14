@@ -118,6 +118,8 @@ pub enum SettingHandlerError {
     StorageError(#[from] storage::Error),
     #[error("setting is read only")]
     ReadOnly,
+    #[error("setting does not exist")]
+    DoesNotExist,
     #[error("setting is missing data (probably not supported by this device)")]
     MissingData,
     #[error(transparent)]

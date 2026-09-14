@@ -245,6 +245,9 @@ mod tests {
                             | Setting::Information { .. }
                             | Setting::ImportString { .. } => None,
                             Setting::Action => Some(true.into()),
+                            Setting::TimeOfDay {
+                                minutes_after_midnight,
+                            } => Some(minutes_after_midnight.into()),
                         };
                         if let Some(value) = value {
                             device

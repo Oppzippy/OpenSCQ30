@@ -4085,6 +4085,7 @@ dependencies = [
  "macaddr",
  "openscq30-i18n",
  "openscq30-lib",
+ "regex",
  "serde",
  "serde_json",
  "strum 0.28.0",

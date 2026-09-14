@@ -58,6 +58,8 @@ soundcore_device!(
             RequestState.to_packet(),
         );
 
+        builder.d1301_alarms();
+
         // misc
         builder.d1301_auto_stop_timer();
         builder.d1301_auto_switch_once_asleep();
@@ -78,7 +80,6 @@ soundcore_device!(
             level_offset: 1,
         });
         builder.serial_number_and_dual_firmware_version();
-        builder.d1301_alarms();
     },
     {
         HashMap::from([
@@ -252,5 +253,88 @@ mod tests {
             (SettingId::FirmwareVersionRight, "81.00".into()),
             (SettingId::SerialNumber, "1301000000000000".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn delete_alarm_shifts_indices() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1301,
+            HashMap::from([
+                (
+                    packet::Command([1, 1]),
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            1, 1, 9, 9, 56, 49, 46, 48, 48, 56, 49, 46, 48, 48, 49, 51, 48, 49, 48,
+                            48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 223, 186, 112, 217, 191,
+                            144, 48, 49, 46, 48, 48, 0, 0, 0, 0, 6, 0xdd, 0x66, 0x00, 0x00, 255,
+                            255, 255, 255, 255, 255, 255, 255, 0, 30, 0, 1, 255, 255, 255, 0, 0, 0,
+                            0, 0, 50, 17, 1, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 203, 49, 61, 0,
+                            0, 0, 0, 0, 2, 2, 1, 128, 0, 0, 0, 0, 0, 0, 4, 3, 2, 128, 0, 0, 0, 0,
+                            0, 0, 4, 4, 3, 128, 0, 0, 0, 0, 0, 0, 4, 5, 4, 128, 0, 0, 0, 0, 0, 0,
+                            4, 1, 0, 0, 1, 8, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0,
+                        ],
+                    ),
+                ),
+                (
+                    packets::inbound::AutoStopTimerPacket::COMMAND,
+                    packet::Inbound::new(
+                        packets::inbound::AutoStopTimerPacket::COMMAND,
+                        vec![0, 30, 0, 1, 60, 0, 0, 0],
+                    ),
+                ),
+                (
+                    packets::inbound::AlarmsPacket::COMMAND,
+                    packet::Inbound::new(packets::inbound::AlarmsPacket::COMMAND, vec![]),
+                ),
+            ]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        // create the alarms before deleting one, since if we do it in one go,
+        // it may optimize and skip creating one rather than deleting
+        device
+            .assert_set_settings_response(
+                vec![
+                    (SettingId::CreateAlarm, true.into()),
+                    (SettingId::CreateAlarm, true.into()),
+                    // volume is different for alarm 2 to distinguish the two
+                    (SettingId::Alarm2Volume, 51.into()),
+                ],
+                vec![
+                    packet::Outbound::new(
+                        packet::Command([20, 129]), // set alarm
+                        vec![0, 0, 0, 0, 0, 0, 50, 10],
+                    ),
+                    packet::Outbound::new(
+                        packet::Command([20, 129]), // set alarm
+                        vec![1, 0, 0, 0, 0, 0, 51, 10],
+                    ),
+                    packet::Outbound::new(
+                        packet::Command([20, 1]), // get alarms
+                        Vec::new(),
+                    ),
+                ],
+            )
+            .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::DeleteAlarm1, true.into())],
+                vec![
+                    packet::Outbound::new(
+                        packet::Command([20, 130]), // delete alarm
+                        vec![0],
+                    ),
+                    packet::Outbound::new(
+                        packet::Command([20, 1]), // get alarms
+                        Vec::new(),
+                    ),
+                ],
+            )
+            .await;
+
+        device.assert_setting_values(vec![(SettingId::Alarm1Volume, 51.into())]);
     }
 }

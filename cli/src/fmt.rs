@@ -45,54 +45,65 @@ impl std::fmt::Display for CustomDisplaySetting {
             Setting::Information { .. } => write!(f, "information (read only)"),
             Setting::ImportString { .. } => write!(f, "import string"),
             Setting::Action => write!(f, "action"),
+            Setting::TimeOfDay { .. } => write!(f, "time of day"),
         }?;
         Ok(())
     }
 }
 
-pub struct DisplayableValue(pub Value);
+pub enum DisplayableValue {
+    Passthrough(Value),
+    MinutesAfterMidnight(i32),
+}
 
 impl std::fmt::Display for DisplayableValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.0 {
-            Value::Bool(value) => write!(f, "{value}"),
-            Value::U16(value) => write!(f, "{value}"),
-            Value::U16Vec(items) => write!(f, "{items:?}"),
-            Value::OptionalU16(value) => {
-                if let Some(value) = value {
-                    write!(f, "{value}")
-                } else {
-                    Ok(())
+        match self {
+            DisplayableValue::Passthrough(value) => match value {
+                Value::Bool(value) => write!(f, "{value}"),
+                Value::U16(value) => write!(f, "{value}"),
+                Value::U16Vec(items) => write!(f, "{items:?}"),
+                Value::OptionalU16(value) => {
+                    if let Some(value) = value {
+                        write!(f, "{value}")
+                    } else {
+                        Ok(())
+                    }
                 }
-            }
-            Value::I16Vec(items) => write!(f, "{items:?}"),
-            Value::I32(value) => write!(f, "{value}"),
-            Value::F32(value) => write!(f, "{value}"),
-            Value::String(value) => write!(f, "{value}"),
-            Value::StringVec(values) => {
-                let mut buffer = Vec::new();
-                let mut writer = csv::WriterBuilder::new()
-                    .has_headers(false)
-                    .from_writer(&mut buffer);
-                // write the fields individually rather than write_record so that we don't get a newline at the end
-                for value in values {
-                    writer.write_field(value.as_bytes()).unwrap();
+                Value::I16Vec(items) => write!(f, "{items:?}"),
+                Value::I32(value) => write!(f, "{value}"),
+                Value::F32(value) => write!(f, "{value}"),
+                Value::String(value) => write!(f, "{value}"),
+                Value::StringVec(values) => {
+                    let mut buffer = Vec::new();
+                    let mut writer = csv::WriterBuilder::new()
+                        .has_headers(false)
+                        .from_writer(&mut buffer);
+                    // write the fields individually rather than write_record so that we don't get a newline at the end
+                    for value in values {
+                        writer.write_field(value.as_bytes()).unwrap();
+                    }
+                    std::mem::drop(writer);
+                    write!(f, "{}", String::from_utf8(buffer).unwrap())
                 }
-                std::mem::drop(writer);
-                write!(f, "{}", String::from_utf8(buffer).unwrap())
-            }
-            Value::OptionalString(value) => {
-                if let Some(value) = value {
-                    write!(f, "{value}")
-                } else {
-                    Ok(())
+                Value::OptionalString(value) => {
+                    if let Some(value) = value {
+                        write!(f, "{value}")
+                    } else {
+                        Ok(())
+                    }
                 }
-            }
-            Value::ModifiableSelectCommand(_) => {
-                unimplemented!("this should not be shown to the user")
-            }
-            Value::MultiSelectWithRemoveCommand(_) => {
-                unimplemented!("this should not be shown to the user")
+                Value::ModifiableSelectCommand(_) => {
+                    unimplemented!("this should not be shown to the user")
+                }
+                Value::MultiSelectWithRemoveCommand(_) => {
+                    unimplemented!("this should not be shown to the user")
+                }
+            },
+            DisplayableValue::MinutesAfterMidnight(minutes_after_midnight) => {
+                let hour = minutes_after_midnight / 60;
+                let minute = minutes_after_midnight % 60;
+                write!(f, "{hour:02}:{minute:02}")
             }
         }
     }

@@ -7,6 +7,7 @@ mod legacy_migration;
 mod quick_presets;
 mod range;
 mod select;
+mod time_of_day;
 mod toggle;
 
 use std::{borrow::Cow, collections::HashMap, path::PathBuf};
@@ -478,6 +479,16 @@ impl DeviceSettingsModel {
             Setting::Action => {
                 action::action(setting_id, Message::SetSetting(setting_id, true.into())).into()
             }
+            Setting::TimeOfDay {
+                minutes_after_midnight,
+            } => time_of_day::time(
+                setting_id,
+                *minutes_after_midnight,
+                move |new_minutes_after_midnight| {
+                    Message::SetSetting(setting_id, new_minutes_after_midnight.into())
+                },
+            )
+            .into(),
         }
     }
 
