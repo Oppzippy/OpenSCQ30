@@ -93,10 +93,16 @@ class ConnectionBackends {
                     every {
                         ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                     } returns PackageManager.PERMISSION_GRANTED
+                    every {
+                        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    } returns PackageManager.PERMISSION_GRANTED
                 },
                 setFailure = {
                     every {
                         ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
+                    } returns PackageManager.PERMISSION_DENIED
+                    every {
+                        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     } returns PackageManager.PERMISSION_DENIED
                 },
                 assertFailureHandled = { verify(exactly = 1) { Log.e(any<String>(), any<String>()) } },
