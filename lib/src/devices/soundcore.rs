@@ -9,6 +9,7 @@ pub mod a3040;
 pub mod a3062;
 pub mod a3116;
 pub mod a3330;
+pub mod a3388;
 pub mod a3876;
 pub mod a3909;
 pub mod a3926;

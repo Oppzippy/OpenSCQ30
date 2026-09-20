@@ -27,6 +27,7 @@ If there's a device not in this list that you want to see supported, check if th
 | A3062  | Soundcore Space One Pro      |
 | A3116  | Soundcore Motion+            |
 | A3330  | Soundcore C30i               |
+| A3388  | Soundcore AeroClip           |
 | A3876  | Soundcore V20i               |
 | A3909  | Soundcore Liberty 2 Pro      |
 | A3926  | Soundcore Life Dot 2S        |

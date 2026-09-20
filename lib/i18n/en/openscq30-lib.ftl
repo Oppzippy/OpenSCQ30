@@ -11,6 +11,7 @@ soundcore-a3040 = Soundcore Space Q45
 soundcore-a3062 = Soundcore Space One Pro
 soundcore-a3116 = Soundcore Motion+
 soundcore-a3330 = Soundcore C30i
+soundcore-a3388 = Soundcore AeroClip
 soundcore-a3876 = Soundcore V20i
 soundcore-a3909 = Soundcore Liberty 2 Pro
 soundcore-a3926 = Soundcore Life Dot 2S
