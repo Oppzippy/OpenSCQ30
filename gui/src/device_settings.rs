@@ -85,7 +85,6 @@ pub struct DeviceSettingsModel {
     settings: Vec<SettingUiState>,
     dialog: Option<Dialog>,
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
-    import_strings: HashMap<SettingId, String>,
     quick_presets_model: quick_presets::QuickPresetsModel,
     throttle: throttle::Throttle,
     key_binds: HashMap<KeyBind, KeyBindAction>,
@@ -144,6 +143,7 @@ enum SettingKindUiState {
         translated_value: String,
     },
     ImportString {
+        text: String,
         confirmation_message: Option<String>,
     },
     HueColorPicker {
@@ -202,6 +202,7 @@ impl From<Setting> for SettingKindUiState {
             Setting::ImportString {
                 confirmation_message,
             } => Self::ImportString {
+                text: String::new(),
                 confirmation_message,
             },
             Setting::HueColorPicker { hue } => Self::HueColorPicker { hue },
@@ -336,7 +337,6 @@ impl DeviceSettingsModel {
             settings: Vec::new(),
             dialog: None,
             legacy_equalizer_migration: None,
-            import_strings: HashMap::new(),
             quick_presets_model,
             key_binds: key_binds(),
         };
@@ -448,6 +448,7 @@ impl DeviceSettingsModel {
                         .body(
                             if let Some(SettingKindUiState::ImportString {
                                 confirmation_message: Some(confirmation_message),
+                                text: _,
                             }) = self
                                 .settings
                                 .iter()
@@ -613,13 +614,11 @@ impl DeviceSettingsModel {
             )
             .into(),
             SettingKindUiState::ImportString {
+                text,
                 confirmation_message: _,
             } => import_string::input(
                 translated_name,
-                self.import_strings
-                    .get(&setting_id)
-                    .map(String::as_str)
-                    .map_or_else(|| Cow::Borrowed(""), Cow::Borrowed),
+                Cow::Borrowed(text),
                 move |text| Message::SetImportString(setting_id, text),
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
             )
@@ -829,8 +828,16 @@ impl DeviceSettingsModel {
                 }
             },
             Message::CopyToClipboard(text) => Action::Task(cosmic::iced::clipboard::write(text)),
-            Message::SetImportString(setting_id, text) => {
-                self.import_strings.insert(setting_id, text);
+            Message::SetImportString(setting_id, new_text) => {
+                if let Some(setting) = self
+                    .settings
+                    .iter_mut()
+                    .find(|setting| setting.setting_id == setting_id)
+                    && let SettingKindUiState::ImportString { text, .. } =
+                        &mut setting.setting_kind_state
+                {
+                    *text = new_text;
+                }
                 Action::None
             }
             Message::AskConfirmImportString(setting_id, import_text) => {
@@ -839,7 +846,15 @@ impl DeviceSettingsModel {
             }
             Message::ConfirmImportString => {
                 if let Some(Dialog::ImportStringConfirm(setting_id, text)) = self.dialog.take() {
-                    self.import_strings.remove(&setting_id);
+                    if let Some(setting) = self
+                        .settings
+                        .iter_mut()
+                        .find(|setting| setting.setting_id == setting_id)
+                        && let SettingKindUiState::ImportString { text, .. } =
+                            &mut setting.setting_kind_state
+                    {
+                        *text = String::new();
+                    }
                     let device = self.device.clone();
                     Action::Task(
                         Task::future(async move {
