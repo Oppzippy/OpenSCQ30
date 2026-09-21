@@ -5,13 +5,12 @@ use cosmic::{
     iced::{Length, alignment},
     widget,
 };
-use openscq30_i18n::Translate;
-use openscq30_lib::settings::{Select, SettingId};
+use openscq30_lib::settings::Select;
 
 use crate::{device_settings::labeled_setting_row, fl};
 
 pub fn select<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     setting: &'a Select,
     value: &str,
     on_change: impl Fn(&str) -> M + Send + Sync + 'static,
@@ -22,7 +21,7 @@ where
     let selected_index = setting.options.iter().position(|option| option == value);
     let options = setting.options.to_owned();
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::dropdown(&setting.localized_options, selected_index, move |index| {
             on_change(&options[index])
         })
@@ -31,7 +30,7 @@ where
 }
 
 pub fn optional_select<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     setting: &'a Select,
     value: Option<&str>,
     on_change: impl Fn(Option<&str>) -> M + Send + Sync + 'static,
@@ -54,7 +53,7 @@ where
         .unwrap_or_default();
     let options = setting.options.to_owned();
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::row![
             widget::dropdown(
                 localized_items_with_none_option,
@@ -73,7 +72,7 @@ where
 }
 
 pub fn modifiable_select<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     setting: &'a Select,
     value: Option<&str>,
     on_change: impl Fn(&str) -> M + Send + Sync + 'static,
@@ -88,7 +87,7 @@ where
     let maybe_deselect_message = value.is_some().then_some(on_remove);
     let options = setting.options.to_owned();
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::Row::with_capacity(3)
             .push(
                 widget::dropdown(&setting.localized_options, selected_index, move |index| {
@@ -107,7 +106,7 @@ where
 }
 
 pub fn multi_select<'a, M>(
-    _setting_id: SettingId,
+    _name: Cow<'a, str>,
     setting: &'a Select,
     values: &'a [Cow<'static, str>],
     on_change: impl Fn(Vec<Cow<'static, str>>) -> M + Send + Sync + Clone + 'static,
@@ -138,7 +137,7 @@ where
 }
 
 pub fn multi_select_with_remove<'a, M>(
-    _setting_id: SettingId,
+    _name: Cow<'a, str>,
     setting: &'a Select,
     values: &'a [Cow<'static, str>],
     on_change: impl Fn(Vec<Cow<'static, str>>) -> M + Send + Sync + Clone + 'static,

@@ -82,13 +82,157 @@ pub enum Action {
 pub struct DeviceSettingsModel {
     device: DebugOpenSCQ30Device,
     nav_model: nav_bar::Model,
-    settings: Vec<(SettingId, Setting)>,
+    settings: Vec<SettingUiState>,
     dialog: Option<Dialog>,
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
     import_strings: HashMap<SettingId, String>,
     quick_presets_model: quick_presets::QuickPresetsModel,
     throttle: throttle::Throttle,
     key_binds: HashMap<KeyBind, KeyBindAction>,
+}
+
+#[derive(Debug)]
+struct SettingUiState {
+    setting_id: SettingId,
+    localized_name: String,
+    setting_kind_state: SettingKindUiState,
+}
+
+#[derive(Debug)]
+enum SettingKindUiState {
+    Toggle {
+        value: bool,
+    },
+    I32Range {
+        setting: settings::Range<i32>,
+        value: i32,
+    },
+    Select {
+        setting: settings::Select,
+        value: Cow<'static, str>,
+    },
+    OptionalSelect {
+        setting: settings::Select,
+        value: Option<Cow<'static, str>>,
+    },
+    ModifiableSelect {
+        setting: settings::Select,
+        value: Option<Cow<'static, str>>,
+    },
+    MultiSelect {
+        setting: settings::Select,
+        values: Vec<Cow<'static, str>>,
+    },
+    MultiSelectWithRemove {
+        setting: settings::Select,
+        values: Vec<Cow<'static, str>>,
+    },
+    Equalizer {
+        setting: settings::Equalizer,
+        read_only: bool,
+        value: Vec<i16>,
+    },
+    PresetEqualizerProfileSelect {
+        equalizer: settings::Equalizer,
+        select: settings::Select,
+        /// Each index corresponds to the same index in select.options
+        presets: Vec<Vec<i16>>,
+        value: Option<Cow<'static, str>>,
+    },
+    Information {
+        value: String,
+        translated_value: String,
+    },
+    ImportString {
+        confirmation_message: Option<String>,
+    },
+    HueColorPicker {
+        /// in degrees, 0 to 360
+        hue: f32,
+    },
+    Action,
+    TimeOfDay {
+        minutes_after_midnight: i32,
+        hour_text: String,
+        minute_text: String,
+    },
+}
+
+impl From<Setting> for SettingKindUiState {
+    fn from(setting: Setting) -> Self {
+        match setting {
+            Setting::Toggle { value } => Self::Toggle { value },
+            Setting::I32Range { setting, value } => Self::I32Range { setting, value },
+            Setting::Select { setting, value } => Self::Select { setting, value },
+            Setting::OptionalSelect { setting, value } => Self::OptionalSelect { setting, value },
+            Setting::ModifiableSelect { setting, value } => {
+                Self::ModifiableSelect { setting, value }
+            }
+            Setting::MultiSelect { setting, values } => Self::MultiSelect { setting, values },
+            Setting::MultiSelectWithRemove { setting, values } => {
+                Self::MultiSelectWithRemove { setting, values }
+            }
+            Setting::Equalizer {
+                setting,
+                read_only,
+                value,
+            } => Self::Equalizer {
+                setting,
+                read_only,
+                value,
+            },
+            Setting::PresetEqualizerProfileSelect {
+                equalizer,
+                select,
+                presets,
+                value,
+            } => Self::PresetEqualizerProfileSelect {
+                equalizer,
+                select,
+                presets,
+                value,
+            },
+            Setting::Information {
+                value,
+                translated_value,
+            } => Self::Information {
+                value,
+                translated_value,
+            },
+            Setting::ImportString {
+                confirmation_message,
+            } => Self::ImportString {
+                confirmation_message,
+            },
+            Setting::HueColorPicker { hue } => Self::HueColorPicker { hue },
+            Setting::Action => Self::Action,
+            Setting::TimeOfDay {
+                minutes_after_midnight,
+            } => Self::TimeOfDay {
+                minutes_after_midnight,
+                hour_text: String::new(),
+                minute_text: String::new(),
+            },
+        }
+    }
+}
+
+impl SettingKindUiState {
+    fn update(&mut self, setting: Setting) {
+        match (self, setting) {
+            (
+                Self::TimeOfDay {
+                    minutes_after_midnight,
+                    hour_text: _,
+                    minute_text: _,
+                },
+                Setting::TimeOfDay {
+                    minutes_after_midnight: new_minutes_after_midnight,
+                },
+            ) => *minutes_after_midnight = new_minutes_after_midnight,
+            (this, setting) => *this = setting.into(),
+        }
+    }
 }
 
 enum Dialog {
@@ -244,6 +388,11 @@ impl DeviceSettingsModel {
                         .setting(&setting_id)
                         .map(|value| (setting_id, value))
                 })
+                .map(|(setting_id, setting)| SettingUiState {
+                    setting_id: setting_id,
+                    localized_name: setting_id.translate(),
+                    setting_kind_state: setting.into(),
+                })
                 .collect();
         }
         Task::none()
@@ -297,12 +446,13 @@ impl DeviceSettingsModel {
                     Dialog::ImportStringConfirm(setting_id, _text) => widget::dialog()
                         .title(setting_id.translate())
                         .body(
-                            if let Some((
-                                _,
-                                Setting::ImportString {
-                                    confirmation_message: Some(confirmation_message),
-                                },
-                            )) = self.settings.iter().find(|(id, _)| id == setting_id)
+                            if let Some(SettingKindUiState::ImportString {
+                                confirmation_message: Some(confirmation_message),
+                            }) = self
+                                .settings
+                                .iter()
+                                .find(|setting| *setting_id == setting.setting_id)
+                                .map(|setting| &setting.setting_kind_state)
                             {
                                 confirmation_message.as_str()
                             } else {
@@ -342,8 +492,8 @@ impl DeviceSettingsModel {
 
     fn view_settings<'a>(&'a self, category_id: &'a CategoryId) -> Element<'a, Message> {
         let mut section = widget::settings::section().title(category_id.translate());
-        for (setting_id, setting) in &self.settings {
-            match self.view_setting(*setting_id, setting) {
+        for setting in &self.settings {
+            match self.view_setting(setting) {
                 SettingDisplayKind::Single(element) => {
                     section = section.add(element);
                 }
@@ -362,42 +512,44 @@ impl DeviceSettingsModel {
         widget::scrollable(section).into()
     }
 
-    fn view_setting<'a>(
-        &'a self,
-        setting_id: SettingId,
-        setting: &'a Setting,
-    ) -> SettingDisplayKind<'a, Message> {
-        match setting {
-            Setting::Toggle { value } => toggle::toggle(setting_id, *value, move |new_value| {
-                Message::SetSetting(setting_id, new_value.into())
-            })
-            .into(),
-            Setting::I32Range { setting, value } => {
-                range::i32_range(setting_id, setting.clone(), *value, move |new_value| {
+    fn view_setting<'a>(&'a self, setting: &'a SettingUiState) -> SettingDisplayKind<'a, Message> {
+        let setting_id = setting.setting_id;
+        let translated_name = Cow::Borrowed(setting.localized_name.as_str());
+        match &setting.setting_kind_state {
+            SettingKindUiState::Toggle { value } => {
+                toggle::toggle(translated_name, *value, move |new_value| {
                     Message::SetSetting(setting_id, new_value.into())
                 })
                 .into()
             }
-            Setting::Select { setting, value } => {
-                select::select(setting_id, setting, value, move |value| {
+            SettingKindUiState::I32Range { setting, value } => {
+                range::i32_range(translated_name, setting.clone(), *value, move |new_value| {
+                    Message::SetSetting(setting_id, new_value.into())
+                })
+                .into()
+            }
+            SettingKindUiState::Select { setting, value } => {
+                select::select(translated_name, setting, value, move |value| {
                     Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
                 })
                 .into()
             }
-            Setting::OptionalSelect { setting, value }
-            | Setting::PresetEqualizerProfileSelect {
+            SettingKindUiState::OptionalSelect { setting, value }
+            | SettingKindUiState::PresetEqualizerProfileSelect {
                 select: setting,
                 value,
                 ..
-            } => select::optional_select(setting_id, setting, value.as_deref(), move |value| {
-                Message::SetSetting(
-                    setting_id,
-                    value.map(ToOwned::to_owned).map(Cow::from).into(),
-                )
-            })
-            .into(),
-            Setting::ModifiableSelect { setting, value } => select::modifiable_select(
-                setting_id,
+            } => {
+                select::optional_select(translated_name, setting, value.as_deref(), move |value| {
+                    Message::SetSetting(
+                        setting_id,
+                        value.map(ToOwned::to_owned).map(Cow::from).into(),
+                    )
+                })
+                .into()
+            }
+            SettingKindUiState::ModifiableSelect { setting, value } => select::modifiable_select(
+                translated_name,
                 setting,
                 value.as_deref(),
                 move |value| Message::SetSetting(setting_id, Cow::from(value.to_owned()).into()),
@@ -405,28 +557,30 @@ impl DeviceSettingsModel {
                 Message::ShowModifiableSelectRemoveDialog(setting_id),
             )
             .into(),
-            Setting::MultiSelect { setting, values } => {
-                select::multi_select(setting_id, setting, values, move |values| {
+            SettingKindUiState::MultiSelect { setting, values } => {
+                select::multi_select(translated_name, setting, values, move |values| {
                     Message::SetSetting(setting_id, values.into())
                 })
                 .into()
             }
-            Setting::MultiSelectWithRemove { setting, values } => select::multi_select_with_remove(
-                setting_id,
-                setting,
-                values,
-                move |values| Message::SetSetting(setting_id, values.into()),
-                |option| {
-                    Message::SetSetting(
-                        setting_id,
-                        Value::MultiSelectWithRemoveCommand(
-                            settings::MultiSelectWithRemoveCommand::Remove(option),
-                        ),
-                    )
-                },
-            )
-            .into(),
-            Setting::Equalizer {
+            SettingKindUiState::MultiSelectWithRemove { setting, values } => {
+                select::multi_select_with_remove(
+                    translated_name,
+                    setting,
+                    values,
+                    move |values| Message::SetSetting(setting_id, values.into()),
+                    |option| {
+                        Message::SetSetting(
+                            setting_id,
+                            Value::MultiSelectWithRemoveCommand(
+                                settings::MultiSelectWithRemoveCommand::Remove(option),
+                            ),
+                        )
+                    },
+                )
+                .into()
+            }
+            SettingKindUiState::Equalizer {
                 setting,
                 read_only,
                 value,
@@ -449,19 +603,19 @@ impl DeviceSettingsModel {
                     .into()
                 }
             }
-            Setting::Information {
+            SettingKindUiState::Information {
                 value: _,
-                translated_value: translated_text,
+                translated_value,
             } => information::information(
-                setting_id,
-                Cow::Borrowed(translated_text),
-                Message::CopyToClipboard(translated_text.to_owned()),
+                translated_name,
+                Cow::Borrowed(translated_value),
+                Message::CopyToClipboard(translated_value.to_owned()),
             )
             .into(),
-            Setting::ImportString {
+            SettingKindUiState::ImportString {
                 confirmation_message: _,
             } => import_string::input(
-                setting_id,
+                translated_name,
                 self.import_strings
                     .get(&setting_id)
                     .map(String::as_str)
@@ -470,19 +624,23 @@ impl DeviceSettingsModel {
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
             )
             .into(),
-            Setting::HueColorPicker { hue } => {
-                hue_color_picker::hue_color_picker(setting_id, *hue, move |new_hue| {
+            SettingKindUiState::HueColorPicker { hue } => {
+                hue_color_picker::hue_color_picker(translated_name, *hue, move |new_hue| {
                     Message::SetSetting(setting_id, new_hue.into())
                 })
                 .into()
             }
-            Setting::Action => {
-                action::action(setting_id, Message::SetSetting(setting_id, true.into())).into()
-            }
-            Setting::TimeOfDay {
+            SettingKindUiState::Action => action::action(
+                translated_name,
+                Message::SetSetting(setting_id, true.into()),
+            )
+            .into(),
+            SettingKindUiState::TimeOfDay {
                 minutes_after_midnight,
+                hour_text,
+                minute_text,
             } => time_of_day::time(
-                setting_id,
+                translated_name,
                 *minutes_after_midnight,
                 move |new_minutes_after_midnight| {
                     Message::SetSetting(setting_id, new_minutes_after_midnight.into())
@@ -568,9 +726,10 @@ impl DeviceSettingsModel {
                 let selected_item = self
                     .settings
                     .iter()
-                    .find(|item| item.0 == setting_id)
+                    .find(|item| item.setting_id == setting_id)
                     .and_then(|item| {
-                        if let (_setting_id, Setting::ModifiableSelect { setting: _, value }) = item
+                        if let SettingKindUiState::ModifiableSelect { setting: _, value } =
+                            &item.setting_kind_state
                         {
                             value.to_owned()
                         } else {

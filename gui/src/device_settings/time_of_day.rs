@@ -1,11 +1,11 @@
+use std::borrow::Cow;
+
 use cosmic::{Element, iced::alignment, widget};
-use openscq30_i18n::Translate;
-use openscq30_lib::settings::SettingId;
 
 use crate::{device_settings::labeled_setting_row, fl};
 
 pub fn time<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     minutes_after_midnight: i32,
     on_change: impl Fn(i32) -> M + Clone + Send + Sync + 'static,
 ) -> Element<'a, M>
@@ -14,7 +14,7 @@ where
 {
     let time = Time::from_minutes_after_midnight(minutes_after_midnight);
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::row![
             widget::spin_button(time.hour.to_string(), fl!("hour"), time.hour, 1, 1, 12, {
                 let on_change = on_change.clone();
