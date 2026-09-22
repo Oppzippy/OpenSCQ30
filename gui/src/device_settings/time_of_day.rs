@@ -21,6 +21,7 @@ where
         name,
         widget::row![
             widget::inline_input(fl!("hour"), hour_text)
+                .width(50)
                 .on_input(on_hour_change.clone())
                 .on_submit({
                     let on_refresh = on_refresh.clone();
@@ -28,6 +29,7 @@ where
                 }),
             widget::text(":"),
             widget::inline_input(fl!("minute"), minute_text)
+                .width(50)
                 .on_input(on_minute_change.clone())
                 .on_submit(move |_| on_refresh.clone()),
             maybe_is_pm.map(|is_pm| widget::dropdown(
