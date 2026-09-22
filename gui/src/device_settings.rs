@@ -61,6 +61,10 @@ pub enum Message {
     AskConfirmImportString(SettingId, String),
     ConfirmImportString,
     Disconnect,
+    SetTimeTwelveHour(SettingId, String),
+    SetTimeMinute(SettingId, String),
+    SetTimePm(SettingId, bool),
+    RefreshTimeTwelveHour(SettingId),
 }
 
 impl From<quick_presets::Message> for Message {
@@ -75,6 +79,7 @@ impl From<throttle::Message> for Message {
     }
 }
 
+#[must_use]
 pub enum Action {
     Task(Task<Message>),
     Warning(String),
@@ -153,7 +158,9 @@ enum SettingVariantUiState {
     },
     Action,
     TimeOfDay {
-        minutes_after_midnight: i32,
+        minutes_after_midnight: MinutesAfterMidnight,
+        hour_text: Option<String>,
+        minute_text: Option<String>,
     },
 }
 
@@ -201,8 +208,63 @@ impl From<Setting> for SettingVariantUiState {
             Setting::TimeOfDay {
                 minutes_after_midnight,
             } => Self::TimeOfDay {
-                minutes_after_midnight,
+                minutes_after_midnight: MinutesAfterMidnight(minutes_after_midnight),
+                hour_text: None,
+                minute_text: None,
             },
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct MinutesAfterMidnight(i32);
+
+impl MinutesAfterMidnight {
+    fn twenty_four_hour(self) -> i32 {
+        self.0 / 60
+    }
+
+    fn twelve_hour(self) -> i32 {
+        let twelve_hour_from_zero = self.twenty_four_hour() % 12;
+        if twelve_hour_from_zero == 0 {
+            12
+        } else {
+            twelve_hour_from_zero
+        }
+    }
+
+    fn minute(self) -> i32 {
+        self.0 % 60
+    }
+
+    fn with_twenty_four_hour(self, twenty_four_hour: i32) -> Self {
+        let twenty_four_hour = twenty_four_hour.clamp(0, 23);
+        Self(twenty_four_hour * 60 + self.minute())
+    }
+
+    fn with_twelve_hour(self, twelve_hour: i32) -> Self {
+        let twelve_hour = twelve_hour.clamp(1, 12);
+        let twelve_hour_from_zero = if twelve_hour == 12 { 0 } else { twelve_hour };
+        let pm_offset = self.is_pm().then_some(12 * 60).unwrap_or_default();
+        Self(pm_offset + twelve_hour_from_zero * 60 + self.minute())
+    }
+
+    fn with_minute(self, minute: i32) -> Self {
+        let minute = minute.clamp(0, 59);
+        Self(self.twenty_four_hour() * 60 + minute)
+    }
+
+    fn is_pm(self) -> bool {
+        self.twenty_four_hour() >= 12
+    }
+
+    fn with_pm(self, is_pm: bool) -> Self {
+        if is_pm && !self.is_pm() {
+            self.with_twenty_four_hour(self.twenty_four_hour() + 12)
+        } else if !is_pm && self.is_pm() {
+            self.with_twenty_four_hour(self.twenty_four_hour() - 12)
+        } else {
+            self
         }
     }
 }
@@ -223,6 +285,17 @@ impl SettingVariantUiState {
                 },
             ) => {
                 *confirmation_message = new_confirmation_message;
+            }
+            (
+                Self::TimeOfDay {
+                    minutes_after_midnight,
+                    ..
+                },
+                Setting::TimeOfDay {
+                    minutes_after_midnight: new_minutes_after_midnight,
+                },
+            ) if minutes_after_midnight.0 == new_minutes_after_midnight => {
+                // Don't reset text inputs if the time hasn't changed
             }
             (this, setting) => *this = setting.into(),
         }
@@ -653,12 +726,23 @@ impl DeviceSettingsModel {
             .into(),
             SettingVariantUiState::TimeOfDay {
                 minutes_after_midnight,
+                hour_text,
+                minute_text,
             } => time_of_day::time(
                 translated_name,
-                *minutes_after_midnight,
-                move |new_minutes_after_midnight| {
-                    Message::SetSetting(setting_id, new_minutes_after_midnight.into())
-                },
+                Some(minutes_after_midnight.is_pm()),
+                hour_text.as_ref().map_or_else(
+                    || Cow::Owned(minutes_after_midnight.twelve_hour().to_string()),
+                    |text| Cow::Borrowed(text.as_str()),
+                ),
+                minute_text.as_ref().map_or_else(
+                    || Cow::Owned(format!("{:02}", minutes_after_midnight.minute())),
+                    |text| Cow::Borrowed(text.as_str()),
+                ),
+                move |hour| Message::SetTimeTwelveHour(setting_id, hour),
+                move |minute| Message::SetTimeMinute(setting_id, minute),
+                move |is_pm| Message::SetTimePm(setting_id, is_pm),
+                Message::RefreshTimeTwelveHour(setting_id),
             )
             .into(),
         }
@@ -685,28 +769,106 @@ impl DeviceSettingsModel {
                 quick_presets::Action::Task(task) => Action::Task(task.map(Into::into)),
                 quick_presets::Action::FocusTextInput(id) => Action::FocusTextInput(id),
             },
-            Message::SetSetting(setting_id, value) => {
-                let device = self.device.clone();
-                let should_throttle = matches!(
-                    device.setting(&setting_id),
-                    Some(Setting::I32Range { .. } | Setting::HueColorPicker { .. }),
-                );
-                if should_throttle {
-                    let maybe_task = self.throttle.set_setting(setting_id, value);
-                    _ = self.refresh_settings();
-                    maybe_task.map_or(Action::None, |task| Action::Task(task.map(Into::into)))
+            Message::SetSetting(setting_id, value) => self.set_setting(setting_id, value),
+            Message::SetTimeTwelveHour(setting_id, new_hour_text) => {
+                let maybe_value = if new_hour_text.len() <= 2
+                    && let Some(setting) = self.settings.get_mut(&setting_id)
+                    && let SettingVariantUiState::TimeOfDay {
+                        minutes_after_midnight,
+                        hour_text,
+                        minute_text,
+                    } = &mut setting.variant_state
+                {
+                    *minute_text = None;
+                    if let Ok(hour) = new_hour_text.parse() {
+                        *minutes_after_midnight = minutes_after_midnight.with_twelve_hour(hour);
+                        // If hour is out of range and gets clamped, update the text to match
+                        *hour_text =
+                            (hour == minutes_after_midnight.twelve_hour()).then_some(new_hour_text);
+                        Some(minutes_after_midnight.0.into())
+                    } else if new_hour_text.is_empty() {
+                        *hour_text = Some(new_hour_text);
+                        None
+                    } else {
+                        *hour_text = None;
+                        None
+                    }
                 } else {
-                    Action::Task(
-                        Task::future(async move {
-                            device
-                                .set_setting_values(vec![(setting_id, value)])
-                                .await
-                                .map_err(handle_soft_error!())?;
-                            Ok(Message::RefreshSettings)
-                        })
-                        .map(coalesce_result),
-                    )
+                    None
+                };
+                if let Some(value) = maybe_value {
+                    self.set_setting(setting_id, value)
+                } else {
+                    Action::None
                 }
+            }
+            Message::SetTimeMinute(setting_id, new_minute_text) => {
+                let maybe_value = if new_minute_text.len() <= 2
+                    && let Some(setting) = self.settings.get_mut(&setting_id)
+                    && let SettingVariantUiState::TimeOfDay {
+                        minutes_after_midnight,
+                        hour_text,
+                        minute_text,
+                    } = &mut setting.variant_state
+                {
+                    *hour_text = None;
+                    if let Ok(minute) = new_minute_text.parse() {
+                        *minutes_after_midnight = minutes_after_midnight.with_minute(minute);
+                        // If minute is out of range and gets clamped, update the text to match
+                        *minute_text =
+                            (minute == minutes_after_midnight.minute()).then_some(new_minute_text);
+                        Some(minutes_after_midnight.0.into())
+                    } else if new_minute_text.is_empty() {
+                        *minute_text = Some(new_minute_text);
+                        None
+                    } else {
+                        *minute_text = None;
+                        None
+                    }
+                } else {
+                    None
+                };
+                // outside of the if statement to avoid double mutable borrow
+                if let Some(value) = maybe_value {
+                    self.set_setting(setting_id, value)
+                } else {
+                    Action::None
+                }
+            }
+            Message::SetTimePm(setting_id, is_pm) => {
+                let maybe_value = if let Some(setting) = self.settings.get_mut(&setting_id)
+                    && let SettingVariantUiState::TimeOfDay {
+                        minutes_after_midnight,
+                        hour_text,
+                        minute_text,
+                    } = &mut setting.variant_state
+                {
+                    *minutes_after_midnight = minutes_after_midnight.with_pm(is_pm);
+                    *hour_text = None;
+                    *minute_text = None;
+                    Some(minutes_after_midnight.0.into())
+                } else {
+                    None
+                };
+
+                if let Some(value) = maybe_value {
+                    self.set_setting(setting_id, value)
+                } else {
+                    Action::None
+                }
+            }
+            Message::RefreshTimeTwelveHour(setting_id) => {
+                if let Some(setting) = self.settings.get_mut(&setting_id)
+                    && let SettingVariantUiState::TimeOfDay {
+                        hour_text,
+                        minute_text,
+                        ..
+                    } = &mut setting.variant_state
+                {
+                    *hour_text = None;
+                    *minute_text = None;
+                }
+                Action::None
             }
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 if let Some(Setting::Equalizer {
