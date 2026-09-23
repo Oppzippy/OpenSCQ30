@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="equalizer">ইকুয়ালাইজার</string>
     <string name="hz">%1$d Hz</string>
     <string name="cancel">বাদ দিন</string>
@@ -12,4 +12,22 @@
     <string name="confirm">নিশ্চিত</string>
     <string name="settings">সেটিংস</string>
     <string name="none">নেই</string>
+    <string name="loading">লোড হচ্ছে</string>
+    <string name="request_permission">অনুমতি অনুরধ করুন</string>
+    <string name="bluetooth_permission_is_required">ব্লুটুথ অনুমতি দরকার</string>
+    <string name="add">যোগ করুন</string>
+    <string name="delete_confirm">আপনি কি নিশ্চিত আপনি \"%s\" ধ্বংস করতে চান?</string>
+    <string name="back">পিছন</string>
+    <string name="info">তথ্য</string>
+    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;&lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt; তে সোর্স কোড এবং সমস্যা রিপোর্ট আছে।&lt;/p&gt; &lt;br&gt; &lt;p&gt;Copyright (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;এই প্রোগ্রামটি মুক্ত সফটওয়্যার: আপনি Free Software Foundation কর্তৃক প্রদর্শিত GNU General Public License এর শর্তানুসারে এটি পুনরায় বিতরণ এবং/অথবা পরিবর্তন করতে পারেন, নাইসেন্স এর সংস্করণ ৩ অতবা (আপনার পছন্দ অনুসারে) কন পরবর্তী সংস্করণ অনুযায়ী।&lt;/p&gt; &lt;br&gt; &lt;p&gt;এই প্রোগ্রামটি বিতরণ করা হয়েছে অন্নদের কাছে এটি উপকারী হবে এ আশায় তবে কন ওয়ারেন্তি ছাড়া; এমনকি বাণিজ্যিকভাবে বিক্রয়যোগ্যটা বা কন নির্দিষ্ট উদ্দেশ্যে উপযুক্তটার অন্তর্নিহিত অয়ারেন্তি ছাড়া। আরও বিস্তারিত জানার জন্য GNU General Public License দেখুন।&lt;/p&gt; &lt;br&gt; &lt;p&gt;এই প্রোগ্রাম এর সাথে আপনার GNU General Public License এর একটি কপি পাওয়ার কথা। যদি না পেয়ে থাকেন তবে &amp;lt;&lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt; দেখুন।&lt;/p&gt;</string>
+    <string name="khz">%s kHz</string>
+    <string name="replace">প্রতিস্থাপন</string>
+    <string name="connected_to">%s এর সাথে সংযুক্ত</string>
+    <string name="connecting_to">%s এর সাথে সংজক হতেছে</string>
+    <string name="disconnected">সংজক বিচ্ছিন্ন</string>
+    <string name="disconnect">সংজক বিচ্ছিন্ন করুন</string>
+    <string name="awaiting_connection">সংযুক্তির জন্য অপেক্ষা করছে</string>
+    <string name="auto_connect">স্বয়ংপূর্ণ সংযুক্তি</string>
+    <string name="no_devices_found">কন যন্ত্র পাওয়া যায় নি</string>
+    <string name="unknown">অজানা</string>
 </resources>
