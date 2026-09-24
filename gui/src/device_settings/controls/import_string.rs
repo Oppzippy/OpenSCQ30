@@ -4,7 +4,7 @@ use cosmic::{Element, widget};
 
 use crate::device_settings::labeled_setting_row;
 
-pub fn input<'a, M>(
+pub fn import_string<'a, M>(
     name: Cow<'a, str>,
     text: Cow<'a, str>,
     on_input: impl Fn(String) -> M + 'static,

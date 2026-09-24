@@ -1,14 +1,6 @@
-mod action;
-mod equalizer;
-mod hue_color_picker;
-mod import_string;
-mod information;
+mod controls;
 mod legacy_migration;
 mod quick_presets;
-mod range;
-mod select;
-mod time_of_day;
-mod toggle;
 
 use std::{
     borrow::Cow,
@@ -607,19 +599,19 @@ impl DeviceSettingsModel {
         let translated_name = Cow::Borrowed(setting.translated_name.as_str());
         match &setting.variant_state {
             SettingVariantUiState::Toggle { value } => {
-                toggle::toggle(translated_name, *value, move |new_value| {
+                controls::toggle(translated_name, *value, move |new_value| {
                     Message::SetSetting(setting_id, new_value.into())
                 })
                 .into()
             }
             SettingVariantUiState::I32Range { setting, value } => {
-                range::i32_range(translated_name, setting.clone(), *value, move |new_value| {
+                controls::i32_range(translated_name, setting.clone(), *value, move |new_value| {
                     Message::SetSetting(setting_id, new_value.into())
                 })
                 .into()
             }
             SettingVariantUiState::Select { setting, value } => {
-                select::select(translated_name, setting, value, move |value| {
+                controls::select(translated_name, setting, value, move |value| {
                     Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
                 })
                 .into()
@@ -629,17 +621,20 @@ impl DeviceSettingsModel {
                 select: setting,
                 value,
                 ..
-            } => {
-                select::optional_select(translated_name, setting, value.as_deref(), move |value| {
+            } => controls::optional_select(
+                translated_name,
+                setting,
+                value.as_deref(),
+                move |value| {
                     Message::SetSetting(
                         setting_id,
                         value.map(ToOwned::to_owned).map(Cow::from).into(),
                     )
-                })
-                .into()
-            }
+                },
+            )
+            .into(),
             SettingVariantUiState::ModifiableSelect { setting, value } => {
-                select::modifiable_select(
+                controls::modifiable_select(
                     translated_name,
                     setting,
                     value.as_deref(),
@@ -652,13 +647,13 @@ impl DeviceSettingsModel {
                 .into()
             }
             SettingVariantUiState::MultiSelect { setting, values } => {
-                select::multi_select(translated_name, setting, values, move |values| {
+                controls::multi_select(translated_name, setting, values, move |values| {
                     Message::SetSetting(setting_id, values.into())
                 })
                 .into()
             }
             SettingVariantUiState::MultiSelectWithRemove { setting, values } => {
-                select::multi_select_with_remove(
+                controls::multi_select_with_remove(
                     translated_name,
                     setting,
                     values,
@@ -680,7 +675,7 @@ impl DeviceSettingsModel {
                 value,
             } => {
                 if !read_only {
-                    equalizer::horizontal_equalizer(setting, value, move |index, value| {
+                    controls::horizontal_equalizer(setting, value, move |index, value| {
                         Message::SetEqualizerBand(setting_id, index, value)
                     })
                     .into()
@@ -697,7 +692,7 @@ impl DeviceSettingsModel {
                     .into()
                 }
             }
-            SettingVariantUiState::Information { translated_value } => information::information(
+            SettingVariantUiState::Information { translated_value } => controls::information(
                 translated_name,
                 Cow::Borrowed(translated_value),
                 Message::CopyToClipboard(translated_value.to_owned()),
@@ -706,7 +701,7 @@ impl DeviceSettingsModel {
             SettingVariantUiState::ImportString {
                 text,
                 confirmation_message: _,
-            } => import_string::input(
+            } => controls::import_string(
                 translated_name,
                 Cow::Borrowed(text),
                 move |text| Message::SetImportString(setting_id, text),
@@ -714,12 +709,12 @@ impl DeviceSettingsModel {
             )
             .into(),
             SettingVariantUiState::HueColorPicker { hue } => {
-                hue_color_picker::hue_color_picker(translated_name, *hue, move |new_hue| {
+                controls::hue_color_picker(translated_name, *hue, move |new_hue| {
                     Message::SetSetting(setting_id, new_hue.into())
                 })
                 .into()
             }
-            SettingVariantUiState::Action => action::action(
+            SettingVariantUiState::Action => controls::action(
                 translated_name,
                 Message::SetSetting(setting_id, true.into()),
             )
@@ -728,7 +723,7 @@ impl DeviceSettingsModel {
                 minutes_after_midnight,
                 hour_text,
                 minute_text,
-            } => time_of_day::time(
+            } => controls::time_of_day(
                 translated_name,
                 Some(minutes_after_midnight.is_pm()),
                 hour_text.as_ref().map_or_else(

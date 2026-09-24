@@ -4,7 +4,7 @@ use cosmic::{Element, iced::alignment, widget};
 
 use crate::{device_settings::labeled_setting_row, fl};
 
-pub fn time<'a, M>(
+pub fn time_of_day<'a, M>(
     name: Cow<'a, str>,
     maybe_is_pm: Option<bool>,
     hour_text: Cow<'a, str>,
