@@ -3891,6 +3891,7 @@ dependencies = [
  "bitflags 2.13.1",
  "block2 0.6.2",
  "dispatch2",
+ "libc",
  "objc2 0.6.4",
 ]
 
@@ -3954,8 +3955,21 @@ checksum = "e3e0adef53c21f888deb4fa59fc59f7eb17404926ee8a6f59f5df0fd7f9f3272"
 dependencies = [
  "bitflags 2.13.1",
  "block2 0.6.2",
+ "libc",
  "objc2 0.6.4",
  "objc2-core-foundation",
+]
+
+[[package]]
+name = "objc2-io-bluetooth"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "558b52e7b77f6a68e1e2cc700ff2266779ede47bacb260a33d363b9a623cc761"
+dependencies = [
+ "libc",
+ "objc2 0.6.4",
+ "objc2-core-foundation",
+ "objc2-foundation 0.3.2",
 ]
 
 [[package]]
@@ -4083,6 +4097,7 @@ dependencies = [
  "insta",
  "insta-cmd",
  "macaddr",
+ "objc2-core-foundation",
  "openscq30-i18n",
  "openscq30-lib",
  "serde",
@@ -4156,6 +4171,10 @@ dependencies = [
  "macaddr",
  "nom 8.0.0",
  "nom-language",
+ "objc2 0.6.4",
+ "objc2-core-foundation",
+ "objc2-foundation 0.3.2",
+ "objc2-io-bluetooth",
  "openscq30-i18n",
  "openscq30-i18n-macros",
  "openscq30-lib-has",

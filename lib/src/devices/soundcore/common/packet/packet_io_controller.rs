@@ -61,6 +61,7 @@ impl PacketIOController {
     ) -> (JoinHandle<()>, mpsc::Receiver<packet::Inbound>) {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
+            tracing::debug!("packet handler started");
             let mut buffer = Vec::<u8>::new();
 
             'receive_packet:
@@ -98,6 +99,7 @@ impl PacketIOController {
                 bytes.extend_from_slice(&buffer[start_index..]);
                 buffer = bytes;
             }
+            tracing::debug!("packet handler stopped: incoming channel closed");
         }.instrument(info_span!("packet handler")));
         (handle, outgoing_receiver)
     }
@@ -126,12 +128,15 @@ impl PacketIOController {
                 .await
                 .is_ok()
             {
+                tracing::debug!("got response on attempt {i}");
                 return Ok(handle.wait_for_value().await);
             }
+            tracing::debug!("no response within {}ms", 500 * i);
         }
 
         self.packet_queues.cancel(&queue_key, handle);
 
+        tracing::warn!("gave up after 3 attempts, no response received");
         Err(device::Error::ActionTimedOut {
             action: "resending packet until ack received",
         })

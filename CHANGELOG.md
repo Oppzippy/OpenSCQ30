@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add macOS support (beta)
+
 ## v2.12.0
 
 ### General

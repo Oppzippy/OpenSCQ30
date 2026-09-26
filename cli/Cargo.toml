@@ -33,6 +33,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 indexmap = { workspace = true, features = ["serde"] }
 
+[target.'cfg(target_os = "macos")'.dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+objc2-core-foundation = { workspace = true }
+
 [dev-dependencies]
 insta = { workspace = true }
 insta-cmd = { workspace = true }
