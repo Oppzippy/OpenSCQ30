@@ -15,8 +15,8 @@ use crate::devices::soundcore::{
         packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
         structures::{
             CaseBatteryLevel, CommonEqualizerConfiguration, DisableAllButtons, DualBatteryLevel,
-            DualFirmwareVersion, LowBatteryPrompt, SerialNumber, SurroundSound, TouchTone,
-            TwsStatus, button_configuration::ButtonStatusCollection,
+            DualFirmwareVersion, LowBatteryPrompt, OptionalVolumeAdjustmentsExt, SerialNumber,
+            SurroundSound, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -26,6 +26,9 @@ use crate::devices::soundcore::{
 // press setting and long pressing does nothing, so they are kept but not exposed. The A3330's
 // call button block does not fit in what remains, and the app has no call button settings, so
 // the tail is kept as unknown bytes.
+//
+// The equalizer has a left and a right channel, since the soundcore app sends the same bands twice
+// when setting it, but the state update packet holds only one, which applies to both.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3388StateUpdatePacket {
     pub tws_status: TwsStatus,
@@ -40,7 +43,7 @@ pub struct A3388StateUpdatePacket {
     pub dual_connections_enabled: bool,
     pub disable_all_buttons: DisableAllButtons,
     pub _bass_mode: bool,
-    pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
 }
 
 impl Default for A3388StateUpdatePacket {
@@ -91,7 +94,7 @@ impl FromPacketBody for A3388StateUpdatePacket {
                     take_bool, // dual connections enabled
                     DisableAllButtons::take,
                     take_bool, // TODO bass mode
-                    CommonEqualizerConfiguration::take,
+                    take_equalizer_configuration,
                     rest, // unknown
                 ),
                 |(
@@ -134,6 +137,22 @@ impl FromPacketBody for A3388StateUpdatePacket {
     }
 }
 
+fn take_equalizer_configuration<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], CommonEqualizerConfiguration<2, 10>, E> {
+    map(
+        CommonEqualizerConfiguration::<1, 10>::take,
+        |configuration| {
+            let [volume_adjustments] = *configuration.volume_adjustments();
+            CommonEqualizerConfiguration::new(
+                configuration.preset_id(),
+                [volume_adjustments, volume_adjustments],
+            )
+        },
+    )
+    .parse(input)
+}
+
 impl ToPacket for A3388StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
@@ -163,7 +182,13 @@ impl ToPacket for A3388StateUpdatePacket {
             .chain(iter::once(self.dual_connections_enabled.into()))
             .chain(self.disable_all_buttons.bytes())
             .chain(iter::once(self._bass_mode.into()))
-            .chain(self.equalizer_configuration.bytes())
+            .chain(self.equalizer_configuration.preset_id().to_le_bytes())
+            .chain(
+                self.equalizer_configuration
+                    .volume_adjustments_channel_1()
+                    .copied()
+                    .bytes(),
+            )
             .chain([1, 0, 0, 255])
             .collect()
     }

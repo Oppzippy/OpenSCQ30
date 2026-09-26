@@ -26,7 +26,7 @@ pub struct A3388State {
     low_battery_prompt: LowBatteryPrompt,
     dual_connections: DualConnections,
     disable_all_buttons: DisableAllButtons,
-    equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
+    equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     reset_button_configuration_pending: ResetButtonConfigurationPending,
 }
 

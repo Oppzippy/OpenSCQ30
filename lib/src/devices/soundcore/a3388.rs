@@ -10,6 +10,7 @@ use crate::devices::soundcore::{
                 ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
                 COMMON_ACTIONS_WITHOUT_SOUND_MODES,
             },
+            case_battery_level::CaseBatteryLevelConfiguration,
             dual_battery_level::DualBatteryLevelConfiguration,
         },
         packet::{
@@ -22,6 +23,7 @@ use crate::devices::soundcore::{
     },
 };
 
+mod modules;
 mod packets;
 mod state;
 
@@ -45,9 +47,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
 
-        builder
-            .equalizer_with_drc(common::modules::equalizer::common_settings_type_2())
-            .await;
+        builder.a3388_equalizer().await;
 
         builder.disable_all_buttons();
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
@@ -59,11 +59,15 @@ soundcore_device!(
         builder.low_battery_prompt();
 
         builder.tws_status();
+        // Battery levels are 0 to 9, where 0 means 10% and 9 means 100%.
         builder.dual_battery_level_custom(DualBatteryLevelConfiguration {
             max_level: 10,
-            level_offset: 0,
+            level_offset: 1,
         });
-        builder.case_battery_level(10);
+        builder.case_battery_level_custom(CaseBatteryLevelConfiguration {
+            max_level: 10,
+            level_offset: 1,
+        });
         builder.serial_number_and_dual_firmware_version();
     },
     {
@@ -156,9 +160,9 @@ mod tests {
         .await;
 
         device.assert_setting_values([
-            (SettingId::BatteryLevelLeft, "8/10".into()),
-            (SettingId::BatteryLevelRight, "8/10".into()),
-            (SettingId::CaseBatteryLevel, "7/10".into()),
+            (SettingId::BatteryLevelLeft, "9/10".into()),
+            (SettingId::BatteryLevelRight, "9/10".into()),
+            (SettingId::CaseBatteryLevel, "8/10".into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::LowBatteryPrompt, true.into()),
             (SettingId::DualConnections, true.into()),
@@ -172,6 +176,36 @@ mod tests {
             (SettingId::FirmwareVersionRight, "01.49".into()),
             (SettingId::SerialNumber, "3388880E8550BDE4".into()),
         ]);
+    }
+
+    // The bands match what the soundcore app sends when choosing Bass Booster: the same bands for
+    // the left and right channels.
+    #[tokio::test(start_paused = true)]
+    async fn equalizer_preset_sets_both_channels() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3388,
+            HashMap::from([(packet::Command([1, 1]), real_state_update_packet())]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::PresetEqualizerProfile,
+                    Some("BassBooster").into(),
+                )],
+                vec![packet::Outbound::new(
+                    packet::Command([0x02, 0x83]),
+                    vec![
+                        2, 0, // preset
+                        160, 150, 130, 120, 120, 120, 120, 120, 120, 0, // left
+                        160, 150, 130, 120, 120, 120, 120, 120, 120, 0, // right
+                    ],
+                )],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]
@@ -196,7 +230,7 @@ mod tests {
         .await;
 
         device.assert_setting_values([
-            (SettingId::BatteryLevelLeft, "9/10".into()),
+            (SettingId::BatteryLevelLeft, "10/10".into()),
             (SettingId::LeftDoublePress, Some("PlayPause").into()),
             (SettingId::RightTriplePress, Some("NextSong").into()),
         ]);
