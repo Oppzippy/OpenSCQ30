@@ -6,6 +6,7 @@ use std::{
     path::PathBuf,
     str::FromStr,
     sync::Arc,
+    time::Duration,
 };
 
 use cosmic::{
@@ -69,6 +70,7 @@ pub enum Message {
     BackToDeviceSelection,
     ActivateConnectToDeviceScreen(DebugOpenSCQ30Device),
     CloseDialogAndRefreshPairedDevices,
+    RefreshConnectedDevices,
     ActivateDeviceSelectionScreen,
     Warning(String),
     CloseWarning,
@@ -207,7 +209,7 @@ impl Application for AppModel {
     }
 
     fn subscription(&self) -> cosmic::iced::Subscription<Self::Message> {
-        event::listen_with(|event, status, _window_id| match event {
+        let key_presses = event::listen_with(|event, status, _window_id| match event {
             event::Event::Keyboard(cosmic::iced::keyboard::Event::KeyPressed {
                 modifiers,
                 key,
@@ -221,7 +223,15 @@ impl Application for AppModel {
                 })
             }
             _ => None,
-        })
+        });
+        match self.screen {
+            Screen::DeviceSelection(_) => cosmic::iced::Subscription::batch([
+                key_presses,
+                cosmic::iced::time::every(Duration::from_secs(3))
+                    .map(|_| Message::RefreshConnectedDevices),
+            ]),
+            _ => key_presses,
+        }
     }
 
     fn nav_model(&self) -> Option<&nav_bar::Model> {
@@ -525,6 +535,13 @@ impl Application for AppModel {
                     )
                     .map(Message::from)
                     .map(Into::into);
+                }
+            }
+            Message::RefreshConnectedDevices => {
+                if let Screen::DeviceSelection(_) = self.screen {
+                    return DeviceSelectionModel::refresh_connected_devices(self.session.clone())
+                        .map(Message::DeviceSelectionScreen)
+                        .map(Into::into);
                 }
             }
             Message::BackToDeviceSelection => {
