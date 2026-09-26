@@ -1,0 +1,169 @@
+name = "Soundcore Liberty 4"
+mac_address = "00:00:00:00:39:53"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3953"
+
+[[responses]]
+# State update
+command = [1, 1]
+# This is a manually crafted packet based on the parser in GH-384
+response = [
+    1,     # host device
+    1,     # tws status
+    5,     # left battery level
+    5,     # right battery level
+    0,     # left battery charging
+    0,     # right battery charging
+    48,    # left FW start
+    51,
+    46,
+    50,
+    51,    # left FW end
+    48,    # right FW start
+    51,
+    46,
+    50,
+    51,    # right FW end
+    51,    # SN start
+    57,
+    53,
+    51,
+    53,
+    52,
+    67,
+    54,
+    51,
+    51,
+    67,
+    67,
+    69,
+    69,
+    69,
+    56,    # SN end
+    0,     # EQ preset
+    0,     # EQ preset
+    120,   # EQ left start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    0,
+    0,     # EQ left end
+    255,   # EQ right start
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,   # EQ right end
+    255,   # hear id initialized (254 and 255 mean false)
+    0,     # hear id enabled
+    60,    # hear id EQ left start
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    0,
+    0,     # hear id EQ left end
+    60,    # hear id EQ right start
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    0,
+    0,     # hear id EQ right end
+    0,     # hear id time start
+    0,
+    0,
+    0,     # hear id time end
+    0,     # hear id type
+    60,    # hear id custom EQ left start
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    0,
+    0,     # hear id custom EQ left end
+    60,    # hear id custom EQ right start
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    0,
+    0,     # hear id custom EQ right end
+    0,     # hear id favorite music genre
+    0,     # hear id favorite music genre
+    18,
+    0x11,  # left single press enabled
+    0x66,  # left single press action
+    0x11,  # right single press enabled
+    0x66,  # right single press action
+    0x11,  # left double press enabled
+    0x34,  # left double press action
+    0x11,  # right double press enabled
+    0x34,  # right double press action
+    0x11,  # left long press enabled
+    0x24,  # left long press action
+    0x11,  # right long press enabled
+    0x24,  # right long press action
+    0x11,  # left triple press enabled
+    0x52,  # left triple press action
+    0x11,  # right triple press enabled
+    0x53,  # right triple press action
+    0b011, # sound mode cycle
+    2,     # ambient sound mode
+    0x30,  # manual/auto anc level
+    0,     # transparency mode
+    0,     # noise canceling mode
+    0x01,  # wind noise
+    1,     # anc auto sensitivity level
+    0,     # unknown
+    0,     # unknown
+    0,     # unknown
+    0,     # unknown
+    255,   # unknown
+    255,   # unknown
+    1,     # wearing detection
+    1,     # left in-ear status
+    0,     # right in-ear status
+    5,     # case battery level
+    0,     # bass up, unused
+    0,     # ldac
+    0,     # dual connections enabled
+    1,     # auto power off enabled
+    2,     # auto power off duration
+    0,     # hear id volume db, unused
+    1,     # wearing tone
+    1,     # low battery prompt
+    1,     # ambient sound prompt
+    0,     # spatial audio enabled
+    1,     # spatial audio effect mode
+    0,     # spatial audio content mode
+    0,     # unknown
+    0,     # unknown
+    0,     # unknown
+    120,   # unknown
+    255,   # unknown
+    # everything after this point is optional and may not be present
+    50,  # device color
+    0,   # pressure sensitivity
+    255,
+    255,
+]
