@@ -62,7 +62,11 @@ fn main() -> anyhow::Result<()> {
     i18n::init(&requested_languages);
     openscq30_lib::i18n::init(&requested_languages);
 
-    let settings = cosmic::app::Settings::default();
+    let settings = match config.get().theme {
+        config::AppTheme::System => cosmic::app::Settings::default(),
+        config::AppTheme::Light => cosmic::app::Settings::default().theme(cosmic::Theme::light()),
+        config::AppTheme::Dark => cosmic::app::Settings::default().theme(cosmic::Theme::dark()),
+    };
     cosmic::app::run::<app::AppModel>(settings, app::AppFlags { config, config_dir })?;
 
     Ok(())

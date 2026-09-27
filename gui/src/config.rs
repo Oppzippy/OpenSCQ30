@@ -19,6 +19,28 @@ pub struct Config {
 #[serde(default)]
 pub struct ConfigInner {
     pub preferred_language: Option<String>,
+    pub theme: AppTheme,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AppTheme {
+    #[default]
+    System,
+    Light,
+    Dark,
+}
+
+impl AppTheme {
+    pub const ALL: [Self; 3] = [Self::System, Self::Light, Self::Dark];
+
+    pub fn name(self) -> String {
+        match self {
+            Self::System => crate::fl!("system-theme"),
+            Self::Light => crate::fl!("light-theme"),
+            Self::Dark => crate::fl!("dark-theme"),
+        }
+    }
 }
 
 impl Config {
