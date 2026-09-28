@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,88 +48,109 @@ fun DeviceSelectionScreen(
 
     val navController = rememberNavController()
 
+    val needsLocationPermission = Build.VERSION.SDK_INT in Build.VERSION_CODES.Q..Build.VERSION_CODES.R
+
     PermissionCheck(
         permission = bluetoothPermission,
         prompt = stringResource(R.string.bluetooth_permission_is_required),
         onPermissionGranted = { viewModel.refreshPairedDevices() },
     ) {
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Connect,
-            enterTransition = {
-                slideInHorizontally { width -> width / 2 } + fadeIn()
-            },
-            exitTransition = {
-                slideOutHorizontally { width -> -width / 2 } + fadeOut()
-            },
-            popEnterTransition = {
-                slideInHorizontally { width -> -width / 2 } + fadeIn()
-            },
-            popExitTransition = {
-                slideOutHorizontally { width -> width / 2 } + fadeOut()
-            },
-        ) {
-            composable<Screen.Connect> {
-                val activity = LocalActivity.current!!
+        if (needsLocationPermission) {
+            PermissionCheck(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                prompt = stringResource(R.string.location_permission_is_required),
+                onPermissionGranted = { viewModel.refreshPairedDevices() },
+            ) {
+                DeviceSelectionContent(navController, viewModel, onDeviceSelected)
+            }
+        } else {
+            DeviceSelectionContent(navController, viewModel, onDeviceSelected)
+        }
+    }
+}
 
-                DeviceListingScreen(
-                    devices = viewModel.pairedDevices.collectAsState().value,
-                    onDeviceClick = { onDeviceSelected(it) },
-                    onUnpair = { viewModel.unpair(activity, it) },
-                    onAddDeviceClick = { navController.navigate(Screen.SelectModelForPairing) },
-                    onRefreshClick = { viewModel.refreshPairedDevices() },
-                    onSettingsClick = { navController.navigate(Screen.Settings) },
-                    onInfoClick = { navController.navigate(Screen.Info) },
-                )
+@Composable
+private fun DeviceSelectionContent(
+    navController: NavHostController,
+    viewModel: DeviceSelectionViewModel,
+    onDeviceSelected: (device: PairedDevice) -> Unit,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Connect,
+        enterTransition = {
+            slideInHorizontally { width -> width / 2 } + fadeIn()
+        },
+        exitTransition = {
+            slideOutHorizontally { width -> -width / 2 } + fadeOut()
+        },
+        popEnterTransition = {
+            slideInHorizontally { width -> -width / 2 } + fadeIn()
+        },
+        popExitTransition = {
+            slideOutHorizontally { width -> width / 2 } + fadeOut()
+        },
+    ) {
+        composable<Screen.Connect> {
+            val activity = LocalActivity.current!!
+
+            DeviceListingScreen(
+                devices = viewModel.pairedDevices.collectAsState().value,
+                onDeviceClick = { onDeviceSelected(it) },
+                onUnpair = { viewModel.unpair(activity, it) },
+                onAddDeviceClick = { navController.navigate(Screen.SelectModelForPairing) },
+                onRefreshClick = { viewModel.refreshPairedDevices() },
+                onSettingsClick = { navController.navigate(Screen.Settings) },
+                onInfoClick = { navController.navigate(Screen.Info) },
+            )
+        }
+
+        composable<Screen.SelectDeviceForPairing> { backStackEntry ->
+            val screen = backStackEntry.toRoute<Screen.SelectDeviceForPairing>()
+            val activity = LocalActivity.current!!
+
+            var isDemoMode by remember { mutableStateOf(false) }
+            val devices = remember { mutableStateOf<List<ConnectionDescriptor>?>(null) }
+            LaunchedEffect(screen.model, isDemoMode) {
+                devices.value = viewModel.listDevices(screen.model, isDemoMode)
             }
 
-            composable<Screen.SelectDeviceForPairing> { backStackEntry ->
-                val screen = backStackEntry.toRoute<Screen.SelectDeviceForPairing>()
-                val activity = LocalActivity.current!!
+            val devicesValue = devices.value
+            SelectDeviceForPairingScreen(
+                model = screen.model,
+                isDemoMode = isDemoMode,
+                devices = devicesValue,
+                onDemoModeChange = { isDemoMode = it },
+                onDescriptorSelected = {
+                    viewModel.pair(
+                        activity = activity,
+                        pairedDevice = PairedDevice(
+                            macAddress = it.macAddress,
+                            model = screen.model,
+                            isDemo = isDemoMode,
+                        ),
+                        onPaired = {
+                            navController.popBackStack<Screen.Connect>(false)
+                        },
+                    )
+                },
+                onBackClick = { navController.popBackStack() },
+            )
+        }
 
-                var isDemoMode by remember { mutableStateOf(false) }
-                val devices = remember { mutableStateOf<List<ConnectionDescriptor>?>(null) }
-                LaunchedEffect(screen.model, isDemoMode) {
-                    devices.value = viewModel.listDevices(screen.model, isDemoMode)
-                }
+        composable<Screen.SelectModelForPairing> {
+            SelectModelForPairingScreen(
+                onModelSelected = { navController.navigate(Screen.SelectDeviceForPairing(it)) },
+                onBackClick = { navController.popBackStack() },
+            )
+        }
 
-                val devicesValue = devices.value
-                SelectDeviceForPairingScreen(
-                    model = screen.model,
-                    isDemoMode = isDemoMode,
-                    devices = devicesValue,
-                    onDemoModeChange = { isDemoMode = it },
-                    onDescriptorSelected = {
-                        viewModel.pair(
-                            activity = activity,
-                            pairedDevice = PairedDevice(
-                                macAddress = it.macAddress,
-                                model = screen.model,
-                                isDemo = isDemoMode,
-                            ),
-                            onPaired = {
-                                navController.popBackStack<Screen.Connect>(false)
-                            },
-                        )
-                    },
-                    onBackClick = { navController.popBackStack() },
-                )
-            }
+        composable<Screen.Info> {
+            AppInfoScreen(onBackClick = { navController.popBackStack() })
+        }
 
-            composable<Screen.SelectModelForPairing> {
-                SelectModelForPairingScreen(
-                    onModelSelected = { navController.navigate(Screen.SelectDeviceForPairing(it)) },
-                    onBackClick = { navController.popBackStack() },
-                )
-            }
-
-            composable<Screen.Info> {
-                AppInfoScreen(onBackClick = { navController.popBackStack() })
-            }
-
-            composable<Screen.Settings> {
-                SettingsPage(onBackClick = { navController.popBackStack() })
-            }
+        composable<Screen.Settings> {
+            SettingsPage(onBackClick = { navController.popBackStack() })
         }
     }
 }
