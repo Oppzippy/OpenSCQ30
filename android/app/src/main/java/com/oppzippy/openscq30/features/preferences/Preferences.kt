@@ -23,6 +23,7 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
         const val TAG = "Preferences"
 
         private const val PREFERENCE_AUTO_CONNECT = "autoConnect"
+        private const val PREFERENCE_AUTO_TRANSPARENCY_DURING_CALLS = "autoTransparencyDuringCalls"
         private const val PREFERENCE_THEME = "theme"
         private const val PREFERENCE_DYNAMIC_COLOR = "dynamicColor"
     }
@@ -32,6 +33,10 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
     private val autoConnectPreference = Preference(
         get = { preferences.getBoolean(PREFERENCE_AUTO_CONNECT, false) },
         set = { preferences.edit { putBoolean(PREFERENCE_AUTO_CONNECT, it) } },
+    )
+    private val autoTransparencyDuringCallsPreference = Preference(
+        get = { preferences.getBoolean(PREFERENCE_AUTO_TRANSPARENCY_DURING_CALLS, false) },
+        set = { preferences.edit { putBoolean(PREFERENCE_AUTO_TRANSPARENCY_DURING_CALLS, it) } },
     )
     private val themePreference = Preference(
         get = {
@@ -61,6 +66,7 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
 
     private val preferenceKeysToPreferences = mapOf(
         PREFERENCE_AUTO_CONNECT to autoConnectPreference,
+        PREFERENCE_AUTO_TRANSPARENCY_DURING_CALLS to autoTransparencyDuringCallsPreference,
         PREFERENCE_THEME to themePreference,
         PREFERENCE_DYNAMIC_COLOR to dynamicColorPreference,
     )
@@ -104,6 +110,11 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
     var autoConnect: Boolean
         get() = autoConnectPreference.flow.value
         set(value) = autoConnectPreference.set(value)
+
+    val autoTransparencyDuringCallsFlow = autoTransparencyDuringCallsPreference.flow
+    var autoTransparencyDuringCalls: Boolean
+        get() = autoTransparencyDuringCallsPreference.flow.value
+        set(value) = autoTransparencyDuringCallsPreference.set(value)
 
     val themeFlow = themePreference.flow
     var theme: ThemeType?
