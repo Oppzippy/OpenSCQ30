@@ -146,6 +146,7 @@ private fun DeviceModelIcon(modifier: Modifier, model: String) {
         "SoundcoreA3951" -> EarbudsIcon(modifier)
         "SoundcoreA3955" -> EarbudsIcon(modifier)
         "SoundcoreA3959" -> EarbudsIcon(modifier)
+        "SoundcoreA6611" -> EarbudsIcon(modifier)
         "SoundcoreDevelopment" -> HeadphonesIcon(modifier)
         else -> HeadphonesIcon(modifier)
     }

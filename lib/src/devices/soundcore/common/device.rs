@@ -777,10 +777,16 @@ where
         let mut change_notify = self.change_notify.clone();
         // receiver will close when self is dropped, so this will clean itself up
         tokio::spawn(async move {
+            // change_notify closes as soon as no module holds a sender for it, which is normal for devices without
+            // such modules. State changes must keep being forwarded after that.
+            let mut is_change_notify_open = true;
             loop {
                 select! {
                     result = receiver.changed() => if result.is_err() { return },
-                    result = change_notify.changed() => if result.is_err() { return },
+                    result = change_notify.changed(), if is_change_notify_open => if result.is_err() {
+                        is_change_notify_open = false;
+                        continue;
+                    },
                 }
                 if change_sender.send(()).is_err() {
                     return;
@@ -920,6 +926,15 @@ pub mod test_utils {
 
         pub fn inner(&self) -> &Arc<dyn OpenSCQ30Device + Send + Sync> {
             &self.device
+        }
+
+        /// Delivers an unsolicited packet from the device and gives its handler time to run.
+        pub async fn receive_packet(&self, packet: packet::Inbound) {
+            self.inbound_sender
+                .send(packet.bytes(self.config.checksum_kind))
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(100)).await;
         }
 
         #[track_caller]

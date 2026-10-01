@@ -37,6 +37,7 @@ soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 soundcore-d1301 = Soundcore Sleep A30
+soundcore-a6611 = Soundcore Sleep A20
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -243,6 +244,9 @@ case-language = Case Language
 atmospheric = Atmospheric
 remote-camera = Remote Camera
 find-device = Find Device
+find-device-left = Find Left Earbud
+find-device-right = Find Right Earbud
+sleep-mode = Sleep Mode
 spatial-audio = Spatial Audio
 spatial-audio-mode = Spatial Audio Mode
 spatial-audio-music-mode = Spatial Audio Music Mode

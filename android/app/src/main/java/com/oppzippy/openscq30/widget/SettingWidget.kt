@@ -63,6 +63,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.bindings.settingRequiresConfirmation
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
@@ -202,7 +203,7 @@ class SettingWidget : GlanceAppWidget() {
                         } else {
                             SettingWidgetState.Connected(
                                 deviceName = translateDeviceModel(device.model()),
-                                settings = settingIds.map { settingId ->
+                                settings = settingIds.filterNot { settingRequiresConfirmation(it) }.map { settingId ->
                                     Pair(
                                         settingId,
                                         device.setting(settingId),
