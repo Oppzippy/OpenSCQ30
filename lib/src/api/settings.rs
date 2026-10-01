@@ -262,6 +262,17 @@ pub enum SettingId {
     Alarm5Volume,
     #[translate("alarm-n-snooze-duration-minutes", number = 5)]
     Alarm5SnoozeDuration,
+    FindDeviceLeft,
+    FindDeviceRight,
+    SleepMode,
+}
+
+impl SettingId {
+    /// Settings that can cause harm if changed by accident, such as ringing an earbud while it is being worn. Frontends
+    /// should ask for confirmation before enabling these, and they are excluded from quick presets.
+    pub fn requires_confirmation(&self) -> bool {
+        matches!(self, Self::FindDeviceLeft | Self::FindDeviceRight)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

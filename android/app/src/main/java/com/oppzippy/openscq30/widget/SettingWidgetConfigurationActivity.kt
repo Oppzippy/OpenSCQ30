@@ -51,6 +51,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.bindings.settingRequiresConfirmation
 import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.ui.DeviceServiceConnection
@@ -290,7 +291,11 @@ private fun Content(
                                     enabledSettingIds = enabledSettingIds,
                                     settingCategories = device.categories()
                                         .map { categoryId ->
-                                            Pair(categoryId, device.settingsInCategory(categoryId))
+                                            Pair(
+                                                categoryId,
+                                                device.settingsInCategory(categoryId)
+                                                    .filterNot { settingRequiresConfirmation(it) },
+                                            )
                                         },
                                     onToggle = { settingId, isEnabled ->
                                         onSetSettingIdEnabled(device.model(), settingId, isEnabled)

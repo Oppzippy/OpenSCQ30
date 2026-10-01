@@ -94,8 +94,11 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
                 .iter()
                 .position(|entry| Arc::ptr_eq(entry, &handle.current))
         {
-            // No need to close the semaphore since we were given ownership of the only outside reference to it
-            queue.remove(index);
+            // The task queued behind this one holds a clone as its preceeding entry and waits for it to close, so it
+            // must be closed or every later task with the same key waits forever
+            if let Some(removed) = queue.remove(index) {
+                removed.semaphore.close();
+            }
         }
     }
 }
@@ -168,6 +171,25 @@ mod tests {
                 Ok(-i)
             );
         }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_cancel_releases_waiting_successor() {
+        let queues = MultiQueue::<i8, i8>::new();
+        let first = queues.add(0);
+        let second = queues.add(0);
+        queues.cancel(&0, first);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(1), second.wait_for_start())
+                .await
+                .is_ok(),
+            "a request queued behind a cancelled one must be able to start",
+        );
+        queues.pop(&0, 2);
+        assert_eq!(
+            tokio::time::timeout(Duration::from_millis(1), second.wait_for_value()).await,
+            Ok(2)
+        );
     }
 
     #[tokio::test(start_paused = true)]

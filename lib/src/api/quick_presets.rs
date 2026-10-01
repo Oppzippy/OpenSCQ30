@@ -53,7 +53,7 @@ impl QuickPresetsHandler {
                     setting_id,
                     SettingId::ImportCustomEqualizerProfiles
                         | SettingId::ExportCustomEqualizerProfiles,
-                )
+                ) && !setting_id.requires_confirmation()
             })
             .filter_map(|setting_id| {
                 device
