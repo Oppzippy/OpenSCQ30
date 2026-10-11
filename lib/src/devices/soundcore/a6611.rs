@@ -132,7 +132,10 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn test_parses_bluetooth_mode() {
         assert_eq!(REAL_STATE_UPDATE_BODY[BLUETOOTH_MODE_INDEX], 0);
-        assert_eq!(REAL_BLUETOOTH_MODE_STATE_UPDATE_BODY[BLUETOOTH_MODE_INDEX], 1);
+        assert_eq!(
+            REAL_BLUETOOTH_MODE_STATE_UPDATE_BODY[BLUETOOTH_MODE_INDEX],
+            1
+        );
         let device = device_with_state(REAL_BLUETOOTH_MODE_STATE_UPDATE_BODY.to_vec()).await;
         device.assert_setting_values([
             (SettingId::SleepMode, false.into()),
@@ -180,16 +183,35 @@ mod tests {
 
         for (setting_id, value, command, body) in [
             (SettingId::FindDeviceLeft, true, [0x10, 0x89], vec![1, 0, 0]),
-            (SettingId::FindDeviceLeft, false, [0x10, 0x89], vec![0, 0, 0]),
-            (SettingId::FindDeviceRight, true, [0x10, 0x89], vec![0, 1, 0]),
-            (SettingId::FindDeviceRight, false, [0x10, 0x89], vec![0, 0, 0]),
+            (
+                SettingId::FindDeviceLeft,
+                false,
+                [0x10, 0x89],
+                vec![0, 0, 0],
+            ),
+            (
+                SettingId::FindDeviceRight,
+                true,
+                [0x10, 0x89],
+                vec![0, 1, 0],
+            ),
+            (
+                SettingId::FindDeviceRight,
+                false,
+                [0x10, 0x89],
+                vec![0, 0, 0],
+            ),
             (SettingId::SleepMode, false, [0x01, 0xa9], vec![1]),
             (SettingId::SleepMode, true, [0x01, 0xa9], vec![0]),
             (SettingId::SleepMode, false, [0x01, 0xa9], vec![1]),
         ] {
             let set = tokio::spawn({
                 let device = device.clone();
-                async move { device.set_setting_values(vec![(setting_id, value.into())]).await }
+                async move {
+                    device
+                        .set_setting_values(vec![(setting_id, value.into())])
+                        .await
+                }
             });
             assert_eq!(
                 outbound_receiver.recv().await.unwrap(),
@@ -197,7 +219,10 @@ mod tests {
             );
             // Acked like the real earbuds do, with an empty body
             inbound_sender
-                .send(packet::Inbound::new(packet::Command(command), Vec::new()).bytes_with_checksum())
+                .send(
+                    packet::Inbound::new(packet::Command(command), Vec::new())
+                        .bytes_with_checksum(),
+                )
                 .await
                 .unwrap();
             set.await.unwrap().expect("acked write should succeed");
@@ -210,7 +235,6 @@ mod tests {
                 .await
                 .expect("the UI must be notified of the change")
                 .expect("change notifications must stay open");
-
         }
     }
 
@@ -220,5 +244,4 @@ mod tests {
         assert!(SettingId::FindDeviceRight.requires_confirmation());
         assert!(!SettingId::SleepMode.requires_confirmation());
     }
-
 }
