@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a6611::structures::{FindDevice, BluetoothMode},
+    a6611::structures::{BluetoothMode, FindDevice},
     common::{
         self,
         structures::{DualBatteryLevel, DualFirmwareVersion, SerialNumber, TwsStatus},
@@ -33,7 +33,7 @@ impl A6611State {
     }
 }
 
-// Not From<A6611StateUpdatePacket>, since the blanket Update impl would reset find_device on every state update
+// Not From<A6611StateUpdatePacket>: the blanket Update impl would reset find_device on updates
 impl common::state::Update<A6611StateUpdatePacket> for A6611State {
     fn update(&mut self, packet: A6611StateUpdatePacket) {
         self.tws_status = packet.tws_status;
