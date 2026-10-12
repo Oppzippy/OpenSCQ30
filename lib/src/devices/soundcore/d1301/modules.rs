@@ -3,6 +3,7 @@ use crate::devices::soundcore::{common::device::SoundcoreDeviceBuilder, d1301::s
 mod alarms;
 mod auto_stop_timer;
 mod auto_switch_once_asleep;
+pub mod dual_connections;
 mod flags;
 mod listening_mode;
 
