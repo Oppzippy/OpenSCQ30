@@ -40,18 +40,18 @@ impl SoundcoreDeviceBuilder<D1301State> {
         let database = self.database();
         let device_model = self.device_model();
 
-        let should_enable = match database
+        let saved = match database
             .fetch_device_model_setting(device_model, SettingId::DualConnections)
             .await
         {
-            Ok(value) => value.and_then(|value| value.as_bool()) == Some(true),
+            Ok(value) => value.and_then(|value| value.as_bool()),
             Err(err) => {
                 tracing::warn!("failed to fetch saved dual connections setting: {err:?}");
-                false
+                None
             }
         };
         let is_enabled = Has::<DualConnections>::get(&*self.state_sender().borrow()).is_enabled;
-        if should_enable && !is_enabled {
+        if saved == Some(true) && !is_enabled {
             match self
                 .packet_io_controller()
                 .send_with_response(&packet::outbound::set_dual_connections_enabled(true))
@@ -65,7 +65,6 @@ impl SoundcoreDeviceBuilder<D1301State> {
         }
 
         self.dual_connections();
-        let saved = Has::<DualConnections>::get(&*self.state_sender().borrow()).is_enabled;
         self.module_collection()
             .add_d1301_dual_connections_persistence(database, device_model, saved);
     }
@@ -81,7 +80,7 @@ where
         &mut self,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
-        saved: bool,
+        saved: Option<bool>,
     ) {
         self.state_modifiers
             .push(Box::new(PersistDualConnectionsStateModifier {
@@ -95,7 +94,9 @@ where
 struct PersistDualConnectionsStateModifier {
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
-    saved: Mutex<bool>,
+    /// Compared against the database's value rather than the device's state, since the state can
+    /// already be enabled (two devices connected) without that ever having been saved.
+    saved: Mutex<Option<bool>>,
 }
 
 #[async_trait]
@@ -106,10 +107,13 @@ where
     async fn move_to_state(
         &self,
         state_sender: &watch::Sender<StateT>,
-        _target_state: &StateT,
+        target_state: &StateT,
     ) -> device::Result<()> {
-        let is_enabled = state_sender.borrow().get().is_enabled;
-        if *self.saved.lock().unwrap() == is_enabled {
+        let is_enabled = target_state.get().is_enabled;
+        // Only save what the dual connections module actually applied to the device.
+        if state_sender.borrow().get().is_enabled != is_enabled
+            || *self.saved.lock().unwrap() == Some(is_enabled)
+        {
             return Ok(());
         }
         // Failing to save shouldn't fail setting the value on the device, which already happened.
@@ -122,7 +126,7 @@ where
             )
             .await
         {
-            Ok(()) => *self.saved.lock().unwrap() = is_enabled,
+            Ok(()) => *self.saved.lock().unwrap() = Some(is_enabled),
             Err(err) => tracing::warn!("failed to save dual connections setting: {err:?}"),
         }
         Ok(())

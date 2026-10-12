@@ -461,6 +461,20 @@ mod tests {
         }
 
         #[tokio::test(start_paused = true)]
+        async fn enabling_while_already_on_is_reapplied_on_reconnect() {
+            let database = database().await;
+            // two connected devices: already shown as enabled, but nothing has been saved yet
+            let mut device = connect(database.clone(), vec![host(1, true), host(2, true)]).await;
+            device
+                .set_settings(vec![(SettingId::DualConnections, true.into())])
+                .await;
+            drop(device);
+
+            let device = connect(database, vec![host(1, true)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
         async fn disabled_is_not_reapplied_on_reconnect() {
             let database = database().await;
             let mut device = connect(database.clone(), vec![host(1, true)]).await;
