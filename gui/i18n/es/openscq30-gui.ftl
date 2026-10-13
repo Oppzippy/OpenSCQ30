@@ -46,3 +46,7 @@ execute = Ejecutar
 default = Por defecto
 preferred-language = Idioma preferido
 color-hue-in-degrees = Tonalidad de color en grados
+am = AM
+pm = PM
+hour = Hora
+minute = Minuto
