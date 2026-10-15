@@ -213,13 +213,13 @@ auto-play-pause = Автовоспроизведение / пауза
 wearing-tone = Звук при надевании
 touch-lock = Блокировка сенсорного управления
 low-battery-prompt = Уведомление о низком заряде
-wearing-detection = Определение ношения
+wearing-detection = Обнаружение наушника в ухе
 voice-prompt = Голосовые подсказки
 side-tone = Слышимость собственного голоса
 dolby-audio = Dolby Audio
 ldac = LDAC
 
-limit-high-volume = Ограничение высокой громкости
+limit-high-volume = Безопасный уровень громкости
 db-limit = Предел громкости (дБ)
 db-refresh-rate = Частота обновления уровня громкости
 real-time = В реальном времени
