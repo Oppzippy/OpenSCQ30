@@ -6,7 +6,9 @@ use std::{
 };
 
 use anyhow::Context;
+use openscq30_i18n_macros::Translate;
 use serde::{Deserialize, Serialize};
+use strum::VariantArray;
 use tokio::sync::oneshot;
 
 pub struct Config {
@@ -19,6 +21,21 @@ pub struct Config {
 #[serde(default)]
 pub struct ConfigInner {
     pub preferred_language: Option<String>,
+    pub theme: AppTheme,
+}
+
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Translate, VariantArray,
+)]
+#[serde(rename_all = "kebab-case")]
+pub enum AppTheme {
+    #[default]
+    #[translate("system-theme")]
+    System,
+    #[translate("light-theme")]
+    Light,
+    #[translate("dark-theme")]
+    Dark,
 }
 
 impl Config {
