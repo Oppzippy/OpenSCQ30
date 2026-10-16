@@ -116,9 +116,25 @@ impl QuickPresetsHandler {
             .database
             .fetch_quick_preset(device.model(), name.into())
             .await?;
-        device
-            .set_setting_values(settings_to_apply(device, quick_preset.fields))
-            .await
+        let settings = settings_to_apply(device, quick_preset.fields);
+        device.set_setting_values(settings.clone()).await?;
+
+        // Setting one value can reset another one, such as changing the equalizer turning off spatial audio on some
+        // devices. Set whatever didn't end up with the requested value once more, now that the other settings are in
+        // place.
+        let not_applied = settings
+            .into_iter()
+            .filter(|(setting_id, value)| {
+                device
+                    .setting(setting_id)
+                    .is_some_and(|setting| settings::Value::from(setting) != *value)
+            })
+            .collect::<Vec<_>>();
+        if not_applied.is_empty() {
+            Ok(())
+        } else {
+            device.set_setting_values(not_applied).await
+        }
     }
 
     /// Deletes a quick preset.
@@ -308,6 +324,64 @@ mod tests {
         assert_eq!(
             None,
             fetch_field(&database, "New", SettingId::ManualNoiseCanceling).await,
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn eq_and_spatial_audio_are_applied_in_one_activation() {
+        activate_eq_and_spatial_audio_preset(false).await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn eq_and_spatial_audio_are_applied_in_one_activation_when_spatial_audio_is_on() {
+        activate_eq_and_spatial_audio_preset(true).await;
+    }
+
+    /// Changing the equalizer turns off spatial audio on the A3954, which must not stop a quick preset from turning
+    /// it on.
+    async fn activate_eq_and_spatial_audio_preset(is_spatial_audio_on_initially: bool) {
+        let (device, database, handler) = connect_demo_a3954().await;
+        // SpatialAudio is registered by two modules on this device, so saving produces two fields with that setting
+        // id and toggling either fails. Create the quick preset directly instead.
+        database
+            .upsert_quick_preset(
+                DeviceModel::SoundcoreA3954,
+                QuickPreset {
+                    name: "Spatial".into(),
+                    fields: vec![
+                        field(SettingId::VolumeAdjustments, vec![10i16; 8].into(), true),
+                        field(SettingId::SpatialAudio, true.into(), true),
+                    ],
+                },
+            )
+            .await
+            .unwrap();
+        device
+            .set_setting_values(vec![(SettingId::VolumeAdjustments, vec![20i16; 8].into())])
+            .await
+            .unwrap();
+        device
+            .set_setting_values(vec![(
+                SettingId::SpatialAudio,
+                is_spatial_audio_on_initially.into(),
+            )])
+            .await
+            .unwrap();
+        assert_eq!(
+            settings::Value::from(is_spatial_audio_on_initially),
+            current_value(device.as_ref(), SettingId::SpatialAudio),
+        );
+
+        handler.activate(device.as_ref(), "Spatial").await.unwrap();
+
+        assert_eq!(
+            settings::Value::from(vec![10i16; 8]),
+            current_value(device.as_ref(), SettingId::VolumeAdjustments),
+        );
+        assert_eq!(
+            settings::Value::from(true),
+            current_value(device.as_ref(), SettingId::SpatialAudio),
+            "spatial audio should be on after a single activation",
         );
     }
 }
