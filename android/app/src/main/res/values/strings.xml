@@ -116,4 +116,7 @@
     <string name="visible_settings">Visible Settings</string>
     <string name="appearance">Appearance</string>
     <string name="compact_layout">Compact Layout</string>
+    <string name="yes">Yes</string>
+    <string name="loud_sound_warning_title">Loud sound warning</string>
+    <string name="loud_sound_warning_message">%s plays a very loud tone that can damage your hearing. Remove the earbud from your ear before continuing. Turn it on?</string>
 </resources>

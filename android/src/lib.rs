@@ -64,3 +64,8 @@ pub enum AndroidError {
 pub fn device_models() -> Vec<serializable::DeviceModel> {
     DeviceModel::iter().map(serializable::DeviceModel).collect()
 }
+
+#[uniffi::export]
+pub fn setting_requires_confirmation(setting_id: serializable::SettingId) -> bool {
+    setting_id.0.requires_confirmation()
+}
