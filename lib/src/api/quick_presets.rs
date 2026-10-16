@@ -6,7 +6,7 @@ use crate::storage::{self, OpenSCQ30Database, QuickPreset, QuickPresetField};
 
 use super::{
     device::{self, OpenSCQ30Device},
-    settings::SettingId,
+    settings::{self, SettingId},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -58,7 +58,8 @@ impl QuickPresetsHandler {
             .filter_map(|setting_id| {
                 device
                     .setting(&setting_id)
-                    .filter(|setting| setting.mode().is_writable())
+                    // Actions are commands rather than state, so there is no value to save and restore.
+                    .filter(|setting| setting.mode().is_writable() && !setting.is_action())
                     .map(|setting| QuickPresetField {
                         setting_id,
                         value: setting.into(),
@@ -96,12 +97,9 @@ impl QuickPresetsHandler {
             .database
             .fetch_quick_preset(device.model(), name.into())
             .await?;
-        let settings = quick_preset
-            .fields
-            .into_iter()
-            .filter_map(|field| field.is_enabled.then_some((field.setting_id, field.value)))
-            .collect::<Vec<_>>();
-        device.set_setting_values(settings).await
+        device
+            .set_setting_values(settings_to_apply(device, quick_preset.fields))
+            .await
     }
 
     /// Deletes a quick preset.
@@ -113,5 +111,125 @@ impl QuickPresetsHandler {
         self.database
             .delete_quick_preset(device.model(), name)
             .await
+    }
+}
+
+/// Picks the enabled fields that should be set when activating a quick preset, in the order they should be set.
+fn settings_to_apply(
+    device: &(dyn OpenSCQ30Device + Send + Sync),
+    fields: Vec<QuickPresetField>,
+) -> Vec<(SettingId, settings::Value)> {
+    fields
+        .into_iter()
+        .filter(|field| field.is_enabled)
+        // Presets saved by older versions may contain actions, which would run every time the preset is activated.
+        .filter(|field| {
+            !device
+                .setting(&field.setting_id)
+                .is_some_and(|setting| setting.is_action())
+        })
+        .map(|field| (field.setting_id, field.value))
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::DeviceModel;
+
+    use super::*;
+
+    async fn connect_demo_a3954() -> (
+        Arc<dyn OpenSCQ30Device + Send + Sync>,
+        Arc<OpenSCQ30Database>,
+        QuickPresetsHandler,
+    ) {
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let model = DeviceModel::SoundcoreA3954;
+        let registry = model.demo_device_registry(database.clone()).await.unwrap();
+        let device = registry.connect(model.demo_mac_address()).await.unwrap();
+        let handler = QuickPresetsHandler::new(database.clone());
+        (device, database, handler)
+    }
+
+    fn current_value(device: &dyn OpenSCQ30Device, setting_id: SettingId) -> settings::Value {
+        device.setting(&setting_id).unwrap().into()
+    }
+
+    fn field(setting_id: SettingId, value: settings::Value, is_enabled: bool) -> QuickPresetField {
+        QuickPresetField {
+            setting_id,
+            value,
+            is_enabled,
+        }
+    }
+
+    async fn fetch_field(
+        database: &OpenSCQ30Database,
+        name: &str,
+        setting_id: SettingId,
+    ) -> Option<QuickPresetField> {
+        database
+            .fetch_quick_preset(DeviceModel::SoundcoreA3954, name.into())
+            .await
+            .unwrap()
+            .fields
+            .into_iter()
+            .find(|field| field.setting_id == setting_id)
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn save_does_not_capture_action_settings() {
+        let (device, database, handler) = connect_demo_a3954().await;
+
+        handler
+            .save(device.as_ref(), "Preset".into())
+            .await
+            .unwrap();
+
+        assert_eq!(
+            None,
+            fetch_field(&database, "Preset", SettingId::ResetButtonsToDefault).await,
+            "actions have no state, so they shouldn't be saved",
+        );
+        assert!(
+            fetch_field(&database, "Preset", SettingId::LeftSinglePress)
+                .await
+                .is_some(),
+            "regular settings should still be saved",
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn activate_does_not_run_action_settings() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        let original = current_value(device.as_ref(), SettingId::LeftSinglePress);
+        device
+            .set_setting_values(vec![(SettingId::LeftSinglePress, Some("NextSong").into())])
+            .await
+            .unwrap();
+        assert_ne!(
+            original,
+            current_value(device.as_ref(), SettingId::LeftSinglePress),
+            "the button should have been changed for the test to mean anything",
+        );
+        // Older versions saved actions as if they were toggles, so presets like this can already exist.
+        database
+            .upsert_quick_preset(
+                DeviceModel::SoundcoreA3954,
+                QuickPreset {
+                    name: "Preset".into(),
+                    fields: vec![field(SettingId::ResetButtonsToDefault, false.into(), true)],
+                },
+            )
+            .await
+            .unwrap();
+
+        handler.activate(device.as_ref(), "Preset").await.unwrap();
+
+        assert_eq!(
+            settings::Value::from(Some("NextSong")),
+            current_value(device.as_ref(), SettingId::LeftSinglePress),
+            "activating a quick preset shouldn't reset the buttons",
+        );
     }
 }

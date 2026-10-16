@@ -388,6 +388,11 @@ impl Setting {
         }
     }
 
+    /// Actions are commands that are run when set rather than state that can be read back.
+    pub fn is_action(&self) -> bool {
+        matches!(self, Self::Action)
+    }
+
     pub fn mode(&self) -> SettingMode {
         match self {
             Self::Toggle { .. } => SettingMode::ReadWrite,
