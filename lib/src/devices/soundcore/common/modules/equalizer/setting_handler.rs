@@ -264,12 +264,16 @@ fn get_inner<
                         custom_profiles
                             .iter()
                             .find(|(_, v)| {
-                                v[..VISIBLE_BANDS]
-                                    == equalizer_configuration
-                                        .volume_adjustments_channel_1()
-                                        .copied()
-                                        .unwrap_or_default()
-                                        .adjustments()[..VISIBLE_BANDS]
+                                // stored profiles aren't guaranteed to have all of the visible bands, so don't
+                                // index into them
+                                v.get(..VISIBLE_BANDS)
+                                    == Some(
+                                        &equalizer_configuration
+                                            .volume_adjustments_channel_1()
+                                            .copied()
+                                            .unwrap_or_default()
+                                            .adjustments()[..VISIBLE_BANDS],
+                                    )
                             })
                             .map(|(name, _)| name.clone().into())
                     })
@@ -652,5 +656,56 @@ mod tests {
         };
         assert_eq!(value, None);
         assert_eq!(state.equalizer_configuration.preset_id(), 0xfefe);
+    }
+
+    fn selected_custom_profile(
+        setting_handler: &EqualizerSettingHandler<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>,
+        state: &TestStateWithEq,
+    ) -> Option<Cow<'static, str>> {
+        let Setting::ModifiableSelect { value, .. } = setting_handler
+            .get(state, &SettingId::CustomEqualizerProfile)
+            .unwrap()
+        else {
+            panic!("setting type should be ModifiableSelect")
+        };
+        value
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn reading_with_stored_short_profile_does_not_panic() {
+        let (_database, setting_handler, profile_store) = set_up().await;
+        // Older versions and hand edited databases can contain profiles with fewer bands than the device has.
+        profile_store
+            .bulk_upsert(vec![("short profile".to_owned(), vec![0, 1, 2])])
+            .await
+            .unwrap();
+        let state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([0; 10]); 2],
+            ),
+        };
+        // a profile that doesn't have every visible band can't be the active one, even if its bands happen to be a
+        // prefix of the current ones
+        assert_eq!(selected_custom_profile(&setting_handler, &state), None);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn stored_profile_with_extra_bands_is_selected_based_on_visible_bands() {
+        let (_database, setting_handler, profile_store) = set_up().await;
+        profile_store
+            .bulk_upsert(vec![("long profile".to_owned(), vec![1; 10])])
+            .await
+            .unwrap();
+        let state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([1, 1, 1, 1, 1, 1, 1, 1, 0, 0]); 2],
+            ),
+        };
+        assert_eq!(
+            selected_custom_profile(&setting_handler, &state),
+            Some(Cow::from("long profile")),
+        );
     }
 }
