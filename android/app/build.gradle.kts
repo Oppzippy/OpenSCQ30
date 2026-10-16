@@ -257,9 +257,7 @@ gradleToCargoProfiles.forEach { (gradleBuildProfile, cargoProfile) ->
                     .withBuildType(gradleBuildProfile)
                     .withFlavor("abi" to abi.android),
             ) { variant ->
-                // TODO switch to variant.sources.kotlin when this issue is fixed:
-                // https://github.com/google/ksp/issues/2494
-                variant.sources.java!!.addGeneratedSourceDirectory(
+                variant.sources.kotlin!!.addGeneratedSourceDirectory(
                     generateTask,
                     GenerateUniffiBindingsTask::outputDirectory,
                 )
