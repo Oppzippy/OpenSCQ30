@@ -21,16 +21,16 @@ open class TestBase<A : ComponentActivity>(
 ) {
     @get:Rule(order = 0)
     val bluetoothPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
-        *(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        *if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            arrayOf(
+                android.Manifest.permission.BLUETOOTH,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+            )
         } else {
             arrayOf(android.Manifest.permission.BLUETOOTH)
-        }),
-        *(if (Build.VERSION.SDK_INT in Build.VERSION_CODES.Q..Build.VERSION_CODES.R) {
-            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            emptyArray()
-        }),
+        },
     )
 
     @get:Rule(order = 1)
