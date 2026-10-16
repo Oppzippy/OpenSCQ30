@@ -259,6 +259,8 @@ class DeviceSettingsManager(
         coroutineScope.launch {
             try {
                 quickPresetHandler.delete(device, name)
+                // The notification builds its buttons from these slots, so they must not outlive the preset
+                quickPresetSlotDao.deleteByName(device.model(), name)
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error deleting quick preset", ex)
                 toastHandler.add(R.string.error_deleting_quick_preset, Toast.LENGTH_SHORT)

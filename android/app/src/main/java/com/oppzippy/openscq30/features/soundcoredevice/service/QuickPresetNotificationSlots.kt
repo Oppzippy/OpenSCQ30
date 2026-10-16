@@ -13,3 +13,10 @@ data class QuickPresetNotificationSlot(val slotIndex: Int, val name: String)
 fun quickPresetNotificationSlots(slotNames: List<String?>): List<QuickPresetNotificationSlot> = slotNames
     .take(QUICK_PRESET_NOTIFICATION_SLOT_COUNT)
     .mapIndexedNotNull { index, name -> name?.let { QuickPresetNotificationSlot(index, it) } }
+
+/**
+ * Replaces slots that refer to a quick preset that no longer exists with empty slots. Indices are preserved, so slots
+ * after a removed one still line up with the indices handed out by [quickPresetNotificationSlots].
+ */
+fun retainExistingQuickPresets(slotNames: List<String?>, existingNames: Set<String>): List<String?> =
+    slotNames.map { name -> name?.takeIf { it in existingNames } }

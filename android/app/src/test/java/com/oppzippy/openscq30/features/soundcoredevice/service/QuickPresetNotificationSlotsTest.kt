@@ -57,4 +57,36 @@ class QuickPresetNotificationSlotsTest {
         val slot = quickPresetNotificationSlots(slotNames).single()
         assertEquals(slot.name, slotNames[slot.slotIndex])
     }
+
+    @Test
+    fun retainExistingKeepsExistingPresetsAtTheirIndices() {
+        assertEquals(
+            listOf("first", "second"),
+            retainExistingQuickPresets(listOf("first", "second"), setOf("first", "second", "other")),
+        )
+    }
+
+    @Test
+    fun retainExistingBlanksDeletedPresetsWithoutShiftingOtherSlots() {
+        assertEquals(
+            listOf<String?>(null, "second"),
+            retainExistingQuickPresets(listOf("first", "second"), setOf("second")),
+        )
+        assertEquals(
+            listOf("first", null),
+            retainExistingQuickPresets(listOf("first", "second"), setOf("first")),
+        )
+    }
+
+    @Test
+    fun retainExistingKeepsEmptySlotsEmpty() {
+        assertEquals(
+            listOf<String?>(null, "second"),
+            retainExistingQuickPresets(listOf(null, "second"), setOf("second")),
+        )
+        assertEquals(
+            listOf<String?>(null, null),
+            retainExistingQuickPresets(listOf("first", "second"), emptySet()),
+        )
+    }
 }
