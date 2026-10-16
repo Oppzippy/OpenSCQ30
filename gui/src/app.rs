@@ -204,12 +204,10 @@ impl Application for AppModel {
             key_binds: key_binds(),
         };
         let command = app.update_title();
-        let theme_command = app.apply_theme();
         (
             app,
             cosmic::Task::batch([
                 command,
-                theme_command,
                 task.map(Message::DeviceSelectionScreen).map(Into::into),
             ]),
         )
