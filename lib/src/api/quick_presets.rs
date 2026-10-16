@@ -93,7 +93,8 @@ impl QuickPresetsHandler {
     }
 
     /// Toggles on/off a field for the specified quick preset. When a quick preset is activated, only the enabled
-    /// fields will be set.
+    /// fields will be set. The equalizer can only be restored as either a factory profile or a custom curve, so
+    /// enabling one of the fields that describe it disables the others.
     pub async fn toggle_field(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
@@ -101,6 +102,22 @@ impl QuickPresetsHandler {
         setting_id: SettingId,
         is_enabled: bool,
     ) -> storage::Result<()> {
+        if is_enabled && EQUALIZER_SETTING_IDS.contains(&setting_id) {
+            for conflicting in EQUALIZER_SETTING_IDS
+                .into_iter()
+                .filter(|other| *other != setting_id)
+            {
+                match self
+                    .database
+                    .toggle_quick_preset_field(device.model(), name.clone(), conflicting, false)
+                    .await
+                {
+                    // The preset doesn't have to contain every equalizer field.
+                    Ok(()) | Err(storage::Error::NotFound { .. }) => (),
+                    Err(err) => return Err(err),
+                }
+            }
+        }
         self.database
             .toggle_quick_preset_field(device.model(), name, setting_id, is_enabled)
             .await
@@ -149,12 +166,19 @@ impl QuickPresetsHandler {
     }
 }
 
+/// The settings that all describe the same thing, the equalizer's curve, and so can't be restored independently.
+const EQUALIZER_SETTING_IDS: [SettingId; 3] = [
+    SettingId::PresetEqualizerProfile,
+    SettingId::CustomEqualizerProfile,
+    SettingId::VolumeAdjustments,
+];
+
 /// Picks the enabled fields that should be set when activating a quick preset, in the order they should be set.
 fn settings_to_apply(
     device: &(dyn OpenSCQ30Device + Send + Sync),
     fields: Vec<QuickPresetField>,
 ) -> Vec<(SettingId, settings::Value)> {
-    fields
+    let mut settings = fields
         .into_iter()
         .filter(|field| field.is_enabled)
         // Presets saved by older versions may contain actions, which would run every time the preset is activated.
@@ -164,7 +188,23 @@ fn settings_to_apply(
                 .is_some_and(|setting| setting.is_action())
         })
         .map(|field| (field.setting_id, field.value))
-        .collect()
+        .collect::<Vec<_>>();
+
+    // Setting the volume adjustments always switches to the custom profile, so if a factory profile and a curve are
+    // both enabled, applying both would undo the factory profile. Presets saved by older versions may do this.
+    let has_factory_profile = settings.iter().any(|(setting_id, value)| {
+        *setting_id == SettingId::PresetEqualizerProfile
+            && value.try_as_optional_str().is_ok_and(|name| name.is_some())
+    });
+    if has_factory_profile {
+        settings.retain(|(setting_id, _)| {
+            !matches!(
+                setting_id,
+                SettingId::CustomEqualizerProfile | SettingId::VolumeAdjustments
+            )
+        });
+    }
+    settings
 }
 
 #[cfg(test)]
@@ -382,6 +422,175 @@ mod tests {
             settings::Value::from(true),
             current_value(device.as_ref(), SettingId::SpatialAudio),
             "spatial audio should be on after a single activation",
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn factory_profile_wins_over_volume_adjustments() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        device
+            .set_setting_values(vec![(SettingId::VolumeAdjustments, vec![5i16; 8].into())])
+            .await
+            .unwrap();
+        // Older versions allowed both to be enabled at the same time, even though setting the volume adjustments
+        // always replaces the factory profile with a custom one.
+        database
+            .upsert_quick_preset(
+                DeviceModel::SoundcoreA3954,
+                QuickPreset {
+                    name: "Acoustic".into(),
+                    fields: vec![
+                        field(
+                            SettingId::PresetEqualizerProfile,
+                            Some("Acoustic").into(),
+                            true,
+                        ),
+                        field(SettingId::VolumeAdjustments, vec![1i16; 8].into(), true),
+                    ],
+                },
+            )
+            .await
+            .unwrap();
+
+        handler.activate(device.as_ref(), "Acoustic").await.unwrap();
+
+        assert_eq!(
+            settings::Value::from(Some("Acoustic")),
+            current_value(device.as_ref(), SettingId::PresetEqualizerProfile),
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn volume_adjustments_win_when_there_is_no_factory_profile() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        device
+            .set_setting_values(vec![(
+                SettingId::PresetEqualizerProfile,
+                Some("Acoustic").into(),
+            )])
+            .await
+            .unwrap();
+        database
+            .upsert_quick_preset(
+                DeviceModel::SoundcoreA3954,
+                QuickPreset {
+                    name: "Custom".into(),
+                    fields: vec![
+                        field(
+                            SettingId::PresetEqualizerProfile,
+                            settings::Value::OptionalString(None),
+                            true,
+                        ),
+                        field(SettingId::VolumeAdjustments, vec![1i16; 8].into(), true),
+                    ],
+                },
+            )
+            .await
+            .unwrap();
+
+        handler.activate(device.as_ref(), "Custom").await.unwrap();
+
+        assert_eq!(
+            settings::Value::OptionalString(None),
+            current_value(device.as_ref(), SettingId::PresetEqualizerProfile),
+        );
+        assert_eq!(
+            settings::Value::from(vec![1i16; 8]),
+            current_value(device.as_ref(), SettingId::VolumeAdjustments),
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn toggling_on_an_equalizer_field_toggles_off_the_others() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        device
+            .set_setting_values(vec![(
+                SettingId::PresetEqualizerProfile,
+                Some("Acoustic").into(),
+            )])
+            .await
+            .unwrap();
+        handler
+            .save(device.as_ref(), "Preset".into())
+            .await
+            .unwrap();
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "Preset".into(),
+                SettingId::PresetEqualizerProfile,
+                true,
+            )
+            .await
+            .unwrap();
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "Preset".into(),
+                SettingId::AmbientSoundMode,
+                true,
+            )
+            .await
+            .unwrap();
+
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "Preset".into(),
+                SettingId::VolumeAdjustments,
+                true,
+            )
+            .await
+            .unwrap();
+
+        for (setting_id, expected) in [
+            (SettingId::PresetEqualizerProfile, false),
+            (SettingId::CustomEqualizerProfile, false),
+            (SettingId::VolumeAdjustments, true),
+            (SettingId::AmbientSoundMode, true),
+        ] {
+            assert_eq!(
+                Some(expected),
+                fetch_field(&database, "Preset", setting_id)
+                    .await
+                    .map(|field| field.is_enabled),
+                "{setting_id:?}",
+            );
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn toggling_off_an_equalizer_field_leaves_the_others_alone() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        handler
+            .save(device.as_ref(), "Preset".into())
+            .await
+            .unwrap();
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "Preset".into(),
+                SettingId::VolumeAdjustments,
+                true,
+            )
+            .await
+            .unwrap();
+
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "Preset".into(),
+                SettingId::PresetEqualizerProfile,
+                false,
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            Some(true),
+            fetch_field(&database, "Preset", SettingId::VolumeAdjustments)
+                .await
+                .map(|field| field.is_enabled),
         );
     }
 }
