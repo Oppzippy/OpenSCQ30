@@ -33,6 +33,7 @@ rust-embed = { workspace = true }
 macaddr = { workspace = true }
 openscq30-lib = { workspace = true }
 openscq30-i18n = { workspace = true }
+openscq30-i18n-macros = { workspace = true }
 strum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }

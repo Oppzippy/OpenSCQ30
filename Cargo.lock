@@ -4111,6 +4111,7 @@ dependencies = [
  "macaddr",
  "open",
  "openscq30-i18n",
+ "openscq30-i18n-macros",
  "openscq30-lib",
  "rust-embed",
  "serde",

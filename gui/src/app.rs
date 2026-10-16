@@ -18,6 +18,7 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
 use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
+use strum::VariantArray;
 use tokio::{select, sync::Semaphore};
 
 use crate::{
@@ -196,7 +197,10 @@ impl Application for AppModel {
             context_drawer_screen: None,
             available_language_names,
             available_languages,
-            theme_names: AppTheme::ALL.iter().map(|theme| theme.name()).collect(),
+            theme_names: AppTheme::VARIANTS
+                .iter()
+                .map(|theme| theme.translate())
+                .collect(),
             key_binds: key_binds(),
         };
         let command = app.update_title();
@@ -360,7 +364,7 @@ impl Application for AppModel {
                             widget::settings::item::builder(fl!("theme")).flex_control(
                                 widget::dropdown(
                                     &self.theme_names,
-                                    AppTheme::ALL
+                                    AppTheme::VARIANTS
                                         .iter()
                                         .position(|theme| *theme == self.config.get().theme),
                                     Message::SetTheme,
@@ -610,7 +614,7 @@ impl Application for AppModel {
             }
             Message::SetTheme(theme_index) => {
                 let result_receiver = self.config.modify(|inner| {
-                    inner.theme = AppTheme::ALL[theme_index];
+                    inner.theme = AppTheme::VARIANTS[theme_index];
                 });
 
                 return Task::batch([

@@ -79,6 +79,8 @@ macro_rules! fl {
     }};
 }
 
+pub use fl;
+
 #[cfg(test)]
 mod tests {
     use super::*;
