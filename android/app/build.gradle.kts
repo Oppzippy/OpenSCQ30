@@ -64,6 +64,16 @@ android {
     productFlavors {
         abis.forEach { abi ->
             create(abi.android) {
+                val buildMachineArch = System.getProperty("os.arch")
+                // since isDefault is only relevant for Android Studio, set it such that it matches the architecture of
+                // an android emulator running on the same machine.
+                isDefault = abi.android == when (buildMachineArch) {
+                    "arm" -> "armeabi-v7a"
+                    "aarch64" -> "arm64-v8a"
+                    "x86" -> "x86"
+                    "amd64" -> "x86_64"
+                    else -> null
+                }
                 dimension = "abi"
                 ndk {
                     abiFilters.clear()
