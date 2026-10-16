@@ -2,11 +2,11 @@ use std::borrow::Cow;
 
 use cosmic::widget;
 
-pub fn toggle<'a, M>(
-    name: Cow<'a, str>,
+pub fn toggle<M>(
+    name: Cow<'_, str>,
     value: bool,
     on_change: impl Fn(bool) -> M + 'static,
-) -> widget::list::ListButton<'a, M>
+) -> widget::list::ListButton<'_, M>
 where
     M: Clone + 'static,
 {

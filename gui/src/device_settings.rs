@@ -237,7 +237,7 @@ impl MinutesAfterMidnight {
     fn with_twelve_hour(self, twelve_hour: i32) -> Self {
         let twelve_hour = twelve_hour.clamp(1, 12);
         let twelve_hour_from_zero = if twelve_hour == 12 { 0 } else { twelve_hour };
-        let pm_offset = self.is_pm().then_some(12 * 60).unwrap_or_default();
+        let pm_offset = if self.is_pm() { 12 * 60 } else { 0 };
         Self(pm_offset + twelve_hour_from_zero * 60 + self.minute())
     }
 
@@ -461,7 +461,7 @@ impl DeviceSettingsModel {
             for (setting_id, setting) in settings.into_iter() {
                 match self.settings.entry(setting_id) {
                     hash_map::Entry::Occupied(mut occupied_entry) => {
-                        occupied_entry.get_mut().variant_state.update(setting)
+                        occupied_entry.get_mut().variant_state.update(setting);
                     }
                     hash_map::Entry::Vacant(vacant_entry) => {
                         vacant_entry.insert(SettingUiState {

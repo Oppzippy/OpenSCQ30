@@ -59,7 +59,7 @@ pub enum DisplayableValue {
 impl std::fmt::Display for DisplayableValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DisplayableValue::Passthrough(value) => match value {
+            Self::Passthrough(value) => match value {
                 Value::Bool(value) => write!(f, "{value}"),
                 Value::U16(value) => write!(f, "{value}"),
                 Value::U16Vec(items) => write!(f, "{items:?}"),
@@ -100,7 +100,7 @@ impl std::fmt::Display for DisplayableValue {
                     unimplemented!("this should not be shown to the user")
                 }
             },
-            DisplayableValue::MinutesAfterMidnight(minutes_after_midnight) => {
+            Self::MinutesAfterMidnight(minutes_after_midnight) => {
                 let hour = minutes_after_midnight / 60;
                 let minute = minutes_after_midnight % 60;
                 write!(f, "{hour:02}:{minute:02}")

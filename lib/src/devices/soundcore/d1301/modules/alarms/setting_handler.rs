@@ -106,7 +106,7 @@ where
                         alarms
                             .push(Alarm::default_with_id(u8::try_from(alarms.len()).expect(
                                 "length is less than MAX_ALARMS, so this won't overflow",
-                            )))
+                            )));
                     }
                 }
             }
@@ -169,10 +169,10 @@ where
             AlarmSettingKind::Volume => {
                 alarm.volume = AlarmVolume::new(
                     value.try_as_i32()?.clamp(u8::MIN.into(), u8::MAX.into()) as u8,
-                )
+                );
             }
             AlarmSettingKind::SnoozeDuration => {
-                alarm.snooze_duration_in_minutes = alarm.snooze_duration_in_minutes.clamp(0, 10)
+                alarm.snooze_duration_in_minutes = alarm.snooze_duration_in_minutes.clamp(0, 10);
             }
         }
 
@@ -251,37 +251,37 @@ impl From<PerAlarmSettingId> for AlarmSettingKind {
             | PerAlarmSettingId::DeleteAlarm2
             | PerAlarmSettingId::DeleteAlarm3
             | PerAlarmSettingId::DeleteAlarm4
-            | PerAlarmSettingId::DeleteAlarm5 => AlarmSettingKind::Delete,
+            | PerAlarmSettingId::DeleteAlarm5 => Self::Delete,
             PerAlarmSettingId::Alarm1Enabled
             | PerAlarmSettingId::Alarm2Enabled
             | PerAlarmSettingId::Alarm3Enabled
             | PerAlarmSettingId::Alarm4Enabled
-            | PerAlarmSettingId::Alarm5Enabled => AlarmSettingKind::Enabled,
+            | PerAlarmSettingId::Alarm5Enabled => Self::Enabled,
             PerAlarmSettingId::Alarm1Time
             | PerAlarmSettingId::Alarm2Time
             | PerAlarmSettingId::Alarm3Time
             | PerAlarmSettingId::Alarm4Time
-            | PerAlarmSettingId::Alarm5Time => AlarmSettingKind::Time,
+            | PerAlarmSettingId::Alarm5Time => Self::Time,
             PerAlarmSettingId::Alarm1Repeat
             | PerAlarmSettingId::Alarm2Repeat
             | PerAlarmSettingId::Alarm3Repeat
             | PerAlarmSettingId::Alarm4Repeat
-            | PerAlarmSettingId::Alarm5Repeat => AlarmSettingKind::Repeat,
+            | PerAlarmSettingId::Alarm5Repeat => Self::Repeat,
             PerAlarmSettingId::Alarm1WakeUpTune
             | PerAlarmSettingId::Alarm2WakeUpTune
             | PerAlarmSettingId::Alarm3WakeUpTune
             | PerAlarmSettingId::Alarm4WakeUpTune
-            | PerAlarmSettingId::Alarm5WakeUpTune => AlarmSettingKind::WakeUpTune,
+            | PerAlarmSettingId::Alarm5WakeUpTune => Self::WakeUpTune,
             PerAlarmSettingId::Alarm1Volume
             | PerAlarmSettingId::Alarm2Volume
             | PerAlarmSettingId::Alarm3Volume
             | PerAlarmSettingId::Alarm4Volume
-            | PerAlarmSettingId::Alarm5Volume => AlarmSettingKind::Volume,
+            | PerAlarmSettingId::Alarm5Volume => Self::Volume,
             PerAlarmSettingId::Alarm1SnoozeDuration
             | PerAlarmSettingId::Alarm2SnoozeDuration
             | PerAlarmSettingId::Alarm3SnoozeDuration
             | PerAlarmSettingId::Alarm4SnoozeDuration
-            | PerAlarmSettingId::Alarm5SnoozeDuration => AlarmSettingKind::SnoozeDuration,
+            | PerAlarmSettingId::Alarm5SnoozeDuration => Self::SnoozeDuration,
         }
     }
 }
@@ -302,15 +302,15 @@ impl AlarmRepeatDay {
         Self::iter().filter(move |variant| repeat.contains(variant.to_alarm_repeat_bit()))
     }
 
-    fn to_alarm_repeat_bit(&self) -> AlarmRepeat {
+    fn to_alarm_repeat_bit(self) -> AlarmRepeat {
         match self {
-            AlarmRepeatDay::Sunday => AlarmRepeat::SUNDAY,
-            AlarmRepeatDay::Monday => AlarmRepeat::MONDAY,
-            AlarmRepeatDay::Tuesday => AlarmRepeat::TUESDAY,
-            AlarmRepeatDay::Wednesday => AlarmRepeat::WEDNESDAY,
-            AlarmRepeatDay::Thursday => AlarmRepeat::THURSDAY,
-            AlarmRepeatDay::Friday => AlarmRepeat::FRIDAY,
-            AlarmRepeatDay::Saturday => AlarmRepeat::SATURDAY,
+            Self::Sunday => AlarmRepeat::SUNDAY,
+            Self::Monday => AlarmRepeat::MONDAY,
+            Self::Tuesday => AlarmRepeat::TUESDAY,
+            Self::Wednesday => AlarmRepeat::WEDNESDAY,
+            Self::Thursday => AlarmRepeat::THURSDAY,
+            Self::Friday => AlarmRepeat::FRIDAY,
+            Self::Saturday => AlarmRepeat::SATURDAY,
         }
     }
 }

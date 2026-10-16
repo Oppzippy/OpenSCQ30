@@ -29,8 +29,7 @@ impl TranslatableEnum {
                     let attribute = variant
                         .attrs
                         .iter()
-                        .find_map(TranslatableEnumAttribute::from_attribute)
-                        .take();
+                        .find_map(TranslatableEnumAttribute::from_attribute);
 
                     TranslatableEnumVariant {
                         enum_ident: enum_ident.to_owned(),

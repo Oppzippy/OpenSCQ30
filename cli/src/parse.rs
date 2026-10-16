@@ -165,13 +165,13 @@ fn parse_time(unparsed: &str) -> anyhow::Result<Value> {
     let maybe_am_pm = captures.get(3);
 
     anyhow::ensure!(
-        minute >= 0 && minute <= 59,
+        (0..=59).contains(&minute),
         "minute {minute} must be between 0 and 59"
     );
 
     if let Some(am_pm) = maybe_am_pm {
         anyhow::ensure!(
-            hour >= 1 && hour <= 12,
+            (1..=12).contains(&hour),
             "hour {hour} must be between 1 and 12 when using 12 hour time"
         );
         let zero_to_eleven_hour = if hour == 12 { 0 } else { hour };
@@ -183,7 +183,7 @@ fn parse_time(unparsed: &str) -> anyhow::Result<Value> {
         Ok(Value::I32(pm_minutes + zero_to_eleven_hour * 60 + minute))
     } else {
         anyhow::ensure!(
-            hour >= 0 && hour <= 23,
+            (0..=23).contains(&hour),
             "hour {hour} must be between 0 and 23 when using 24 hour time"
         );
         Ok(Value::I32(hour * 60 + minute))
