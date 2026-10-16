@@ -34,7 +34,7 @@ where
 {
     pub fn add_a3954_sound_modes(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager
-            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler);
+            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
         self.add_partial_sound_modes_v2::<a3954::structures::SoundModes>(packet_io.clone());
     }
 }

@@ -390,6 +390,32 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
+    async fn returning_to_anc_restores_previous_strength() {
+        let device = connect_demo_device().await;
+        device
+            .set_setting_values(vec![
+                (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+                (SettingId::ManualNoiseCanceling, 5.into()),
+            ])
+            .await
+            .unwrap();
+
+        for mode in ["Transparency", "NoiseCanceling"] {
+            device
+                .set_setting_values(vec![(SettingId::AmbientSoundMode, mode.into())])
+                .await
+                .unwrap();
+        }
+
+        assert_eq!(
+            device
+                .setting(&SettingId::ManualNoiseCanceling)
+                .map(Value::from),
+            Some(5.into())
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
     async fn importing_short_profile_fails_instead_of_breaking_later_reads() {
         let device = connect_demo_device().await;
         let result = device
