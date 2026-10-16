@@ -16,7 +16,7 @@ use crate::{
 use super::SoundModesSetting;
 
 /// The sound mode slider is positioned from 1 to 11. 6 is normal mode, and the further it is from 6, the stronger
-/// the effect. 1 to 5 is noise canceling, 7 to 11 is transparency.
+/// the effect. 7 to 11 is noise canceling, 1 to 5 is transparency.
 #[derive(Default)]
 pub struct SoundModesSettingHandler {
     /// The device only stores the strength of the active mode, so switching to another mode would lose it. We
@@ -35,18 +35,18 @@ impl RememberedStrengths {
     fn remember(&mut self, sound_mode_slider: u8) {
         match sound_mode_slider {
             // Strength is the slider's distance from the center, so flip it around for <6
-            1..=5 => self.noise_canceling = Some(6 - sound_mode_slider),
-            7..=11 => self.transparency = Some(sound_mode_slider - 6),
+            1..=5 => self.transparency = Some(6 - sound_mode_slider),
+            7..=11 => self.noise_canceling = Some(sound_mode_slider - 6),
             _ => (),
         }
     }
 
     fn noise_canceling_slider(&self) -> u8 {
-        6 - self.noise_canceling.unwrap_or(1)
+        6 + self.noise_canceling.unwrap_or(1)
     }
 
     fn transparency_slider(&self) -> u8 {
-        6 + self.transparency.unwrap_or(1)
+        6 - self.transparency.unwrap_or(1)
     }
 }
 
@@ -72,7 +72,17 @@ where
             SoundModesSetting::AmbientSoundMode => Some(Setting::select_from_enum_all_variants(
                 sound_modes.ambient_sound_mode,
             )),
-            SoundModesSetting::ManualNoiseCanceling => (1..=5)
+            SoundModesSetting::ManualNoiseCanceling => (7..=11)
+                .contains(&sound_modes.sound_mode_slider)
+                .then(|| Setting::I32Range {
+                    setting: settings::Range {
+                        range: 1..=5,
+                        step: 1,
+                    },
+                    // normal is 6, so noise canceling is 7 to 11
+                    value: i32::from(sound_modes.sound_mode_slider - 6),
+                }),
+            SoundModesSetting::ManualTransparency => (1..=5)
                 .contains(&sound_modes.sound_mode_slider)
                 .then(|| Setting::I32Range {
                     setting: settings::Range {
@@ -81,15 +91,6 @@ where
                     },
                     // Strength is the slider's distance from the center, so flip it around for <6
                     value: i32::from(6 - sound_modes.sound_mode_slider),
-                }),
-            SoundModesSetting::ManualTransparency => (7..=11)
-                .contains(&sound_modes.sound_mode_slider)
-                .then(|| Setting::I32Range {
-                    setting: settings::Range {
-                        range: 1..=5,
-                        step: 1,
-                    },
-                    value: i32::from(sound_modes.sound_mode_slider - 6),
                 }),
             SoundModesSetting::AirplaneMode => Some(Setting::select_from_enum_all_variants(
                 sound_modes.airplane_mode,
@@ -147,6 +148,17 @@ where
                 if sound_modes.ambient_sound_mode
                     == a3954::structures::AmbientSoundMode::NoiseCanceling
                 {
+                    // normal is 6, so noise canceling is 7 to 11
+                    let value = u8::try_from(value.try_as_i32()?.clamp(1, 5)).expect("clamped") + 6;
+                    sound_modes.sound_mode_slider = value;
+                    self.remembered_strengths.lock().unwrap().remember(value);
+                }
+            }
+            SoundModesSetting::ManualTransparency => {
+                let sound_modes: &mut SoundModes = state.get_mut();
+                if sound_modes.ambient_sound_mode
+                    == a3954::structures::AmbientSoundMode::Transparency
+                {
                     let value = u8::try_from(value.try_as_i32()?.clamp(1, 5)).expect("clamped");
                     // Strength is the slider's distance from the center, so flip it around for <6
                     let adjusted_value = 6 - value;
@@ -155,17 +167,6 @@ where
                         .lock()
                         .unwrap()
                         .remember(adjusted_value);
-                }
-            }
-            SoundModesSetting::ManualTransparency => {
-                let sound_modes: &mut SoundModes = state.get_mut();
-                if sound_modes.ambient_sound_mode
-                    == a3954::structures::AmbientSoundMode::Transparency
-                {
-                    // normal is 6, so transparency is 7 to 11
-                    let value = u8::try_from(value.try_as_i32()?.clamp(1, 5)).expect("clamped") + 6;
-                    sound_modes.sound_mode_slider = value;
-                    self.remembered_strengths.lock().unwrap().remember(value);
                 }
             }
             SoundModesSetting::AirplaneMode => {
@@ -262,7 +263,7 @@ mod tests {
             strength(&handler, &state, SettingId::ManualNoiseCanceling),
             Some(5)
         );
-        assert_eq!(state.sound_modes.sound_mode_slider, 1);
+        assert_eq!(state.sound_modes.sound_mode_slider, 11);
     }
 
     #[tokio::test(start_paused = true)]
@@ -279,13 +280,13 @@ mod tests {
             strength(&handler, &state, SettingId::ManualTransparency),
             Some(4)
         );
-        assert_eq!(state.sound_modes.sound_mode_slider, 10);
+        assert_eq!(state.sound_modes.sound_mode_slider, 2);
     }
 
     #[tokio::test(start_paused = true)]
     async fn strength_is_restored_after_passing_through_normal_mode() {
         let handler = SoundModesSettingHandler::default();
-        let mut state = state(AmbientSoundMode::NoiseCanceling, 2);
+        let mut state = state(AmbientSoundMode::NoiseCanceling, 10);
 
         set_mode(&handler, &mut state, "Normal").await;
         assert_eq!(state.sound_modes.sound_mode_slider, 6);
@@ -324,7 +325,7 @@ mod tests {
     async fn strength_changed_on_the_device_is_restored() {
         let handler = SoundModesSettingHandler::default();
         // the device reports strengths that we never set ourselves
-        let anc_state_from_device = state(AmbientSoundMode::NoiseCanceling, 2);
+        let anc_state_from_device = state(AmbientSoundMode::NoiseCanceling, 10);
         assert_eq!(
             strength(
                 &handler,
@@ -333,7 +334,7 @@ mod tests {
             ),
             Some(4)
         );
-        let mut transparency_state_from_device = state(AmbientSoundMode::Transparency, 9);
+        let mut transparency_state_from_device = state(AmbientSoundMode::Transparency, 3);
         assert_eq!(
             strength(
                 &handler,
@@ -370,10 +371,110 @@ mod tests {
             strength(&handler, &state, SettingId::ManualNoiseCanceling),
             Some(1)
         );
+        assert_eq!(state.sound_modes.sound_mode_slider, 7);
         set_mode(&handler, &mut state, "Transparency").await;
         assert_eq!(
             strength(&handler, &state, SettingId::ManualTransparency),
             Some(1)
+        );
+        assert_eq!(state.sound_modes.sound_mode_slider, 5);
+        set_mode(&handler, &mut state, "Normal").await;
+        assert_eq!(state.sound_modes.sound_mode_slider, 6);
+    }
+
+    // The sound mode slider is 1 to 11, where 6 is normal, 7 to 11 is noise canceling and 5 to 1 is transparency
+    // (see the device faker's a3954.toml). Verified on a Liberty 4 Pro: with the halves swapped, strengths 1 and 5
+    // both sounded like maximum strength.
+    #[tokio::test(start_paused = true)]
+    async fn noise_canceling_strength_is_sent_as_slider_above_normal() {
+        let handler = SoundModesSettingHandler::default();
+        let mut state = state(AmbientSoundMode::Normal, 6);
+        set_mode(&handler, &mut state, "NoiseCanceling").await;
+
+        for (strength, expected_slider) in [(1, 7), (2, 8), (3, 9), (4, 10), (5, 11)] {
+            set_strength(
+                &handler,
+                &mut state,
+                SettingId::ManualNoiseCanceling,
+                strength,
+            )
+            .await;
+            assert_eq!(
+                state.sound_modes.sound_mode_slider, expected_slider,
+                "noise canceling strength {strength}"
+            );
+            assert_eq!(
+                state.sound_modes.bytes().take(2).collect::<Vec<_>>(),
+                [0, expected_slider],
+                "noise canceling strength {strength}"
+            );
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn transparency_strength_is_sent_as_slider_below_normal() {
+        let handler = SoundModesSettingHandler::default();
+        let mut state = state(AmbientSoundMode::Normal, 6);
+        set_mode(&handler, &mut state, "Transparency").await;
+
+        for (strength, expected_slider) in [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)] {
+            set_strength(
+                &handler,
+                &mut state,
+                SettingId::ManualTransparency,
+                strength,
+            )
+            .await;
+            assert_eq!(
+                state.sound_modes.sound_mode_slider, expected_slider,
+                "transparency strength {strength}"
+            );
+            assert_eq!(
+                state.sound_modes.bytes().take(2).collect::<Vec<_>>(),
+                [1, expected_slider],
+                "transparency strength {strength}"
+            );
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn strength_is_read_from_the_matching_half_of_the_slider() {
+        let handler = SoundModesSettingHandler::default();
+
+        for slider in 7..=11 {
+            let state = state(AmbientSoundMode::NoiseCanceling, slider);
+            assert_eq!(
+                strength(&handler, &state, SettingId::ManualNoiseCanceling),
+                Some(i32::from(slider) - 6),
+                "noise canceling slider {slider}"
+            );
+            assert_eq!(
+                strength(&handler, &state, SettingId::ManualTransparency),
+                None,
+                "noise canceling slider {slider}"
+            );
+        }
+        for slider in 1..=5 {
+            let state = state(AmbientSoundMode::Transparency, slider);
+            assert_eq!(
+                strength(&handler, &state, SettingId::ManualTransparency),
+                Some(6 - i32::from(slider)),
+                "transparency slider {slider}"
+            );
+            assert_eq!(
+                strength(&handler, &state, SettingId::ManualNoiseCanceling),
+                None,
+                "transparency slider {slider}"
+            );
+        }
+        let normal = state(AmbientSoundMode::Normal, 6);
+        assert_eq!(
+            strength(&handler, &normal, SettingId::ManualNoiseCanceling),
+            None
+        );
+        assert_eq!(
+            strength(&handler, &normal, SettingId::ManualTransparency),
+            None
         );
     }
 }
