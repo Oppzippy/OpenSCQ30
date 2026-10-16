@@ -37,13 +37,14 @@ impl QuickPresetsHandler {
 
     /// Saves the device's current settings to a quick preset. By default, all fields will be toggled off. If a quick
     /// preset with the specified name already exists, the setting values will be updated, but whether or not each
-    /// field is toggled on or not will remain unchanged.
+    /// field is toggled on or not will remain unchanged. Fields for settings that are currently unavailable on the
+    /// device are kept as they were.
     pub async fn save(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
         name: String,
     ) -> storage::Result<()> {
-        let fields = device
+        let mut fields = device
             .categories()
             .iter()
             .flat_map(|category_id| device.settings_in_category(category_id))
@@ -67,6 +68,24 @@ impl QuickPresetsHandler {
                     })
             })
             .collect::<Vec<_>>();
+
+        // Some settings are only available in certain states, such as the noise canceling strength while in
+        // transparency mode. Don't discard the saved value of a field just because it can't be read right now.
+        let unavailable_fields = match self
+            .database
+            .fetch_quick_preset(device.model(), name.clone())
+            .await
+        {
+            Ok(existing) => existing
+                .fields
+                .into_iter()
+                .filter(|field| device.setting(&field.setting_id).is_none())
+                .filter(|field| fields.iter().all(|f| f.setting_id != field.setting_id))
+                .collect::<Vec<_>>(),
+            Err(storage::Error::NotFound { .. }) => Vec::new(),
+            Err(err) => return Err(err),
+        };
+        fields.extend(unavailable_fields);
 
         self.database
             .upsert_quick_preset(device.model(), QuickPreset { name, fields })
@@ -230,6 +249,65 @@ mod tests {
             settings::Value::from(Some("NextSong")),
             current_value(device.as_ref(), SettingId::LeftSinglePress),
             "activating a quick preset shouldn't reset the buttons",
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn save_keeps_enabled_field_for_unavailable_setting() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        device
+            .set_setting_values(vec![
+                (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+                (SettingId::ManualNoiseCanceling, 5.into()),
+            ])
+            .await
+            .unwrap();
+        handler.save(device.as_ref(), "ANC".into()).await.unwrap();
+        handler
+            .toggle_field(
+                device.as_ref(),
+                "ANC".into(),
+                SettingId::ManualNoiseCanceling,
+                true,
+            )
+            .await
+            .unwrap();
+
+        // The noise canceling strength can't be read in transparency mode
+        device
+            .set_setting_values(vec![(SettingId::AmbientSoundMode, "Transparency".into())])
+            .await
+            .unwrap();
+        assert!(device.setting(&SettingId::ManualNoiseCanceling).is_none());
+        handler.save(device.as_ref(), "ANC".into()).await.unwrap();
+
+        assert_eq!(
+            Some(field(SettingId::ManualNoiseCanceling, 5.into(), true)),
+            fetch_field(&database, "ANC", SettingId::ManualNoiseCanceling).await,
+            "the field should be unchanged since there was no new value to save",
+        );
+        assert_eq!(
+            Some(settings::Value::from("Transparency")),
+            fetch_field(&database, "ANC", SettingId::AmbientSoundMode)
+                .await
+                .map(|field| field.value),
+            "available fields should still be updated",
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn save_new_preset_does_not_invent_unavailable_fields() {
+        let (device, database, handler) = connect_demo_a3954().await;
+        device
+            .set_setting_values(vec![(SettingId::AmbientSoundMode, "Transparency".into())])
+            .await
+            .unwrap();
+
+        handler.save(device.as_ref(), "New".into()).await.unwrap();
+
+        assert_eq!(
+            None,
+            fetch_field(&database, "New", SettingId::ManualNoiseCanceling).await,
         );
     }
 }
