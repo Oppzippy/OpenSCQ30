@@ -321,3 +321,5 @@ alarm-n-repeat = Alarm { $number } Repeat
 alarm-n-wake-up-tune = Alarm { $number } Wake Up Tune
 alarm-n-volume = Alarm { $number } Volume
 alarm-n-snooze-duration-minutes = Alarm { $number } Snooze Duration (minutes)
+
+both-earbuds-must-be-connected = Both earbuds must be connected.

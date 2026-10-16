@@ -16,6 +16,7 @@ use crate::{
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
     },
+    i18n::fl,
 };
 
 use super::EqualizerSetting;
@@ -130,12 +131,22 @@ where
     }
 
     fn get(&self, state: &StateT, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
-        // TODO display as a read only setting. When TWS is disconnected, the equalizer configuration can be read
-        // but not written.
+        let setting = (*setting_id).try_into().ok()?;
+
         if let Some(get_tws_status) = self.get_tws_status
             && !get_tws_status(state).is_connected
         {
-            return None;
+            // While it would make sense for the CLI to return this same Information for all
+            // EqualizerSettings, that would be problematic for GUIs, where it would show the same
+            // message repeated three times for each of the settings.
+            return if setting == EqualizerSetting::VolumeAdjustments {
+                Some(Setting::Information {
+                    value: "Unavailable".to_string(),
+                    translated_value: fl!("both-earbuds-must-be-connected"),
+                })
+            } else {
+                None
+            };
         }
         let equalizer_configuration = state.get();
 
@@ -143,7 +154,7 @@ where
             equalizer_configuration,
             &self.module_settings,
             &self.custom_profiles_receiver,
-            setting_id,
+            setting,
         )
     }
 
@@ -198,9 +209,8 @@ fn get_inner<
         FRACTION_DIGITS,
     >,
     custom_profiles_receiver: &watch::Receiver<Vec<(String, Vec<i16>)>>,
-    setting_id: &SettingId,
+    setting: EqualizerSetting,
 ) -> Option<crate::api::settings::Setting> {
-    let setting = (*setting_id).try_into().ok()?;
     Some(match setting {
         EqualizerSetting::PresetEqualizerProfile => {
             let maybe_preset = module_settings
