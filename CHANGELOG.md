@@ -15,6 +15,7 @@
 #### Fixes
 
 - Show a message in the Equalizer category when only one earbud is connected indicating that the equalizer settings are only available when both earbuds are connected.
+- Don't show case battery level with nonsensical value when unavailable
 
 ### GUI
 
