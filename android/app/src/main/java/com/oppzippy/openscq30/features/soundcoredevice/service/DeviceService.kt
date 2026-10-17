@@ -21,6 +21,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -95,7 +97,10 @@ class DeviceService : LifecycleService() {
     private var quickPresetNames = connectionStatusFlow.flatMapLatest { connectionStatus ->
         if (connectionStatus is ConnectionStatus.Connected) {
             val device = connectionStatus.deviceManager.device
-            quickPresetSlotDao.allNames(device.model())
+            quickPresetSlotDao.allNames(device.model()).map { slotNames ->
+                // A slot can outlive the preset it points to, so don't offer buttons for presets that were deleted
+                existingQuickPresetNames(device)?.let { retainExistingQuickPresets(slotNames, it) } ?: slotNames
+            }
         } else {
             emptyFlow()
         }
@@ -123,16 +128,30 @@ class DeviceService : LifecycleService() {
                         Log.e(TAG, "got ACTION_QUICK_PRESET, but INTENT_EXTRA_PRESET_SLOT_INDEX is not specified")
                         return
                     }
-                    val presetName = quickPresetNames.value.getOrNull(presetIndex) ?: return
+                    val presetName = quickPresetNames.value.getOrNull(presetIndex)
+                    if (presetName == null) {
+                        Log.w(TAG, "got ACTION_QUICK_PRESET for slot $presetIndex, but it has no quick preset")
+                        showQuickPresetError()
+                        return
+                    }
                     lifecycleScope.launch {
                         connectionStatusFlow.value.let {
                             if (it is ConnectionStatus.Connected) {
                                 val device = it.deviceManager.device
                                 session.quickPresetHandler().use { quickPresetHandler ->
                                     try {
-                                        quickPresetHandler.activate(device, presetName)
+                                        val presetExists =
+                                            quickPresetHandler.quickPresets(device).any { it.name == presetName }
+                                        if (presetExists) {
+                                            quickPresetHandler.activate(device, presetName)
+                                        } else {
+                                            Log.w(TAG, "quick preset $presetName no longer exists, removing its slot")
+                                            quickPresetSlotDao.deleteByName(device.model(), presetName)
+                                            showQuickPresetError()
+                                        }
                                     } catch (ex: OpenScq30Exception) {
                                         Log.e(TAG, "error activating quick preset $presetName", ex)
+                                        showQuickPresetError()
                                     }
                                 }
                             }
@@ -288,6 +307,23 @@ class DeviceService : LifecycleService() {
             SettingWidget().updateAllConnectionStatus(applicationContext, session, ConnectionStatus.Disconnected)
         }
         _isRunning.value = false
+    }
+
+    /** Returns the names of the quick presets that exist for [device], or null if they could not be fetched. */
+    private suspend fun existingQuickPresetNames(device: OpenScq30Device): Set<String>? = try {
+        session.quickPresetHandler().use { quickPresetHandler ->
+            quickPresetHandler.quickPresets(device).map { it.name }.toSet()
+        }
+    } catch (ex: OpenScq30Exception) {
+        Log.w(TAG, "error fetching quick presets, not checking whether slots refer to existing presets", ex)
+        null
+    } catch (ex: IllegalStateException) {
+        Log.w(TAG, "device was closed, can't fetch quick presets", ex)
+        null
+    }
+
+    private fun showQuickPresetError() {
+        Toast.makeText(applicationContext, R.string.error_activating_quick_preset, Toast.LENGTH_SHORT).show()
     }
 
     private fun createNotificationChannel() {

@@ -37,6 +37,9 @@ abstract class QuickPresetSlotDao {
 
     @Query("DELETE FROM QuickPresetSlot WHERE deviceModel = :deviceModel AND slotIndex = :index")
     abstract suspend fun delete(deviceModel: String, index: Int)
+
+    @Query("DELETE FROM QuickPresetSlot WHERE deviceModel = :deviceModel AND name = :name")
+    abstract suspend fun deleteByName(deviceModel: String, name: String)
 }
 
 @Module

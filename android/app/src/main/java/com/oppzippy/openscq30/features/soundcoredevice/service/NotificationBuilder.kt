@@ -78,14 +78,14 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 ).build(),
             )
 
-        quickPresetNames.take(2).filterNotNull().forEachIndexed { index, name ->
+        quickPresetNotificationSlots(quickPresetNames).forEach { (slotIndex, name) ->
             builder.addAction(
                 buildQuickPresetNotificationAction(
-                    index,
+                    slotIndex,
                     name,
                     icon = Icon.createWithResource(
                         context,
-                        if (index == 0) R.drawable.counter_1_24px else R.drawable.counter_2_24px,
+                        if (slotIndex == 0) R.drawable.counter_1_24px else R.drawable.counter_2_24px,
                     ),
                 ),
             )
