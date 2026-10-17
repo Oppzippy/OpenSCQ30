@@ -235,4 +235,43 @@ mod tests {
             (SettingId::RightTriplePress, Some("NextSong").into()),
         ]);
     }
+
+    // Read from a real AeroClip on firmware 01.49 with both earbuds out of the charging
+    // case: the case battery byte is 0xFF (unavailable). Reading it must yield no
+    // setting instead of panicking on u8 overflow when adding the level offset.
+    #[tokio::test(start_paused = true)]
+    async fn out_of_case_packet_has_no_case_battery() {
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3388,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 7, 7, 48, 49, 46, 52, 57, 48, 49, 46, 52, 57, 51, 51, 56, 56, 56,
+                        56, 48, 69, 56, 53, 57, 51, 53, 66, 66, 56, 232, 252, 16, 15, 172, 255,
+                        7, 102, 102, 51, 51, 85, 85, 49, 0, 1, 1, 1, 0, 1, 30, 0, 140, 150,
+                        160, 170, 180, 180, 170, 160, 120, 0, 1, 0, 0, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::BatteryLevelLeft, "8/10".into()),
+            (SettingId::BatteryLevelRight, "8/10".into()),
+            (SettingId::FirmwareVersionLeft, "01.49".into()),
+            (SettingId::SerialNumber, "3388880E85935BB8".into()),
+        ]);
+        assert!(
+            device
+                .inner()
+                .setting(&SettingId::CaseBatteryLevel)
+                .is_none(),
+            "case battery should be absent when the buds are out of the case"
+        );
+    }
 }

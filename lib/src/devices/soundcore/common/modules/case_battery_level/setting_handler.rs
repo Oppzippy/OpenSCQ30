@@ -56,6 +56,12 @@ impl CaseBatteryLevelSettingHandler {
     #[inline(never)]
     fn get_inner(&self, battery: &CaseBatteryLevel, setting_id: &SettingId) -> Option<Setting> {
         let setting: CaseBatteryLevelSetting = (*setting_id).try_into().ok()?;
+        // A raw level of 255 means the case level is unavailable (e.g. the earbuds are
+        // out of the case), mirroring DualBatteryLevelSettingHandler's 255 convention.
+        // Bail out instead of overflowing `u8` when adding `level_offset`.
+        if battery.0.0 == 255 {
+            return None;
+        }
         Some(match setting {
             CaseBatteryLevelSetting::CaseBatteryLevel => Setting::Information {
                 value: format!("{}/{}", battery.0.0 + self.level_offset, self.max_level),
