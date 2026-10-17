@@ -194,15 +194,17 @@ pub const SLIDE_DOWN_ACTIONS: &[ButtonAction] = &[ButtonAction {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::{collections::HashMap, sync::Arc};
 
     use crate::{
         DeviceModel,
+        api::device::OpenSCQ30Device,
         devices::soundcore::common::{
             device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
             packet,
         },
         settings::{SettingId, Value},
+        storage::OpenSCQ30Database,
     };
 
     #[tokio::test(start_paused = true)]
@@ -373,5 +375,58 @@ mod tests {
             )])
             .await;
         device.assert_setting_values(vec![(SettingId::SpatialAudio, false.into())]);
+    }
+
+    async fn connect_demo_device() -> Arc<dyn OpenSCQ30Device + Send + Sync> {
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let model = DeviceModel::SoundcoreA3954;
+        model
+            .demo_device_registry(database)
+            .await
+            .unwrap()
+            .connect(model.demo_mac_address())
+            .await
+            .unwrap()
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn returning_to_anc_restores_previous_strength() {
+        let device = connect_demo_device().await;
+        device
+            .set_setting_values(vec![
+                (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+                (SettingId::ManualNoiseCanceling, 5.into()),
+            ])
+            .await
+            .unwrap();
+
+        for mode in ["Transparency", "NoiseCanceling"] {
+            device
+                .set_setting_values(vec![(SettingId::AmbientSoundMode, mode.into())])
+                .await
+                .unwrap();
+        }
+
+        assert_eq!(
+            device
+                .setting(&SettingId::ManualNoiseCanceling)
+                .map(Value::from),
+            Some(5.into())
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn importing_short_profile_fails_instead_of_breaking_later_reads() {
+        let device = connect_demo_device().await;
+        let result = device
+            .set_setting_values(vec![(
+                SettingId::ImportCustomEqualizerProfiles,
+                r#"[{"name":"Short profile","volumeAdjustments":[0,1,2]}]"#.into(),
+            )])
+            .await;
+
+        assert!(result.is_err(), "{result:?}");
+        // this used to panic
+        assert!(device.setting(&SettingId::CustomEqualizerProfile).is_some());
     }
 }

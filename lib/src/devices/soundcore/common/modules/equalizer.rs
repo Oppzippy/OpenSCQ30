@@ -772,7 +772,14 @@ impl<T: 'static> ModuleCollection<T> {
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,
-            ImportExportSettingHandler::new(profile_store, change_notify),
+            ImportExportSettingHandler::<
+                CHANNELS,
+                BANDS,
+                VISIBLE_BANDS,
+                MIN_VOLUME,
+                MAX_VOLUME,
+                FRACTION_DIGITS,
+            >::new(profile_store, change_notify),
         );
         self.state_modifiers.push(state_modifier);
     }
@@ -823,7 +830,14 @@ impl<T: 'static> ModuleCollection<T> {
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,
-            ImportExportSettingHandler::new(profile_store, change_notify),
+            ImportExportSettingHandler::<
+                CHANNELS,
+                BANDS,
+                VISIBLE_BANDS,
+                MIN_VOLUME,
+                MAX_VOLUME,
+                FRACTION_DIGITS,
+            >::new(profile_store, change_notify),
         );
         self.state_modifiers.push(state_modifier);
     }
