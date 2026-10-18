@@ -1,0 +1,41 @@
+use std::iter;
+
+use crate::devices::soundcore::{
+    common::{
+        packet,
+        structures::{CommonEqualizerConfiguration, CustomHearId, OptionalVolumeAdjustmentsExt},
+    },
+    d1402::structures::EqualizerUnknownBytes,
+};
+
+/// Same as the Space One Pro's, except the two bytes after the volume adjustments are the unknown
+/// bytes from the state update packet rather than gender and age.
+pub fn set_equalizer<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const HEAR_ID_CHANNELS: usize,
+    const HEAR_ID_BANDS: usize,
+>(
+    equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS>,
+    hear_id: &CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
+    equalizer_unknown_bytes: EqualizerUnknownBytes,
+) -> packet::Outbound {
+    let active_volume_adjustments = equalizer_configuration.volume_adjustments();
+
+    let body = equalizer_configuration
+        .preset_id()
+        .to_le_bytes()
+        .into_iter()
+        .chain(hear_id.favorite_music_genre.bytes())
+        .chain(active_volume_adjustments.iter().flat_map(|v| v.bytes()))
+        .chain(equalizer_unknown_bytes.bytes())
+        .chain(iter::once(hear_id.is_enabled.into()))
+        .chain(hear_id.volume_adjustment_bytes())
+        .chain(hear_id.time.to_be_bytes())
+        .chain(iter::once(hear_id.hear_id_type as u8))
+        .chain(hear_id.custom_volume_adjustment_bytes())
+        .chain(active_volume_adjustments.iter().flat_map(|v| v.bytes()))
+        .chain(iter::once(0)) // unknown
+        .collect();
+    packet::Outbound::new(packet::Command([0x03, 0x87]), body)
+}

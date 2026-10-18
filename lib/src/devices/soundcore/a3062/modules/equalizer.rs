@@ -49,7 +49,8 @@ where
     }
 }
 
-fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
+pub(in crate::devices::soundcore) fn equalizer_settings()
+-> EqualizerModuleSettings<8, 10, -120, 134, 1> {
     common::modules::equalizer::common_settings_with_presets(vec![
         EqualizerPreset {
             name: "SoundcoreSignature",

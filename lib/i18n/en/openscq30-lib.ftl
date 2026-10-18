@@ -38,6 +38,7 @@ soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 soundcore-d1301 = Soundcore Sleep A30
+soundcore-d1402 = Soundcore Space 2
 soundcore-development = Soundcore Development Information
 
 general = General

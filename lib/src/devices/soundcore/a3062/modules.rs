@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
 };
 
 mod button_configuration;
-mod equalizer;
+pub(in crate::devices::soundcore) mod equalizer;
 mod flag;
 mod sound_modes;
 
