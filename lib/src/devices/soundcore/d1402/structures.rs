@@ -110,8 +110,14 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct CustomNoiseCanceling(u8);
+
+impl Default for CustomNoiseCanceling {
+    fn default() -> Self {
+        Self(1)
+    }
+}
 
 impl CustomNoiseCanceling {
     pub fn new(byte: u8) -> Self {
@@ -127,20 +133,44 @@ impl CustomNoiseCanceling {
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Default)]
 pub struct ButtonConfiguration {
     pub double_press_action: Option<ButtonAction>,
+    /// A double press value this app doesn't know about. It's kept so writing the configuration
+    /// back doesn't overwrite it.
+    unknown_double_press_action: Option<u8>,
 }
 
 impl ButtonConfiguration {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |single_press_action| Self {
-            double_press_action: ButtonAction::from_repr(single_press_action),
+        map(le_u8, |double_press_action_byte| {
+            let double_press_action = ButtonAction::from_repr(double_press_action_byte);
+            let unknown_double_press_action =
+                if double_press_action.is_none() && double_press_action_byte != 0xF {
+                    Some(double_press_action_byte)
+                } else {
+                    None
+                };
+            Self {
+                double_press_action,
+                unknown_double_press_action,
+            }
         })
         .parse_complete(input)
     }
 
     pub fn bytes(&self) -> [u8; 1] {
-        [self.double_press_action.map_or(0xF, |action| action as u8)]
+        let byte = match (self.double_press_action, self.unknown_double_press_action) {
+            (Some(action), _) => action as u8,
+            (None, Some(unknown_byte)) => unknown_byte,
+            (None, None) => 0xF,
+        };
+        [byte]
+    }
+
+    /// Sets the double press action from a setting, which replaces any unknown value.
+    pub fn set_double_press_action(&mut self, double_press_action: Option<ButtonAction>) {
+        self.double_press_action = double_press_action;
+        self.unknown_double_press_action = None;
     }
 }
 
@@ -161,4 +191,42 @@ impl ButtonConfiguration {
 pub enum ButtonAction {
     #[default]
     BassUp = 7,
+}
+
+#[cfg(test)]
+mod tests {
+    use nom_language::error::VerboseError;
+
+    use super::*;
+
+    #[test]
+    fn button_configuration_round_trips_unknown_double_press_byte() {
+        let (remaining, button_configuration) =
+            ButtonConfiguration::take::<VerboseError<&[u8]>>(&[0x09]).unwrap();
+
+        assert!(remaining.is_empty());
+        assert_eq!(button_configuration.double_press_action, None);
+        assert_eq!(button_configuration.bytes(), [0x09]);
+    }
+
+    #[test]
+    fn button_configuration_writes_known_action_and_no_action_bytes() {
+        let (_, bass_up) = ButtonConfiguration::take::<VerboseError<&[u8]>>(&[0x07]).unwrap();
+        assert_eq!(bass_up.double_press_action, Some(ButtonAction::BassUp));
+        assert_eq!(bass_up.bytes(), [0x07]);
+
+        let (_, none) = ButtonConfiguration::take::<VerboseError<&[u8]>>(&[0x0F]).unwrap();
+        assert_eq!(none.double_press_action, None);
+        assert_eq!(none.bytes(), [0x0F]);
+    }
+
+    #[test]
+    fn setting_double_press_action_replaces_unknown_byte() {
+        let (_, mut button_configuration) =
+            ButtonConfiguration::take::<VerboseError<&[u8]>>(&[0x09]).unwrap();
+
+        button_configuration.set_double_press_action(None);
+
+        assert_eq!(button_configuration.bytes(), [0x0F]);
+    }
 }

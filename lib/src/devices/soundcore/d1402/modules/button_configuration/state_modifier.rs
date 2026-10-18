@@ -40,7 +40,7 @@ where
 
         self.packet_io
             .send_with_response(&d1402::packets::outbound::set_button_double_press_action(
-                target_button_configuration.double_press_action,
+                target_button_configuration,
             ))
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_button_configuration);

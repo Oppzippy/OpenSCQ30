@@ -55,7 +55,7 @@ where
         match button_configuration_setting {
             ButtonConfigurationSetting::SinglePress => return Err(SettingHandlerError::ReadOnly),
             ButtonConfigurationSetting::DoublePress => {
-                button_configuration.double_press_action = value.try_as_optional_enum_variant()?;
+                button_configuration.set_double_press_action(value.try_as_optional_enum_variant()?);
             }
         }
         Ok(())

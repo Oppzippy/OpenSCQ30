@@ -19,7 +19,7 @@ use crate::devices::soundcore::{
     d1402::{self, packets::outbound, state::D1402State},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct D1402StateUpdatePacket {
     pub battery: SingleBattery,
     pub firmware_version: FirmwareVersion,
@@ -46,6 +46,37 @@ pub struct D1402StateUpdatePacket {
     pub hey_anka_enabled: bool,
 }
 
+impl Default for D1402StateUpdatePacket {
+    /// Matches the values a real device sends for the parts that aren't stored by this app.
+    fn default() -> Self {
+        Self {
+            battery: SingleBattery::default(),
+            firmware_version: FirmwareVersion::default(),
+            serial_number: SerialNumber::default(),
+            equalizer_configuration: CommonEqualizerConfiguration::default(),
+            // 30 is the only value seen from hardware.
+            equalizer_unknown_byte: d1402::structures::EqualizerUnknownByte(30),
+            age_range: AgeRange(u8::MAX),
+            hear_id: CustomHearId::default(),
+            button_configuration: d1402::structures::ButtonConfiguration::default(),
+            ambient_sound_mode_cycle: AmbientSoundModeCycle::default(),
+            // System voice assistant, the value seen from hardware before it was changed.
+            mfb_long_press_action: 5,
+            sound_modes: d1402::structures::SoundModes::default(),
+            three_d_sound: SurroundSound::default(),
+            ambient_sound_mode_voice_prompt:
+                d1402::structures::AmbientSoundModeVoicePrompt::default(),
+            low_battery_prompt: LowBatteryPrompt::default(),
+            ldac: Ldac::default(),
+            dual_connections_enabled: false,
+            auto_power_off: AutoPowerOff::default(),
+            limit_high_volume: LimitHighVolume::default(),
+            auto_play_pause: AutoPlayPause::default(),
+            hey_anka_enabled: false,
+        }
+    }
+}
+
 impl FromPacketBody for D1402StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
@@ -65,6 +96,9 @@ impl FromPacketBody for D1402StateUpdatePacket {
                         AgeRange::take,
                     ),
                     CustomHearId::take_with_music_genre_at_end,
+                    // Probing showed `04 81 [side, 2, action]` writes byte 66 and
+                    // `04 81 [side, 1, action]` writes byte 68, so these are likely button slots.
+                    // The official app doesn't offer them, so they're not exposed.
                     take(2usize), // unknown
                     d1402::structures::ButtonConfiguration::take,
                     take(1usize), // unknown
@@ -155,13 +189,13 @@ impl ToPacket for D1402StateUpdatePacket {
             .chain(outbound::hear_id_bytes_with_music_genre_at_end(
                 &self.hear_id,
             ))
-            .chain([0; 2]) // unknown
+            .chain([6, 4]) // unknown
             .chain(self.button_configuration.bytes())
-            .chain([0; 1]) // unknown
+            .chain([255]) // unknown
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain([self.mfb_long_press_action])
             .chain(self.sound_modes.bytes())
-            .chain([0; 1]) // unknown
+            .chain([49]) // unknown
             .chain(self.three_d_sound.bytes())
             .chain([0; 2]) // unknown
             .chain(self.ambient_sound_mode_voice_prompt.bytes())
@@ -170,10 +204,10 @@ impl ToPacket for D1402StateUpdatePacket {
             .chain([self.dual_connections_enabled.into()])
             .chain(self.auto_power_off.bytes())
             .chain(self.limit_high_volume.bytes())
-            .chain([0; 3]) // audio streaming status and unknown
+            .chain([0, 1, 0]) // audio streaming status and unknown
             .chain(self.auto_play_pause.bytes())
             .chain([self.hey_anka_enabled.into()])
-            .chain([0; 8]) // unknown
+            .chain([0, 0, 0, 255, 255, 255, 255, 255]) // unknown
             .collect()
     }
 }

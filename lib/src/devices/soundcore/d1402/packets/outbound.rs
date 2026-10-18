@@ -8,13 +8,16 @@ use crate::devices::soundcore::{
             OptionalVolumeAdjustmentsExt,
         },
     },
-    d1402::structures::{ButtonAction, EqualizerUnknownByte},
+    d1402::structures::{ButtonConfiguration, EqualizerUnknownByte},
 };
 
-pub fn set_button_double_press_action(maybe_action: Option<ButtonAction>) -> packet::Outbound {
+/// Writes the configuration's byte as it is, so an unknown double press value is kept.
+pub fn set_button_double_press_action(
+    button_configuration: &ButtonConfiguration,
+) -> packet::Outbound {
     packet::Outbound::new(
         packet::Command([0x04, 0x81]),
-        vec![0, 0, maybe_action.map_or(0xF, |action| action as u8)],
+        vec![0, 0, button_configuration.bytes()[0]],
     )
 }
 

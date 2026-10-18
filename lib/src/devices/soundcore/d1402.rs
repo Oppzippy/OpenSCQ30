@@ -345,6 +345,61 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
+    async fn setting_ldac_and_three_d_sound_on_together_only_sends_three_d_sound() {
+        let mut state_update_body = ISSUE_PACKET_1;
+        state_update_body[78] = 0; // 3d sound off
+        state_update_body[83] = 0; // ldac off
+        let mut device = new_device(&state_update_body).await;
+
+        device
+            .assert_set_settings_response(
+                vec![
+                    (SettingId::Ldac, true.into()),
+                    (SettingId::SurroundSound, true.into()),
+                ],
+                vec![packet::Outbound::new(packet::Command([2, 134]), vec![1])],
+            )
+            .await;
+
+        device.assert_setting_values([
+            (SettingId::SurroundSound, true.into()),
+            (SettingId::Ldac, false.into()),
+        ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn turning_three_d_sound_off_sends_only_three_d_sound() {
+        let mut state_update_body = ISSUE_PACKET_1;
+        state_update_body[78] = 1; // 3d sound on
+        state_update_body[83] = 0; // ldac off
+        let mut device = new_device(&state_update_body).await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SurroundSound, false.into())],
+                vec![packet::Outbound::new(packet::Command([2, 134]), vec![0])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn unknown_double_press_value_is_kept_when_changing_other_settings() {
+        let mut state_update_body = ISSUE_PACKET_1;
+        state_update_body[67] = 0x09; // double press: unknown to this app
+        let mut device = new_device(&state_update_body).await;
+
+        device.assert_setting_values([(SettingId::DoublePress, None::<&str>.into())]);
+
+        // Only LDAC is sent, so the unknown double press byte isn't rewritten with 04 81.
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::Ldac, false.into())],
+                vec![packet::Outbound::new(packet::Command([1, 0xff]), vec![0])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
     async fn set_flags_and_buttons() {
         let mut state_update_body = ISSUE_PACKET_1;
         state_update_body[67] = 15; // double press: none
