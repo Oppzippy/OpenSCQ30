@@ -7,7 +7,6 @@ use nom::{
 };
 
 use crate::devices::soundcore::{
-    a3062,
     common::{
         macros::state_update_packet_module,
         packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
@@ -28,13 +27,13 @@ pub struct D1402StateUpdatePacket {
     pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub equalizer_unknown_bytes: d1402::structures::EqualizerUnknownBytes,
     pub hear_id: CustomHearId<1, 10>,
-    pub button_configuration: a3062::structures::ButtonConfiguration,
+    pub button_configuration: d1402::structures::ButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     /// Not configurable in the official app's UI for us to expose, so it's only parsed.
     pub mfb_long_press_action: u8,
     pub sound_modes: d1402::structures::SoundModes,
     pub three_d_sound: SurroundSound,
-    pub ambient_sound_mode_voice_prompt: a3062::structures::AmbientSoundModeVoicePrompt,
+    pub ambient_sound_mode_voice_prompt: d1402::structures::AmbientSoundModeVoicePrompt,
     pub low_battery_prompt: LowBatteryPrompt,
     pub ldac: Ldac,
     pub dual_connections_enabled: bool,
@@ -61,7 +60,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     d1402::structures::EqualizerUnknownBytes::take,
                     CustomHearId::take_with_music_genre_at_end,
                     take(2usize), // unknown
-                    a3062::structures::ButtonConfiguration::take,
+                    d1402::structures::ButtonConfiguration::take,
                     take(1usize), // unknown
                     AmbientSoundModeCycle::take,
                     le_u8, // mfb long press action
@@ -69,7 +68,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     take(1usize), // unknown
                     SurroundSound::take,
                     take(2usize), // unknown
-                    a3062::structures::AmbientSoundModeVoicePrompt::take,
+                    d1402::structures::AmbientSoundModeVoicePrompt::take,
                     LowBatteryPrompt::take,
                     Ldac::take,
                     take_bool, // dual connections

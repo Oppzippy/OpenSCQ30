@@ -12,10 +12,10 @@ use crate::devices::soundcore::{
     },
 };
 
-pub(in crate::devices::soundcore) mod modules;
+mod modules;
 mod packets;
 mod state;
-pub(in crate::devices::soundcore) mod structures;
+mod structures;
 
 soundcore_device!(
     A3062State,

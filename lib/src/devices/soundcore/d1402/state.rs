@@ -1,7 +1,6 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3062,
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         state::Update,
@@ -24,11 +23,11 @@ pub struct D1402State {
     equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     equalizer_unknown_bytes: d1402::structures::EqualizerUnknownBytes,
     hear_id: CustomHearId<1, 10>,
-    button_configuration: a3062::structures::ButtonConfiguration,
+    button_configuration: d1402::structures::ButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: d1402::structures::SoundModes,
     three_d_sound: SurroundSound,
-    ambient_sound_mode_voice_prompt: a3062::structures::AmbientSoundModeVoicePrompt,
+    ambient_sound_mode_voice_prompt: d1402::structures::AmbientSoundModeVoicePrompt,
     low_battery_prompt: LowBatteryPrompt,
     ldac: Ldac,
     auto_power_off: AutoPowerOff,

@@ -40,7 +40,7 @@ soundcore_device!(
 
         builder.d1402_equalizer().await;
 
-        builder.a3062_button_configuration();
+        builder.d1402_button_configuration();
         builder.ambient_sound_mode_cycle();
 
         builder.limit_high_volume();
@@ -53,7 +53,7 @@ soundcore_device!(
         );
         builder.auto_play_pause();
         builder.low_battery_prompt();
-        builder.a3062_ambient_sound_mode_voice_prompt();
+        builder.d1402_ambient_sound_mode_voice_prompt();
 
         builder.single_battery_custom(
             common::modules::single_battery::SingleBatteryConfiguration {

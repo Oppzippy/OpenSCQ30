@@ -5,8 +5,15 @@ use crate::devices::soundcore::{
         packet,
         structures::{CommonEqualizerConfiguration, CustomHearId, OptionalVolumeAdjustmentsExt},
     },
-    d1402::structures::EqualizerUnknownBytes,
+    d1402::structures::{ButtonAction, EqualizerUnknownBytes},
 };
+
+pub fn set_button_double_press_action(maybe_action: Option<ButtonAction>) -> packet::Outbound {
+    packet::Outbound::new(
+        packet::Command([0x04, 0x81]),
+        vec![0, 0, maybe_action.map_or(0xF, |action| action as u8)],
+    )
+}
 
 /// Same as the Space One Pro's, except the two bytes after the volume adjustments are the unknown
 /// bytes from the state update packet rather than gender and age.

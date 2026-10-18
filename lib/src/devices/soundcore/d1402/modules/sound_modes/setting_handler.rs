@@ -5,7 +5,6 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::{
-        a3062,
         common::settings_manager::{SettingHandler, SettingHandlerResult},
         d1402,
     },
@@ -58,7 +57,7 @@ where
                 sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::ManualNoiseCanceling => {
-                sound_modes.custom_noise_canceling = a3062::structures::CustomNoiseCanceling::new(
+                sound_modes.custom_noise_canceling = d1402::structures::CustomNoiseCanceling::new(
                     value.try_as_i32()?.clamp(u8::MIN as i32, u8::MAX as i32) as u8,
                 );
             }

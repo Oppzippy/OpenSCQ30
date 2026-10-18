@@ -9,7 +9,9 @@ use crate::devices::soundcore::{
     d1402,
 };
 
+mod button_configuration;
 mod equalizer;
+mod flag;
 mod ldac_and_three_d_sound;
 mod sound_modes;
 
@@ -54,5 +56,27 @@ where
         let packet_io_controller = self.packet_io_controller().clone();
         self.module_collection()
             .add_d1402_ldac_and_three_d_sound(packet_io_controller);
+    }
+}
+
+impl<StateType> SoundcoreDeviceBuilder<StateType>
+where
+    StateType: Has<d1402::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
+{
+    pub fn d1402_button_configuration(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_d1402_button_configuration(packet_io_controller);
+    }
+}
+
+impl<StateType> SoundcoreDeviceBuilder<StateType>
+where
+    StateType: Has<d1402::structures::AmbientSoundModeVoicePrompt> + Send + Sync + Clone + 'static,
+{
+    pub fn d1402_ambient_sound_mode_voice_prompt(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_d1402_ambient_sound_mode_voice_prompt(packet_io_controller);
     }
 }

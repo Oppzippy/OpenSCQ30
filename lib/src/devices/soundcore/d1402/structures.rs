@@ -4,16 +4,18 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
+use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
+use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::{
-    a3062::structures::CustomNoiseCanceling,
-    common::{
-        modules::sound_modes_v2,
-        packet::{self, inbound::FromPacketBody},
-        structures::AmbientSoundMode,
-    },
+use crate::devices::soundcore::common::{
+    self,
+    modules::sound_modes_v2,
+    packet::{self, inbound::FromPacketBody},
+    structures::AmbientSoundMode,
 };
+
+common::structures::flag!(AmbientSoundModeVoicePrompt);
 
 /// The two bytes between the equalizer and hear id. The equalizer command writes these back in the
 /// place where the Space One Pro has gender and age, so they need to be kept around to be able to
@@ -115,4 +117,57 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     fn bytes(&self) -> Vec<u8> {
         self.bytes().to_vec()
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
+pub struct CustomNoiseCanceling(u8);
+
+impl CustomNoiseCanceling {
+    pub fn new(byte: u8) -> Self {
+        Self(byte.clamp(1, 5))
+    }
+
+    pub fn inner(&self) -> u8 {
+        self.0
+    }
+}
+
+// same as the Space One Pro
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Default)]
+pub struct ButtonConfiguration {
+    pub double_press_action: Option<ButtonAction>,
+}
+
+impl ButtonConfiguration {
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        map(le_u8, |single_press_action| Self {
+            double_press_action: ButtonAction::from_repr(single_press_action),
+        })
+        .parse_complete(input)
+    }
+
+    pub fn bytes(&self) -> [u8; 1] {
+        [self.double_press_action.map_or(0xF, |action| action as u8)]
+    }
+}
+
+#[repr(u8)]
+#[derive(
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Debug,
+    Default,
+    FromRepr,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
+    Translate,
+)]
+pub enum ButtonAction {
+    #[default]
+    BassUp = 7,
 }
