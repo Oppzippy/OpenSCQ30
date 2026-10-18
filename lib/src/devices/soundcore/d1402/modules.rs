@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     common::{
         self,
         device::SoundcoreDeviceBuilder,
-        structures::{Ldac, SurroundSound},
+        structures::{AgeRange, Ldac, SurroundSound},
     },
     d1402,
 };
@@ -30,7 +30,8 @@ impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
     StateType: Has<common::structures::CommonEqualizerConfiguration<1, 10>>
         + Has<common::structures::CustomHearId<1, 10>>
-        + Has<d1402::structures::EqualizerUnknownBytes>
+        + Has<d1402::structures::EqualizerUnknownByte>
+        + Has<AgeRange>
         + Send
         + Sync
         + Clone

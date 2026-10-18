@@ -5,9 +5,10 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         state::Update,
         structures::{
-            AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CommonEqualizerConfiguration,
-            CustomHearId, DualConnections, DualConnectionsDevice, FirmwareVersion, Ldac,
-            LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery, SurroundSound,
+            AgeRange, AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff,
+            CommonEqualizerConfiguration, CustomHearId, DualConnections, DualConnectionsDevice,
+            FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery,
+            SurroundSound,
         },
     },
     d1402,
@@ -21,7 +22,8 @@ pub struct D1402State {
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
-    equalizer_unknown_bytes: d1402::structures::EqualizerUnknownBytes,
+    equalizer_unknown_byte: d1402::structures::EqualizerUnknownByte,
+    age_range: AgeRange,
     hear_id: CustomHearId<1, 10>,
     button_configuration: d1402::structures::ButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
@@ -47,7 +49,8 @@ impl D1402State {
             firmware_version: state_update_packet.firmware_version,
             serial_number: state_update_packet.serial_number,
             equalizer_configuration: state_update_packet.equalizer_configuration,
-            equalizer_unknown_bytes: state_update_packet.equalizer_unknown_bytes,
+            equalizer_unknown_byte: state_update_packet.equalizer_unknown_byte,
+            age_range: state_update_packet.age_range,
             hear_id: state_update_packet.hear_id,
             button_configuration: state_update_packet.button_configuration,
             ambient_sound_mode_cycle: state_update_packet.ambient_sound_mode_cycle,
@@ -75,7 +78,8 @@ impl Update<D1402StateUpdatePacket> for D1402State {
             firmware_version,
             serial_number,
             equalizer_configuration,
-            equalizer_unknown_bytes,
+            equalizer_unknown_byte,
+            age_range,
             hear_id,
             button_configuration,
             ambient_sound_mode_cycle,
@@ -95,7 +99,8 @@ impl Update<D1402StateUpdatePacket> for D1402State {
         self.firmware_version = firmware_version;
         self.serial_number = serial_number;
         self.equalizer_configuration = equalizer_configuration;
-        self.equalizer_unknown_bytes = equalizer_unknown_bytes;
+        self.equalizer_unknown_byte = equalizer_unknown_byte;
+        self.age_range = age_range;
         self.hear_id = hear_id;
         self.button_configuration = button_configuration;
         self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;

@@ -11,12 +11,12 @@ use crate::devices::soundcore::{
         macros::state_update_packet_module,
         packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
         structures::{
-            AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CommonEqualizerConfiguration,
-            CustomHearId, EqualizerConfiguration, FirmwareVersion, Ldac, LimitHighVolume,
-            LowBatteryPrompt, SerialNumber, SingleBattery, SurroundSound,
+            AgeRange, AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff,
+            CommonEqualizerConfiguration, CustomHearId, EqualizerConfiguration, FirmwareVersion,
+            Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery, SurroundSound,
         },
     },
-    d1402::{self, state::D1402State},
+    d1402::{self, packets::outbound, state::D1402State},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -25,7 +25,10 @@ pub struct D1402StateUpdatePacket {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
-    pub equalizer_unknown_bytes: d1402::structures::EqualizerUnknownBytes,
+    pub equalizer_unknown_byte: d1402::structures::EqualizerUnknownByte,
+    /// Index into the official app's list of age ranges (13-19, 20-29, 30-39, 40-49, 50-59,
+    /// 60-69, 70+), set by its hear id test. 255 means not set.
+    pub age_range: AgeRange,
     pub hear_id: CustomHearId<1, 10>,
     pub button_configuration: d1402::structures::ButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
@@ -57,7 +60,10 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     FirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
-                    d1402::structures::EqualizerUnknownBytes::take,
+                    (
+                        d1402::structures::EqualizerUnknownByte::take,
+                        AgeRange::take,
+                    ),
                     CustomHearId::take_with_music_genre_at_end,
                     take(2usize), // unknown
                     d1402::structures::ButtonConfiguration::take,
@@ -86,7 +92,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     firmware_version,
                     serial_number,
                     equalizer_configuration,
-                    equalizer_unknown_bytes,
+                    (equalizer_unknown_byte, age_range),
                     hear_id,
                     _unknown1,
                     button_configuration,
@@ -108,7 +114,8 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     firmware_version,
                     serial_number,
                     equalizer_configuration,
-                    equalizer_unknown_bytes,
+                    equalizer_unknown_byte,
+                    age_range,
                     hear_id,
                     button_configuration,
                     ambient_sound_mode_cycle,
@@ -144,8 +151,10 @@ impl ToPacket for D1402StateUpdatePacket {
             .chain(self.firmware_version.bytes())
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
-            .chain(self.equalizer_unknown_bytes.bytes())
-            .chain(self.hear_id.bytes_with_music_genre_at_end())
+            .chain([self.equalizer_unknown_byte.0, self.age_range.0])
+            .chain(outbound::hear_id_bytes_with_music_genre_at_end(
+                &self.hear_id,
+            ))
             .chain([0; 2]) // unknown
             .chain(self.button_configuration.bytes())
             .chain([0; 1]) // unknown

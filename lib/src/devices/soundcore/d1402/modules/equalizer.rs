@@ -13,7 +13,7 @@ use crate::{
                 equalizer::{EqualizerModuleSettings, EqualizerPreset},
             },
             packet::PacketIOController,
-            structures::{CommonEqualizerConfiguration, CustomHearId, VolumeAdjustments},
+            structures::{AgeRange, CommonEqualizerConfiguration, CustomHearId, VolumeAdjustments},
         },
         d1402,
     },
@@ -27,7 +27,8 @@ impl<T> ModuleCollection<T>
 where
     T: Has<CommonEqualizerConfiguration<1, 10>>
         + Has<CustomHearId<1, 10>>
-        + Has<d1402::structures::EqualizerUnknownBytes>
+        + Has<d1402::structures::EqualizerUnknownByte>
+        + Has<AgeRange>
         + Clone
         + Send
         + Sync
@@ -51,7 +52,7 @@ where
     }
 }
 
-// same presets as the Space One Pro
+// same presets as the Space One Pro (A3062)
 fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
     common::modules::equalizer::common_settings_with_presets(vec![
         EqualizerPreset {

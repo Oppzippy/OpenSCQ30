@@ -17,25 +17,16 @@ use crate::devices::soundcore::common::{
 
 common::structures::flag!(AmbientSoundModeVoicePrompt);
 
-/// The two bytes between the equalizer and hear id. The equalizer command writes these back in the
-/// place where the Space One Pro has gender and age, so they need to be kept around to be able to
-/// write them unchanged. Writing zeros was observed to overwrite the second byte.
+/// Unknown byte between the equalizer and the age range. It has only been seen as 30. The
+/// equalizer command writes it back where the Space One Pro has gender.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct EqualizerUnknownBytes(pub [u8; 2]);
+pub struct EqualizerUnknownByte(pub u8);
 
-impl EqualizerUnknownBytes {
+impl EqualizerUnknownByte {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "d1402 equalizer unknown bytes",
-            map((le_u8, le_u8), |(first, second)| Self([first, second])),
-        )
-        .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 2] {
-        self.0
+        context("d1402 equalizer unknown byte", map(le_u8, Self)).parse_complete(input)
     }
 }
 

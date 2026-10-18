@@ -10,7 +10,7 @@ use crate::{
         common::{
             packet::PacketIOController,
             state_modifier::StateModifier,
-            structures::{CommonEqualizerConfiguration, CustomHearId},
+            structures::{AgeRange, CommonEqualizerConfiguration, CustomHearId},
         },
         d1402,
     },
@@ -31,7 +31,8 @@ impl<T> StateModifier<T> for EqualizerStateModifier
 where
     T: Has<CommonEqualizerConfiguration<1, 10>>
         + Has<CustomHearId<1, 10>>
-        + Has<d1402::structures::EqualizerUnknownBytes>
+        + Has<d1402::structures::EqualizerUnknownByte>
+        + Has<AgeRange>
         + Clone
         + Send
         + Sync,
@@ -43,7 +44,7 @@ where
     ) -> device::Result<()> {
         let target_equalizer_configuration: &CommonEqualizerConfiguration<1, 10> =
             target_state.get();
-        let equalizer_unknown_bytes = {
+        let (equalizer_unknown_byte, age_range) = {
             let state = state_sender.borrow();
             let equalizer_configuration: &CommonEqualizerConfiguration<1, 10> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
@@ -51,7 +52,10 @@ where
             }
             // use the device's current value rather than the target's, since the target isn't
             // something that can be changed
-            *Has::<d1402::structures::EqualizerUnknownBytes>::get(&*state)
+            (
+                *Has::<d1402::structures::EqualizerUnknownByte>::get(&*state),
+                *Has::<AgeRange>::get(&*state),
+            )
         };
 
         let mut target_hear_id: CustomHearId<1, 10> = *target_state.get();
@@ -63,7 +67,8 @@ where
             .send_with_response(&d1402::packets::outbound::set_equalizer(
                 target_equalizer_configuration,
                 &target_hear_id,
-                equalizer_unknown_bytes,
+                equalizer_unknown_byte,
+                age_range,
             ))
             .await?;
         state_sender.send_modify(|state| {

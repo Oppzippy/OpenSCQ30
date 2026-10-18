@@ -266,8 +266,40 @@ mod tests {
                         1,   // hear id type
                         125, 125, 124, 125, 127, 126, 126, 121, 60,
                         60, // hear id custom volume adjustments
-                        100, 100, 110, 120, 120, 120, 100, 100, 120,
-                        0, // active volume adjustments
+                        118, 119, 119, 120, 120, 121, 118, 118, 120,
+                        0, // drc volume adjustments
+                        0, // unknown
+                    ],
+                )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_equalizer_writes_absent_hear_id_as_the_device_stores_it() {
+        let mut device = new_device(&ISSUE_PACKET_1).await;
+
+        // The last band of each absent hear id array must be 0, not 255. 255 results in extremely
+        // loud and distorted audio.
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::PresetEqualizerProfile, "Flat".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        9, 0, // preset
+                        0, 0, // hear id favorite music genre
+                        100, 100, 110, 120, 120, 120, 100, 100, 120, 0, // volume adjustments
+                        30, 255, // unknown bytes from the state update packet
+                        0,   // hear id enabled
+                        255, 255, 255, 255, 255, 255, 255, 255, 255,
+                        0, // hear id volume adjustments
+                        0, 0, 0, 0, // hear id time
+                        0, // hear id type
+                        255, 255, 255, 255, 255, 255, 255, 255, 255,
+                        0, // hear id custom volume adjustments
+                        118, 119, 119, 120, 120, 121, 118, 118, 120,
+                        0, // drc volume adjustments
                         0, // unknown
                     ],
                 )],
@@ -380,6 +412,8 @@ mod tests {
                     .unwrap();
             let to_packet_body = parsed.body();
             assert_eq!(to_packet_body.len(), body.len());
+            // the unknown bytes aren't preserved, but everything through the hear id is
+            assert_eq!(to_packet_body[..65], body[..65]);
             let reparsed: D1402StateUpdatePacket =
                 packet::Inbound::new(packet::Command([1, 1]), to_packet_body)
                     .try_to_packet()
