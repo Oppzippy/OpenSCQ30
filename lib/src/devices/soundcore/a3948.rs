@@ -34,6 +34,7 @@ soundcore_device!(
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3948StateUpdatePacket>(RequestState.to_packet());
 
+        builder.gaming_mode();
         builder.touch_tone();
 
         builder.serial_number_and_dual_firmware_version();
@@ -212,6 +213,44 @@ mod tests {
                     packet::Outbound::new(packet::Command([0x04, 0x81]), vec![1, 1, 0x30]),
                     packet::Outbound::new(packet::Command([0x04, 0x83]), vec![1, 1, 1]),
                 ],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn gaming_mode() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3948,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 0, 5, 255, 0, 0, 50, 49, 46, 53, 54, 0, 0, 0, 0, 0, 51, 57, 52, 56, 55,
+                        49, 48, 54, 56, 54, 54, 54, 65, 69, 70, 48, 19, 0, 90, 100, 130, 140, 140,
+                        130, 120, 90, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 241, 1, 255, 1,
+                        98, 1, 246, 1, 54, 1, 243, 255, 255, 255, 49, //
+                        1,  // gaming mode
+                        0,  // touch tone
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+        device.assert_setting_values([
+            (SettingId::GamingMode, true.into()),
+            (SettingId::TouchTone, false.into()),
+        ]);
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::GamingMode, false.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([0x01, 0x87]),
+                    vec![0],
+                )],
             )
             .await;
     }

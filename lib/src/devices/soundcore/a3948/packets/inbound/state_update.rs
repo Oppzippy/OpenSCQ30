@@ -11,8 +11,8 @@ use crate::devices::soundcore::{
         macros::state_update_packet_module,
         packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
         structures::{
-            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
-            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode,
+            SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -25,6 +25,7 @@ pub struct A3948StateUpdatePacket {
     pub serial_number: SerialNumber,
     pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
+    pub gaming_mode: GamingMode,
     pub touch_tone: TouchTone,
 }
 
@@ -37,6 +38,7 @@ impl Default for A3948StateUpdatePacket {
             serial_number: Default::default(),
             equalizer_configuration: Default::default(),
             button_configuration: a3948::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            gaming_mode: Default::default(),
             touch_tone: Default::default(),
         }
     }
@@ -61,7 +63,8 @@ impl FromPacketBody for A3948StateUpdatePacket {
                     ButtonStatusCollection::take(
                         a3948::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),
-                    take(5usize), // padding
+                    take(4usize), // padding
+                    GamingMode::take,
                     TouchTone::take,
                     take(15usize), // padding
                 ),
@@ -74,6 +77,7 @@ impl FromPacketBody for A3948StateUpdatePacket {
                     _padding0,
                     button_configuration,
                     _padding1,
+                    gaming_mode,
                     touch_tone,
                     _padding2,
                 )| {
@@ -84,6 +88,7 @@ impl FromPacketBody for A3948StateUpdatePacket {
                         serial_number,
                         equalizer_configuration,
                         button_configuration,
+                        gaming_mode,
                         touch_tone,
                     }
                 },
@@ -113,7 +118,8 @@ impl ToPacket for A3948StateUpdatePacket {
                 self.button_configuration
                     .bytes(a3948::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             ) // TODO button configuration
-            .chain([0; 5]) // padding
+            .chain([0; 4]) // padding
+            .chain(self.gaming_mode.bytes())
             .chain(self.touch_tone.bytes())
             .chain([0; 15]) // padding
             .collect()
