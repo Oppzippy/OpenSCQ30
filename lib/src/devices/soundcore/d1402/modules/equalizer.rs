@@ -196,7 +196,9 @@ fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
         EqualizerPreset {
             name: "BassBooster",
             localized_name: || fl!("bass-booster"),
-            id: 0x7e7e, // yes, this number is correct. no idea why it's this instead of the usual 2.
+            // The official app writes 0x7e7e for Bass Booster on the Space 2 (verified on
+            // hardware), as on the Space One and Space One Pro, rather than the usual 2.
+            id: 0x7e7e,
             volume_adjustments: VolumeAdjustments::new([40, 30, 10, 0, 0, 0, 0, 0, 0, -120]),
         },
     ])
