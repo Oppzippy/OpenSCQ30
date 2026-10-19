@@ -267,6 +267,10 @@ where
         self.change_notify.clone()
     }
 
+    pub fn state_sender(&self) -> &watch::Sender<StateType> {
+        &self.state_sender
+    }
+
     pub fn sound_modes(&mut self, available_sound_modes: AvailableSoundModes)
     where
         StateType: Has<SoundModes>,
@@ -840,9 +844,38 @@ pub mod test_utils {
             StateType: Clone + Send + Sync + 'static,
             SoundcoreDeviceRegistry<StateType>: BuildDevice<StateType>,
         {
+            let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+            Self::new_with_database(
+                constructor,
+                device_model,
+                packet_responses,
+                config,
+                delays,
+                database,
+            )
+            .await
+        }
+
+        /// Allows sharing a database between multiple connections, for testing things that are
+        /// persisted across reconnects.
+        pub async fn new_with_database<StateType>(
+            constructor: fn(
+                Arc<dyn RfcommBackend + Send + Sync>,
+                Arc<OpenSCQ30Database>,
+                DeviceModel,
+            ) -> SoundcoreDeviceRegistry<StateType>,
+            device_model: DeviceModel,
+            packet_responses: HashMap<Command, packet::Inbound>,
+            config: SoundcoreDeviceConfig,
+            delays: HashMap<packet::Command, Duration>,
+            database: Arc<OpenSCQ30Database>,
+        ) -> Self
+        where
+            StateType: Clone + Send + Sync + 'static,
+            SoundcoreDeviceRegistry<StateType>: BuildDevice<StateType>,
+        {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
             let (outbound_sender, mut outbound_receiver) = mpsc::channel(100);
-            let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
 
             let registry = constructor(
                 Arc::new(MockRfcommBackend::new(inbound_receiver, outbound_sender)),

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::{
     devices::soundcore::{
         common::{
+            self,
             macros::soundcore_device,
             modules::{
                 button_configuration::{
@@ -11,7 +12,7 @@ use crate::{
                 dual_battery_level::DualBatteryLevelConfiguration,
             },
             packet::{
-                inbound::TryToPacket,
+                inbound::{DualConnectionsDevicePacket, TryToPacket},
                 outbound::{RequestState, ToPacket},
             },
             structures::button_configuration::{
@@ -43,10 +44,15 @@ soundcore_device!(
             .send_with_response(&packets::outbound::request_alarms())
             .await?
             .try_to_packet()?;
+        // Unlike other models, the D1301 answers this even while dual connections is disabled, and the
+        // state update packet has no enabled flag, so always ask.
+        let dual_connections_devices =
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?;
         Ok(state::D1301State::new(
             state_update_packet,
             auto_stop_timer_packet.0,
             alarms_packet.0,
+            modules::dual_connections::initial_dual_connections(dual_connections_devices),
         ))
     },
     async |builder| {
@@ -59,6 +65,8 @@ soundcore_device!(
         );
 
         builder.d1301_alarms();
+
+        builder.d1301_dual_connections().await;
 
         // misc
         builder.d1301_auto_stop_timer();
@@ -95,6 +103,10 @@ soundcore_device!(
             (
                 packets::inbound::AlarmsPacket::COMMAND,
                 packets::inbound::AlarmsPacket(Vec::new()).to_packet(),
+            ),
+            (
+                DualConnectionsDevicePacket::COMMAND,
+                DualConnectionsDevicePacket::demo().to_packet(),
             ),
         ])
     },
@@ -336,5 +348,146 @@ mod tests {
             .await;
 
         device.assert_setting_values(vec![(SettingId::Alarm1Volume, 51.into())]);
+    }
+
+    mod dual_connections {
+        use std::{sync::Arc, time::Duration};
+
+        use macaddr::MacAddr6;
+
+        use super::*;
+        use crate::{
+            devices::soundcore::common::structures::DualConnectionsDevice,
+            storage::OpenSCQ30Database,
+        };
+
+        fn packet_responses(
+            dual_connections_devices: Vec<DualConnectionsDevice>,
+        ) -> HashMap<packet::Command, packet::Inbound> {
+            HashMap::from([
+                (
+                    RequestState::COMMAND,
+                    D1301StateUpdatePacket::default().to_packet(),
+                ),
+                (
+                    packets::inbound::AutoStopTimerPacket::COMMAND,
+                    packets::inbound::AutoStopTimerPacket(structures::AutoStopTimer::default())
+                        .to_packet(),
+                ),
+                (
+                    packets::inbound::AlarmsPacket::COMMAND,
+                    packets::inbound::AlarmsPacket(Vec::new()).to_packet(),
+                ),
+                (
+                    DualConnectionsDevicePacket::COMMAND,
+                    DualConnectionsDevicePacket {
+                        total_packets: 1,
+                        current_packet_index: 1,
+                        devices: dual_connections_devices,
+                    }
+                    .to_packet(),
+                ),
+                // captured from a real device: echoes the value followed by a 0 status byte
+                (
+                    packet::Command([0x0b, 0x84]),
+                    packet::Inbound::new(packet::Command([0x0b, 0x84]), vec![1, 0]),
+                ),
+            ])
+        }
+
+        fn host(last_octet: u8, is_connected: bool) -> DualConnectionsDevice {
+            DualConnectionsDevice {
+                is_connected,
+                mac_address: MacAddr6::new(0, 0, 0, 0, 0, last_octet),
+                name: format!("Device {last_octet}"),
+            }
+        }
+
+        async fn connect(
+            database: Arc<OpenSCQ30Database>,
+            dual_connections_devices: Vec<DualConnectionsDevice>,
+        ) -> TestSoundcoreDevice {
+            TestSoundcoreDevice::new_with_database(
+                super::super::device_registry,
+                DeviceModel::SoundcoreD1301,
+                packet_responses(dual_connections_devices),
+                SoundcoreDeviceConfig::default(),
+                HashMap::<packet::Command, Duration>::new(),
+                database,
+            )
+            .await
+        }
+
+        async fn database() -> Arc<OpenSCQ30Database> {
+            Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap())
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn is_off_when_unknown() {
+            let device = connect(database().await, vec![host(1, true), host(2, false)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, false.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn is_on_when_two_devices_are_connected() {
+            let device = connect(database().await, vec![host(1, true), host(2, true)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn enabling_sends_packet() {
+            let mut device = connect(database().await, vec![host(1, true)]).await;
+            device
+                .assert_set_settings_response(
+                    vec![(SettingId::DualConnections, true.into())],
+                    vec![packet::outbound::set_dual_connections_enabled(true)],
+                )
+                .await;
+            device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn enabled_is_reapplied_on_reconnect() {
+            let database = database().await;
+            let mut device = connect(database.clone(), vec![host(1, true)]).await;
+            device
+                .set_settings(vec![(SettingId::DualConnections, true.into())])
+                .await;
+            drop(device);
+
+            // simulate the earbuds having been powered off, which disables dual connections
+            let device = connect(database, vec![host(1, true)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn enabling_while_already_on_is_reapplied_on_reconnect() {
+            let database = database().await;
+            // two connected devices: already shown as enabled, but nothing has been saved yet
+            let mut device = connect(database.clone(), vec![host(1, true), host(2, true)]).await;
+            device
+                .set_settings(vec![(SettingId::DualConnections, true.into())])
+                .await;
+            drop(device);
+
+            let device = connect(database, vec![host(1, true)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+        }
+
+        #[tokio::test(start_paused = true)]
+        async fn disabled_is_not_reapplied_on_reconnect() {
+            let database = database().await;
+            let mut device = connect(database.clone(), vec![host(1, true)]).await;
+            device
+                .set_settings(vec![(SettingId::DualConnections, true.into())])
+                .await;
+            device
+                .set_settings(vec![(SettingId::DualConnections, false.into())])
+                .await;
+            drop(device);
+
+            let device = connect(database, vec![host(1, true)]).await;
+            device.assert_setting_values([(SettingId::DualConnections, false.into())]);
+        }
     }
 }
