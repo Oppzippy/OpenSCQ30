@@ -4,9 +4,10 @@ use crate::devices::soundcore::{
     a3947,
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
+        state::Update,
         structures::{
             AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel,
-            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode,
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode, Ldac,
             LimitHighVolume, LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound,
             TouchLock, TouchTone, TwsStatus, WearingTone,
             button_configuration::ButtonStatusCollection,
@@ -37,10 +38,40 @@ pub struct A3947State {
     touch_lock: TouchLock,
     low_battery_prompt: LowBatteryPrompt,
     reset_button_configuration_pending: ResetButtonConfigurationPending,
+    ldac: Ldac,
 }
 
-impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
-    fn from(packet: a3947::packets::A3947StateUpdatePacket) -> Self {
+impl A3947State {
+    pub fn new(state_update_packet: a3947::packets::A3947StateUpdatePacket, ldac: Ldac) -> Self {
+        Self {
+            tws_status: state_update_packet.tws_status,
+            battery: state_update_packet.battery,
+            dual_firmware_version: state_update_packet.dual_firmware_version,
+            serial_number: state_update_packet.serial_number,
+            equalizer_configuration: state_update_packet.equalizer_configuration,
+            hear_id: state_update_packet.hear_id,
+            button_configuration: state_update_packet.button_configuration,
+            ambient_sound_mode_cycle: state_update_packet.ambient_sound_mode_cycle,
+            sound_modes: state_update_packet.sound_modes,
+            touch_tone: state_update_packet.touch_tone,
+            limit_high_volume: state_update_packet.limit_high_volume,
+            auto_power_off: state_update_packet.auto_power_off,
+            case_battery_level: state_update_packet.case_battery_level,
+            gaming_mode: state_update_packet.gaming_mode,
+            sound_leak_compensation: state_update_packet.sound_leak_compensation,
+            surround_sound: state_update_packet.surround_sound,
+            auto_play_pause: state_update_packet.auto_play_pause,
+            wearing_tone: state_update_packet.wearing_tone,
+            touch_lock: state_update_packet.touch_lock,
+            low_battery_prompt: state_update_packet.low_battery_prompt,
+            reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
+            ldac,
+        }
+    }
+}
+
+impl Update<a3947::packets::A3947StateUpdatePacket> for A3947State {
+    fn update(&mut self, partial: a3947::packets::A3947StateUpdatePacket) {
         let a3947::packets::A3947StateUpdatePacket {
             tws_status,
             battery,
@@ -62,30 +93,27 @@ impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
             auto_power_off,
             touch_lock,
             low_battery_prompt,
-        } = packet;
+        } = partial;
 
-        Self {
-            reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
-            tws_status,
-            battery,
-            dual_firmware_version,
-            serial_number,
-            equalizer_configuration,
-            hear_id,
-            button_configuration,
-            ambient_sound_mode_cycle,
-            sound_modes,
-            touch_tone,
-            limit_high_volume,
-            auto_power_off,
-            case_battery_level,
-            gaming_mode,
-            sound_leak_compensation,
-            surround_sound,
-            auto_play_pause,
-            wearing_tone,
-            touch_lock,
-            low_battery_prompt,
-        }
+        self.tws_status = tws_status;
+        self.battery = battery;
+        self.dual_firmware_version = dual_firmware_version;
+        self.serial_number = serial_number;
+        self.equalizer_configuration = equalizer_configuration;
+        self.hear_id = hear_id;
+        self.button_configuration = button_configuration;
+        self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;
+        self.sound_modes = sound_modes;
+        self.case_battery_level = case_battery_level;
+        self.sound_leak_compensation = sound_leak_compensation;
+        self.gaming_mode = gaming_mode;
+        self.touch_tone = touch_tone;
+        self.surround_sound = surround_sound;
+        self.limit_high_volume = limit_high_volume;
+        self.auto_play_pause = auto_play_pause;
+        self.wearing_tone = wearing_tone;
+        self.auto_power_off = auto_power_off;
+        self.touch_lock = touch_lock;
+        self.low_battery_prompt = low_battery_prompt;
     }
 }
