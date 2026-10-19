@@ -11,7 +11,7 @@ use crate::devices::soundcore::{
     a3947::{self, state::A3947State},
     common::{
         macros::state_update_packet_module,
-        packet::{self, inbound::FromPacketBody, outbound::ToPacket},
+        packet::{self, inbound::FromPacketBody, outbound::ToPacket, parsing::take_bool},
         structures::{
             AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel,
             CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode,
@@ -38,6 +38,7 @@ pub struct A3947StateUpdatePacket {
     pub gaming_mode: GamingMode,
     pub touch_tone: TouchTone,
     pub surround_sound: SurroundSound,
+    pub dual_connections_enabled: bool,
     pub limit_high_volume: LimitHighVolume,
     pub auto_play_pause: AutoPlayPause,
     pub wearing_tone: WearingTone,
@@ -69,6 +70,7 @@ impl Default for A3947StateUpdatePacket {
             touch_lock: Default::default(),
             low_battery_prompt: Default::default(),
             surround_sound: Default::default(),
+            dual_connections_enabled: Default::default(),
         }
     }
 }
@@ -105,10 +107,11 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         take(1usize),                // unknown
                         GamingMode::take,
                         TouchTone::take,
-                        take(3usize),        // unknown
-                        SurroundSound::take, // 3d surround sound
+                        take(2usize), // unknown
+                        take_bool,
                     ),
                     (
+                        SurroundSound::take, // 3d surround sound
                         LimitHighVolume::take,
                         AutoPlayPause::take, // auto play/pause
                         WearingTone::take,   // wearing tone
@@ -139,9 +142,10 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         gaming_mode,
                         touch_tone,
                         _unknown7,
-                        surround_sound,
+                        dual_connections_enabled,
                     ),
                     (
+                        surround_sound,
                         limit_high_volume,
                         auto_play_pause,
                         wearing_tone,
@@ -164,6 +168,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         sound_modes,
                         sound_leak_compensation,
                         gaming_mode,
+                        dual_connections_enabled,
                         surround_sound,
                         limit_high_volume,
                         auto_play_pause,

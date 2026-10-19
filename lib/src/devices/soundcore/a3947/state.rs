@@ -7,9 +7,9 @@ use crate::devices::soundcore::{
         state::Update,
         structures::{
             AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel,
-            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode, Ldac,
-            LimitHighVolume, LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound,
-            TouchLock, TouchTone, TwsStatus, WearingTone,
+            CommonEqualizerConfiguration, DualBattery, DualConnections, DualConnectionsDevice,
+            DualFirmwareVersion, GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber,
+            SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, TwsStatus, WearingTone,
             button_configuration::ButtonStatusCollection,
         },
     },
@@ -39,10 +39,15 @@ pub struct A3947State {
     low_battery_prompt: LowBatteryPrompt,
     reset_button_configuration_pending: ResetButtonConfigurationPending,
     ldac: Ldac,
+    dual_connections: DualConnections,
 }
 
 impl A3947State {
-    pub fn new(state_update_packet: a3947::packets::A3947StateUpdatePacket, ldac: Ldac) -> Self {
+    pub fn new(
+        state_update_packet: a3947::packets::A3947StateUpdatePacket,
+        ldac: Ldac,
+        dual_connections_devices: Vec<DualConnectionsDevice>,
+    ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,
             battery: state_update_packet.battery,
@@ -66,6 +71,10 @@ impl A3947State {
             low_battery_prompt: state_update_packet.low_battery_prompt,
             reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
             ldac,
+            dual_connections: DualConnections {
+                is_enabled: state_update_packet.dual_connections_enabled,
+                devices: dual_connections_devices,
+            },
         }
     }
 }
@@ -93,6 +102,7 @@ impl Update<a3947::packets::A3947StateUpdatePacket> for A3947State {
             auto_power_off,
             touch_lock,
             low_battery_prompt,
+            dual_connections_enabled,
         } = partial;
 
         self.tws_status = tws_status;
@@ -115,5 +125,6 @@ impl Update<a3947::packets::A3947StateUpdatePacket> for A3947State {
         self.auto_power_off = auto_power_off;
         self.touch_lock = touch_lock;
         self.low_battery_prompt = low_battery_prompt;
+        self.dual_connections.is_enabled = dual_connections_enabled;
     }
 }

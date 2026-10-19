@@ -34,7 +34,16 @@ soundcore_device!(
             .send_with_response(&common::packet::outbound::request_ldac_state())
             .await?
             .try_to_packet()?;
-        Ok(state::A3947State::new(state_update_packet, ldac_state.0))
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(state::A3947State::new(
+            state_update_packet,
+            ldac_state.0,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
