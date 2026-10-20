@@ -26,18 +26,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -46,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.bindings.settingRequiresConfirmation
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.MultiSelectWithRemoveCommandInner
@@ -98,11 +103,19 @@ private fun FallbackSettingCategoryScreen(
         settings.forEach { (settingId, setting) ->
             val name = translateSettingId(settingId)
             when (setting) {
-                is Setting.ToggleSetting -> Toggle(
-                    name = name,
-                    isEnabled = setting.value,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+                is Setting.ToggleSetting -> if (settingRequiresConfirmation(settingId)) {
+                    ConfirmedToggle(
+                        name = name,
+                        isEnabled = setting.value,
+                        onChange = { setSetting(settingId, it.toValue()) },
+                    )
+                } else {
+                    Toggle(
+                        name = name,
+                        isEnabled = setting.value,
+                        onChange = { setSetting(settingId, it.toValue()) },
+                    )
+                }
 
                 is Setting.EqualizerSetting -> Equalizer(
                     name = name,
@@ -185,6 +198,55 @@ private fun FallbackSettingCategoryScreen(
 @Composable
 private fun Toggle(name: String, isEnabled: Boolean, onChange: (Boolean) -> Unit) {
     LabeledSwitch(name, isEnabled, onChange)
+}
+
+// Turning on requires explicit confirmation, cancel is the default for every dismissal path. Turning off is immediate.
+@Composable
+private fun ConfirmedToggle(name: String, isEnabled: Boolean, onChange: (Boolean) -> Unit) {
+    var isDialogOpen by remember { mutableStateOf(false) }
+    LabeledSwitch(
+        label = name,
+        isChecked = isEnabled,
+        onCheckedChange = { newValue ->
+            if (newValue) {
+                isDialogOpen = true
+            } else {
+                onChange(false)
+            }
+        },
+    )
+    if (isDialogOpen) {
+        val cancelFocusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) { cancelFocusRequester.requestFocus() }
+        AlertDialog(
+            modifier = Modifier.testTag("confirmToggleDialog"),
+            onDismissRequest = { isDialogOpen = false },
+            icon = { Icon(painterResource(R.drawable.warning_24px), contentDescription = null) },
+            title = { Text(stringResource(R.string.loud_sound_warning_title)) },
+            text = { Text(stringResource(R.string.loud_sound_warning_message, name)) },
+            confirmButton = {
+                Button(
+                    modifier = Modifier
+                        .focusRequester(cancelFocusRequester)
+                        .testTag("confirmToggleCancel"),
+                    onClick = { isDialogOpen = false },
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    modifier = Modifier.testTag("confirmToggleYes"),
+                    onClick = {
+                        isDialogOpen = false
+                        onChange(true)
+                    },
+                ) {
+                    Text(stringResource(R.string.yes))
+                }
+            },
+        )
+    }
 }
 
 @Composable
