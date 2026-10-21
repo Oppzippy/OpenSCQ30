@@ -57,6 +57,7 @@ soundcore_device!(
             .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&SLIDE_BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3954StateUpdatePacket>(
             RequestState.to_packet(),
@@ -96,7 +97,7 @@ soundcore_device!(
     },
 );
 
-pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<12, 6> =
+pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
         ignore_enabled_flag: false,
@@ -111,10 +112,6 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<12, 6> =
             Button::RightTriplePress,
             Button::LeftLongPress,
             Button::RightLongPress,
-            Button::LeftSlideUp,
-            Button::RightSlideUp,
-            Button::LeftSlideDown,
-            Button::RightSlideDown,
         ],
         settings: [
             ButtonSettings {
@@ -157,6 +154,24 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<12, 6> =
                 available_actions: COMMON_ACTIONS,
                 disable_mode: ButtonDisableMode::IndividualDisable,
             },
+        ],
+    };
+
+/// Slide button configuration is not present in the state update packet of all firmware versions,
+/// so it is kept separate from the other buttons.
+pub const SLIDE_BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<4, 2> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false,
+        ignore_enabled_flag: false,
+        set_button_action_command_override: None,
+        setting_id_override: None,
+        order: [
+            Button::LeftSlideUp,
+            Button::RightSlideUp,
+            Button::LeftSlideDown,
+            Button::RightSlideDown,
+        ],
+        settings: [
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
                     enabled_flag_kind: EnabledFlagKind::None,
@@ -198,12 +213,138 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{
-            device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
-            packet,
+        devices::soundcore::{
+            a3954::packets::inbound::fixtures::{FULL_BODY, ISSUE_246_BODY, ISSUE_284_BODY},
+            common::{
+                device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
+                packet::{self, outbound::ToPacket},
+                structures::button_configuration::Button,
+            },
         },
         settings::{SettingId, Value},
     };
+
+    const SLIDE_SETTINGS: [SettingId; 4] = [
+        SettingId::LeftSlideUp,
+        SettingId::RightSlideUp,
+        SettingId::LeftSlideDown,
+        SettingId::RightSlideDown,
+    ];
+
+    async fn device_with_state_update_body(body: &[u8]) -> TestSoundcoreDevice {
+        TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3954,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(packet::Command([1, 1]), body.to_vec()),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn connects_with_packet_without_slide_buttons() {
+        // Left double press is 0x32: PreviousSong when TWS is connected, NextSong when disconnected.
+        // #246 is TWS disconnected, #284 is TWS connected.
+        for (body, left_double_press) in [
+            (&ISSUE_246_BODY, "NextSong"),
+            (&ISSUE_284_BODY, "PreviousSong"),
+        ] {
+            let device = device_with_state_update_body(body).await;
+            device.assert_setting_values([
+                (SettingId::FirmwareVersionLeft, "03.23".into()),
+                (SettingId::FirmwareVersionRight, "03.23".into()),
+                (SettingId::LeftSinglePress, Some("PlayPause").into()),
+                (SettingId::RightSinglePress, Some("PlayPause").into()),
+                (SettingId::LeftDoublePress, Some(left_double_press).into()),
+                (SettingId::RightDoublePress, Some("NextSong").into()),
+                (SettingId::LeftTriplePress, Value::OptionalString(None)),
+                (SettingId::RightTriplePress, Value::OptionalString(None)),
+                (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+                (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+                (SettingId::WearingDetection, true.into()),
+            ]);
+            for setting_id in SLIDE_SETTINGS {
+                assert!(
+                    device.inner().setting(&setting_id).is_none(),
+                    "{setting_id} was not reported by the device",
+                );
+            }
+        }
+        let device = device_with_state_update_body(&ISSUE_284_BODY).await;
+        device.assert_setting_values([
+            (SettingId::BatteryLevelLeft, "100/100".into()),
+            (SettingId::BatteryLevelRight, "99/100".into()),
+            (SettingId::CaseFirmwareVersion, "01.56".into()),
+            (SettingId::AutoPowerOff, "30m".into()),
+        ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn setting_unreported_slide_buttons_fails_without_sending_packets() {
+        let mut device = device_with_state_update_body(&ISSUE_284_BODY).await;
+        for setting_id in SLIDE_SETTINGS {
+            device
+                .assert_set_settings_fails_without_sending_packets(vec![(
+                    setting_id,
+                    Value::OptionalString(None),
+                )])
+                .await;
+        }
+        // The whole batch should fail, including the valid change
+        device
+            .assert_set_settings_fails_without_sending_packets(vec![
+                (SettingId::LeftSinglePress, Some("NextSong").into()),
+                (SettingId::LeftSlideUp, Some("VolumeUp").into()),
+            ])
+            .await;
+        device.assert_setting_values([(SettingId::LeftSinglePress, Some("PlayPause").into())]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn setting_button_without_slide_buttons_sends_only_that_button() {
+        let mut device = device_with_state_update_body(&ISSUE_284_BODY).await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::LeftSinglePress, Some("NextSong").into())],
+                vec![
+                    packet::outbound::SetButtonConfiguration {
+                        command_override: None,
+                        button_id: 2,
+                        side: Button::LeftSinglePress.side(),
+                        action_id: 0x63,
+                    }
+                    .to_packet(),
+                ],
+            )
+            .await;
+        device.assert_setting_values([(SettingId::LeftSinglePress, Some("NextSong").into())]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn setting_slide_button_sends_packet() {
+        let mut device = device_with_state_update_body(&FULL_BODY).await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::RightSlideDown, Value::OptionalString(None))],
+                vec![
+                    packet::outbound::SetButtonConfiguration {
+                        command_override: None,
+                        button_id: 7,
+                        side: Button::RightSlideDown.side(),
+                        action_id: 0x1F,
+                    }
+                    .to_packet(),
+                ],
+            )
+            .await;
+        device.assert_setting_values([
+            (SettingId::RightSlideDown, Value::OptionalString(None)),
+            (SettingId::LeftSlideDown, Some("VolumeDown").into()),
+        ]);
+    }
 
     #[tokio::test(start_paused = true)]
     async fn parses_known_packet() {
