@@ -63,6 +63,21 @@ soundcore_device!(
         builder
             .module_collection()
             .add_d1203_custom_equalizer(packet_io);
+        // Wind noise reduction toggle (under Sound Modes). This is driven by a
+        // DEDICATED command (`Command([0x41, 0x88])`, payload `[0x0b, 0|1]`),
+        // NOT the `06 81` sound-mode command — reverse engineering confirmed
+        // wind noise reduction is independent of the ambient sound mode. The
+        // `41 88` packet uses standard framing (its length field, 0x0c, is the
+        // total packet size INCLUDING the checksum), so it goes through the
+        // generic `packet::Outbound` serializer, not the raw EQ path.
+        //
+        // TODO(read): the current wind-noise state is initialized to Default
+        // (OFF) on connect because its state-packet TLV tag is not yet
+        // identified. Writes apply correctly regardless.
+        let wind_noise_packet_io = builder.packet_io_controller().clone();
+        builder
+            .module_collection()
+            .add_d1203_wind_noise(wind_noise_packet_io);
     },
     {
         HashMap::from([(

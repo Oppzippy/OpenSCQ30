@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     d1203::{
         modules::{
             D1203AmbientSoundMode, D1203CustomEqualizer, D1203ManualNoiseCanceling,
-            D1203NoiseCancelingMode,
+            D1203NoiseCancelingMode, D1203WindNoise,
         },
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
@@ -45,6 +45,14 @@ pub struct D1203State {
     /// TODO(read): not yet decoded from the state packet (TLV tag unknown), so
     /// initialized to `Default` (level 1) on connect. Writing works regardless.
     manual_nc_level: D1203ManualNoiseCanceling,
+    /// Wind noise reduction toggle. Driven by its OWN dedicated command
+    /// (`Command([0x41, 0x88])`, payload `[0x0b, 0|1]`), NOT the `06 81`
+    /// sound-mode command. See `modules::wind_noise`.
+    ///
+    /// TODO(read): the state-packet TLV tag carrying this is not yet
+    /// identified, so it is initialized to `Default` (OFF) on connect. Writing
+    /// works regardless.
+    wind_noise: D1203WindNoise,
 }
 
 impl D1203State {
@@ -75,6 +83,10 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // Default; writes still apply correctly.
             nc_mode: value.nc_mode,
             manual_nc_level: value.manual_nc_level,
+            // TODO: read the real wind-noise state from the state packet once
+            // its TLV tag is identified. For now start at Default (OFF); writes
+            // still apply correctly (the device accepts the 41 88 command).
+            wind_noise: value.wind_noise,
         }
     }
 }

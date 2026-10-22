@@ -143,6 +143,12 @@ pub struct D1203StateUpdatePacket {
     /// `Default` (level 1) after a parse. The write path is fully functional;
     /// only read-back is outstanding.
     pub manual_nc_level: crate::devices::soundcore::d1203::modules::D1203ManualNoiseCanceling,
+    /// Current wind noise reduction state.
+    ///
+    /// TODO: the TLV tag carrying this is not yet known, so it is always
+    /// `Default` (OFF) after a parse. The write path (dedicated command
+    /// `41 88`) is fully functional; only read-back is outstanding.
+    pub wind_noise: crate::devices::soundcore::d1203::modules::D1203WindNoise,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -155,6 +161,7 @@ impl Default for D1203StateUpdatePacket {
             ambient_sound_mode: Default::default(),
             nc_mode: Default::default(),
             manual_nc_level: Default::default(),
+            wind_noise: Default::default(),
         }
     }
 }
@@ -257,6 +264,9 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     // unaffected.
                     nc_mode: Default::default(),
                     manual_nc_level: Default::default(),
+                    // TODO: decode the wind-noise state once its TLV tag is
+                    // known. Defaulting here (OFF); writing is unaffected.
+                    wind_noise: Default::default(),
                 },
             ))
         })
