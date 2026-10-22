@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Liberty 5 Pro (D1203): reads firmware, serial number
+  and per-earbud battery level, reads the active equalizer preset, and reads/writes
+  an 8-band parametric custom equalizer (100–12800 Hz, -6..+6 dB), sound modes
+  (noise cancelling / transparency / normal / adaptive, with noise-cancelling sub-mode,
+  manual ANC level and transportation airplane/car), wind noise reduction, button
+  configuration (remap single/double/triple/long press per earbud), and miscellaneous
+  toggles (touch tone, wearing tone, low battery prompt, LDAC, easy chat, spatial audio,
+  auto power off). The D1203 uses a TLV-based state packet and several device-specific
+  write commands, all decoded via reverse engineering. Note: the device does not report
+  these settings back in its state packet, so they are write-only (initialised to defaults
+  on connect).
+
 ## v2.13.0
 
 ### General

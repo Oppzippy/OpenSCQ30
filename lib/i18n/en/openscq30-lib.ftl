@@ -37,6 +37,7 @@ soundcore-a3957 = Soundcore Liberty 5
 soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
+soundcore-d1203 = Soundcore Liberty 5 Pro
 soundcore-d1301 = Soundcore Sleep A30
 soundcore-development = Soundcore Development Information
 
@@ -98,6 +99,7 @@ anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
 manual-update = Manual Update
 automatic-update = Automatic Update
 airplane-mode = Airplane Mode
+airplane = Airplane
 real-time-adaptive-noise-canceling = Real Time Adaptive Noise Canceling
 
 soundcore-signature = Soundcore Signature
@@ -154,6 +156,13 @@ previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
 play-pause = Play Pause
+# D1203 (Liberty 5 Pro) button actions
+previous-track = Previous Track
+next-track = Next Track
+ambient-sound = Ambient Sound
+system-voice-assistant = System Voice Assistant
+ai-translation = AI Translation
+anker-voice-assistant = Anker Voice Assistant
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
@@ -199,6 +208,7 @@ x-seconds = { $seconds ->
     *[other] { $seconds } seconds
 }
 disabled = Disabled
+never = Never
 
 touch-tone = Touch Tone
 gaming-mode = Gaming Mode
