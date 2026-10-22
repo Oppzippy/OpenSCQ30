@@ -3,8 +3,9 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::{
     d1203::{
         modules::{
-            D1203AmbientSoundMode, D1203CustomEqualizer, D1203ManualNoiseCanceling,
-            D1203NoiseCancelingMode, D1203TransportationMode, D1203WindNoise,
+            D1203AmbientSoundMode, D1203ButtonConfiguration, D1203CustomEqualizer,
+            D1203ManualNoiseCanceling, D1203NoiseCancelingMode, D1203TransportationMode,
+            D1203WindNoise,
         },
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
@@ -62,6 +63,15 @@ pub struct D1203State {
     /// identified, so it is initialized to `Default` (OFF) on connect. Writing
     /// works regardless.
     wind_noise: D1203WindNoise,
+    /// Current action of each of the eight configurable buttons (2 sides x 4
+    /// gestures). Driven by the `04 8c` command, one packet per changed gesture.
+    /// See `modules::button_configuration`.
+    ///
+    /// TODO(read): the D1203 state packet does not expose button configuration
+    /// in any known form (state read-back for the D1203 has been investigated
+    /// and is infeasible for most fields), so this is initialized to `Default`
+    /// (every button = PlayPause) on connect. Writing works regardless.
+    button_configuration: D1203ButtonConfiguration,
 }
 
 impl D1203State {
@@ -100,6 +110,11 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // its TLV tag is identified. For now start at Default (OFF); writes
             // still apply correctly (the device accepts the 41 88 command).
             wind_noise: value.wind_noise,
+            // TODO: the D1203 state packet does not expose button configuration
+            // in any known form, so start at Default (every button = PlayPause)
+            // on connect; writes still apply correctly (the device accepts the
+            // 04 8c command, one packet per changed gesture).
+            button_configuration: D1203ButtonConfiguration::default(),
         }
     }
 }

@@ -78,6 +78,20 @@ soundcore_device!(
         builder
             .module_collection()
             .add_d1203_wind_noise(wind_noise_packet_io);
+        // Button (gesture) configuration. Each of the 8 configurable
+        // combinations (2 sides x 4 gestures) is a Select whose options are the
+        // actions valid for that gesture. Setting one sends a single `04 8c`
+        // packet with payload `[side, b1, action, b3]` through the generic
+        // `packet::Outbound` serializer (standard framing). See
+        // `modules::button_configuration`.
+        //
+        // TODO(read): the D1203 state packet does not expose button
+        // configuration in any known form, so the 8 actions are initialized to
+        // Default (PlayPause) on connect. Writes apply correctly regardless.
+        let button_configuration_packet_io = builder.packet_io_controller().clone();
+        builder
+            .module_collection()
+            .add_d1203_button_configuration(button_configuration_packet_io);
     },
     {
         HashMap::from([(

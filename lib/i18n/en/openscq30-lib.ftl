@@ -156,6 +156,13 @@ previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
 play-pause = Play Pause
+# D1203 (Liberty 5 Pro) button actions
+previous-track = Previous Track
+next-track = Next Track
+ambient-sound = Ambient Sound
+system-voice-assistant = System Voice Assistant
+ai-translation = AI Translation
+anker-voice-assistant = Anker Voice Assistant
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
