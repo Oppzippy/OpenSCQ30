@@ -53,6 +53,7 @@ If there's a device not in this list that you want to see supported, check if th
 | D1101  | Soundcore C50i               |
 | D1202  | Soundcore P31i               |
 | D1202C | Soundcore R60i NC            |
+| D1203  | Soundcore Liberty 5 Pro      |
 | D1301  | Soundcore Sleep A30          |
 
 ## Installing
