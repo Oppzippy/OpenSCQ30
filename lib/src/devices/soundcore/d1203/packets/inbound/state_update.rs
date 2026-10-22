@@ -155,6 +155,41 @@ pub struct D1203StateUpdatePacket {
     /// `Default` (OFF) after a parse. The write path (dedicated command
     /// `41 88`) is fully functional; only read-back is outstanding.
     pub wind_noise: crate::devices::soundcore::d1203::modules::D1203WindNoise,
+    /// Touch Tone toggle (`41 87` sub-id 0).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub touch_tone: crate::devices::soundcore::d1203::modules::D1203TouchTone,
+    /// Low Battery Prompt toggle (`41 87` sub-id 1).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub low_battery_prompt: crate::devices::soundcore::d1203::modules::D1203LowBatteryPrompt,
+    /// Wearing Tone toggle (`41 87` sub-id 3).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub wearing_tone: crate::devices::soundcore::d1203::modules::D1203WearingTone,
+    /// LDAC codec toggle (`41 88` sub-id 2).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub ldac: crate::devices::soundcore::d1203::modules::D1203Ldac,
+    /// Easy Chat toggle (`41 88` sub-id 14).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub easy_chat: crate::devices::soundcore::d1203::modules::D1203EasyChat,
+    /// Soundstage / Soundfield rendering toggle (`41 88` sub-id 29).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
+    /// The write path is fully functional.
+    pub soundstage: crate::devices::soundcore::d1203::modules::D1203Soundstage,
+    /// Auto power off selector (`01 86`).
+    ///
+    /// TODO: read-back not yet decoded; always `Default` (Never) after a parse.
+    /// The write path is fully functional.
+    pub auto_power_off: crate::devices::soundcore::d1203::modules::D1203AutoPowerOff,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -169,6 +204,13 @@ impl Default for D1203StateUpdatePacket {
             manual_nc_level: Default::default(),
             transportation_mode: Default::default(),
             wind_noise: Default::default(),
+            touch_tone: Default::default(),
+            low_battery_prompt: Default::default(),
+            wearing_tone: Default::default(),
+            ldac: Default::default(),
+            easy_chat: Default::default(),
+            soundstage: Default::default(),
+            auto_power_off: Default::default(),
         }
     }
 }
@@ -277,6 +319,16 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     // TODO: decode the wind-noise state once its TLV tag is
                     // known. Defaulting here (OFF); writing is unaffected.
                     wind_noise: Default::default(),
+                    // TODO: decode the miscellaneous toggles / auto power off
+                    // once their TLV tags are known. Defaulting here; writing
+                    // is unaffected (each uses its own dedicated command).
+                    touch_tone: Default::default(),
+                    low_battery_prompt: Default::default(),
+                    wearing_tone: Default::default(),
+                    ldac: Default::default(),
+                    easy_chat: Default::default(),
+                    soundstage: Default::default(),
+                    auto_power_off: Default::default(),
                 },
             ))
         })

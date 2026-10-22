@@ -208,6 +208,7 @@ x-seconds = { $seconds ->
     *[other] { $seconds } seconds
 }
 disabled = Disabled
+never = Never
 
 touch-tone = Touch Tone
 gaming-mode = Gaming Mode

@@ -3,9 +3,10 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::{
     d1203::{
         modules::{
-            D1203AmbientSoundMode, D1203ButtonConfiguration, D1203CustomEqualizer,
-            D1203ManualNoiseCanceling, D1203NoiseCancelingMode, D1203TransportationMode,
-            D1203WindNoise,
+            D1203AmbientSoundMode, D1203AutoPowerOff, D1203ButtonConfiguration,
+            D1203CustomEqualizer, D1203EasyChat, D1203Ldac, D1203LowBatteryPrompt,
+            D1203ManualNoiseCanceling, D1203NoiseCancelingMode, D1203Soundstage, D1203TouchTone,
+            D1203TransportationMode, D1203WearingTone, D1203WindNoise,
         },
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
@@ -72,6 +73,44 @@ pub struct D1203State {
     /// and is infeasible for most fields), so this is initialized to `Default`
     /// (every button = PlayPause) on connect. Writing works regardless.
     button_configuration: D1203ButtonConfiguration,
+    /// Touch Tone prompt toggle. Driven by command `41 87` sub-id 0. See
+    /// `modules::misc`.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    touch_tone: D1203TouchTone,
+    /// Low Battery Prompt toggle. Driven by command `41 87` sub-id 1.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    low_battery_prompt: D1203LowBatteryPrompt,
+    /// Wearing Tone prompt toggle. Driven by command `41 87` sub-id 3.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    wearing_tone: D1203WearingTone,
+    /// LDAC high-resolution codec toggle. Driven by command `41 88` sub-id 2.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    ldac: D1203Ldac,
+    /// Easy Chat toggle. Driven by command `41 88` sub-id 14.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    easy_chat: D1203EasyChat,
+    /// Soundstage / Soundfield rendering toggle. Driven by command `41 88`
+    /// sub-id 29. Exposed via `SettingId::SpatialAudio`.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (OFF). Writing works regardless.
+    soundstage: D1203Soundstage,
+    /// Auto power off timeout selector. Driven by command `01 86`, payload
+    /// `[enabled, duration_idx]`. See `modules::misc`.
+    ///
+    /// TODO(read): state-packet TLV tag not yet identified; initialized to
+    /// `Default` (Never). Writing works regardless.
+    auto_power_off: D1203AutoPowerOff,
 }
 
 impl D1203State {
@@ -115,6 +154,17 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // on connect; writes still apply correctly (the device accepts the
             // 04 8c command, one packet per changed gesture).
             button_configuration: D1203ButtonConfiguration::default(),
+            // TODO: read the real miscellaneous toggle / auto power off state
+            // from the state packet once their TLV tags are identified. For now
+            // start at Default; writes still apply correctly (each uses its own
+            // dedicated command: 41 87 / 41 88 / 01 86).
+            touch_tone: value.touch_tone,
+            low_battery_prompt: value.low_battery_prompt,
+            wearing_tone: value.wearing_tone,
+            ldac: value.ldac,
+            easy_chat: value.easy_chat,
+            soundstage: value.soundstage,
+            auto_power_off: value.auto_power_off,
         }
     }
 }

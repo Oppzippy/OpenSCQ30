@@ -92,6 +92,23 @@ soundcore_device!(
         builder
             .module_collection()
             .add_d1203_button_configuration(button_configuration_packet_io);
+        // Miscellaneous settings (under CategoryId::Miscellaneous). Each is
+        // driven by its OWN dedicated command, independent of the sound-mode
+        // (06 81) write, all using standard framing through the generic
+        // packet::Outbound serializer:
+        //   - Touch Tone / Low Battery Prompt / Wearing Tone: command 41 87,
+        //     payload [sub_id, 0|1] (sub 0 / 1 / 3).
+        //   - LDAC / Easy Chat / Soundstage: command 41 88, payload
+        //     [sub_id, 0|1] (sub 2 / 14 / 29; sub 11 = wind noise is separate).
+        //   - Auto Power Off: command 01 86, payload [enabled, duration_idx].
+        //
+        // TODO(read): the current value of each of these is initialized to
+        // Default on connect because their state-packet TLV tags are not yet
+        // identified. Writes apply correctly regardless. See modules::misc.
+        let misc_packet_io = builder.packet_io_controller().clone();
+        builder
+            .module_collection()
+            .add_d1203_miscellaneous(misc_packet_io);
     },
     {
         HashMap::from([(
@@ -364,6 +381,109 @@ mod tests {
             adaptive_packets.last().unwrap()[9],
             0x03,
             "Adaptive payload[0] must be 3"
+        );
+    }
+
+    /// End-to-end: driving each MISCELLANEOUS setting on a real D1203 device
+    /// instance emits the dedicated write with the expected bytes. This
+    /// exercises the full wiring (setting handler + state modifier + builder
+    /// registration), not just the framing helpers. Every write uses standard
+    /// framing (length 0x0c includes the checksum), so the last 7 bytes are
+    /// `cat cmd 0c 00 <p0> <p1> <checksum>`.
+    #[tokio::test(start_paused = true)]
+    async fn setting_miscellaneous_sends_dedicated_writes() {
+        use crate::settings::Value;
+
+        async fn sent_packets(setting_id: SettingId, value: Value) -> Vec<Vec<u8>> {
+            let mut device = TestSoundcoreDevice::new(
+                super::device_registry,
+                DeviceModel::SoundcoreD1203,
+                HashMap::from([(
+                    packet::Command([1, 1]),
+                    packet::Inbound::new(packet::Command([1, 1]), real_state_update_body()),
+                )]),
+                SoundcoreDeviceConfig::default(),
+            )
+            .await;
+            device
+                .set_settings_and_gather_sent_packets(vec![(setting_id, value)])
+                .await
+        }
+
+        // Returns the first sent packet whose command bytes (offsets 5..7)
+        // match `command`.
+        fn find_by_command<'a>(
+            packets: &'a [Vec<u8>],
+            command: [u8; 2],
+        ) -> Option<&'a Vec<u8>> {
+            packets.iter().find(|bytes| {
+                bytes.len() >= 12 && bytes[5] == command[0] && bytes[6] == command[1]
+            })
+        }
+
+        // Touch Tone ON (41 87 sub 0) -> ...41 87 0c 00 00 01 cb
+        let packets = sent_packets(SettingId::TouchTone, Value::Bool(true)).await;
+        let pkt = find_by_command(&packets, [0x41, 0x87]).expect("41 87 packet for TouchTone");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x87, 0x0c, 0x00, 0x00, 0x01, 0xcb]
+        );
+
+        // Low Battery Prompt ON (41 87 sub 1) -> ...41 87 0c 00 01 01 cc
+        let packets = sent_packets(SettingId::LowBatteryPrompt, Value::Bool(true)).await;
+        let pkt =
+            find_by_command(&packets, [0x41, 0x87]).expect("41 87 packet for LowBatteryPrompt");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x87, 0x0c, 0x00, 0x01, 0x01, 0xcc]
+        );
+
+        // Wearing Tone ON (41 87 sub 3) -> ...41 87 0c 00 03 01 ce
+        let packets = sent_packets(SettingId::WearingTone, Value::Bool(true)).await;
+        let pkt = find_by_command(&packets, [0x41, 0x87]).expect("41 87 packet for WearingTone");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x87, 0x0c, 0x00, 0x03, 0x01, 0xce]
+        );
+
+        // LDAC ON (41 88 sub 2) -> ...41 88 0c 00 02 01 ce
+        let packets = sent_packets(SettingId::Ldac, Value::Bool(true)).await;
+        let pkt = find_by_command(&packets, [0x41, 0x88]).expect("41 88 packet for Ldac");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x88, 0x0c, 0x00, 0x02, 0x01, 0xce]
+        );
+
+        // Easy Chat ON (41 88 sub 14) -> ...41 88 0c 00 0e 01 da
+        // (default is OFF, so setting ON must emit a packet.)
+        let packets = sent_packets(SettingId::EasyChat, Value::Bool(true)).await;
+        let pkt = find_by_command(&packets, [0x41, 0x88]).expect("41 88 packet for EasyChat");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x88, 0x0c, 0x00, 0x0e, 0x01, 0xda]
+        );
+
+        // Soundstage ON via SpatialAudio (41 88 sub 29) -> ...41 88 0c 00 1d 01 e9
+        let packets = sent_packets(SettingId::SpatialAudio, Value::Bool(true)).await;
+        let pkt =
+            find_by_command(&packets, [0x41, 0x88]).expect("41 88 packet for Soundstage");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x41, 0x88, 0x0c, 0x00, 0x1d, 0x01, 0xe9]
+        );
+
+        // Auto Power Off = 60 minutes (01 86, [1, 3]) -> ...01 86 0c 00 01 03 8d
+        // (default is Never/disabled, so a timed value must emit a packet.)
+        let packets = sent_packets(
+            SettingId::AutoPowerOff,
+            Value::String("60m".to_string().into()),
+        )
+        .await;
+        let pkt =
+            find_by_command(&packets, [0x01, 0x86]).expect("01 86 packet for AutoPowerOff 60m");
+        assert_eq!(
+            &pkt[pkt.len() - 7..],
+            &[0x01, 0x86, 0x0c, 0x00, 0x01, 0x03, 0x8d]
         );
     }
 }
