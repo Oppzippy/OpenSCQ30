@@ -47,7 +47,7 @@ const TAG_EQ_PRESET: u8 = 11;
 /// have not mapped yet.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum D1203PresetEqualizer {
-    /// `1` — "Vozes nítidas" / Clear Voice.
+    /// `1` — Clear Voice ("Vozes nítidas" in the pt-BR app).
     ClearVoice,
     /// `2` — Bass Booster.
     BassBooster,
@@ -88,7 +88,7 @@ impl D1203PresetEqualizer {
     /// Human-readable name of the preset, matching the Soundcore app.
     pub fn name(self) -> String {
         match self {
-            Self::ClearVoice => "Vozes nítidas".to_string(),
+            Self::ClearVoice => "Clear Voice".to_string(),
             Self::BassBooster => "Bass Booster".to_string(),
             Self::SoundcoreSignature => "Soundcore Signature".to_string(),
             Self::Custom => "Custom".to_string(),
@@ -123,13 +123,14 @@ pub struct D1203StateUpdatePacket {
     pub serial_number: SerialNumber,
     /// EQ preset reported by tag 11 (read-only/informational).
     pub preset_equalizer: D1203PresetEqualizer,
-    /// Current ANC / ambient sound modes.
+    /// Current ambient sound mode (ANC / Transparency / Normal / Adaptive).
     ///
-    /// TODO: the D1203 state packet TLV tag carrying the sound mode is not yet
-    /// known (a full capture is pending), so this is always `Default` after a
-    /// parse. The write path (command `06 81`) is fully functional; only the
-    /// read-back of the device's current sound mode is outstanding.
-    pub sound_modes: crate::devices::soundcore::a3957::structures::SoundModes,
+    /// TODO: the D1203 state packet TLV tag carrying the ambient sound mode is
+    /// not yet known (a full capture is pending), so this is always `Default`
+    /// after a parse. The write path (command `06 81`) is fully functional,
+    /// including value 3 = Adaptive; only the read-back of the device's current
+    /// mode is outstanding.
+    pub ambient_sound_mode: crate::devices::soundcore::d1203::modules::D1203AmbientSoundMode,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -139,7 +140,7 @@ impl Default for D1203StateUpdatePacket {
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
             preset_equalizer: Default::default(),
-            sound_modes: Default::default(),
+            ambient_sound_mode: Default::default(),
         }
     }
 }
@@ -233,10 +234,10 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     dual_firmware_version,
                     serial_number: serial_number.unwrap_or_default(),
                     preset_equalizer,
-                    // TODO: decode the real sound mode once its TLV tag is
-                    // known. Defaulting here means the state reads as the
-                    // default sound mode; writing is unaffected.
-                    sound_modes: Default::default(),
+                    // TODO: decode the real ambient sound mode once its TLV
+                    // tag is known. Defaulting here means the state reads as
+                    // the default mode; writing is unaffected.
+                    ambient_sound_mode: Default::default(),
                 },
             ))
         })
@@ -337,7 +338,7 @@ mod tests {
 
     #[test]
     fn preset_names() {
-        assert_eq!(D1203PresetEqualizer::ClearVoice.name(), "Vozes nítidas");
+        assert_eq!(D1203PresetEqualizer::ClearVoice.name(), "Clear Voice");
         assert_eq!(D1203PresetEqualizer::BassBooster.name(), "Bass Booster");
         assert_eq!(
             D1203PresetEqualizer::SoundcoreSignature.name(),

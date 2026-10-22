@@ -1,9 +1,8 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3957,
     d1203::{
-        modules::D1203CustomEqualizer,
+        modules::{D1203AmbientSoundMode, D1203CustomEqualizer},
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
     common::structures::{DualBattery, DualFirmwareVersion, SerialNumber},
@@ -19,17 +18,17 @@ pub struct D1203State {
     /// User-requested custom 8-band EQ gains (whole dB). Written by the
     /// interactive `customEqualizerProfile` setting; see `modules`.
     custom_equalizer: D1203CustomEqualizer,
-    /// ANC / ambient sound modes. The write command for the D1203 is identical
-    /// to the A3957 (`Command([0x06, 0x81])`, 7-byte payload), so we reuse the
-    /// A3957 `SoundModes` structure and its sound-modes module wholesale.
+    /// Ambient sound mode (ANC / Transparency / Normal / Adaptive). The D1203
+    /// write command (`Command([0x06, 0x81])`, 7-byte payload) is identical to
+    /// the A3957, but the D1203 has a FOURTH mode (`3 = Adaptive`) the A3957
+    /// enum cannot represent, so we use a D1203-specific enum instead of
+    /// reusing `a3957::structures::SoundModes`. See `modules::ambient_sound_mode`.
     ///
     /// TODO(read): which TLV tag of the D1203 state packet carries the current
-    /// sound mode is not yet known (a full state capture is pending), so this
-    /// is initialized to `Default` on connect. Writing works regardless; only
-    /// reading back the device's *current* sound mode is a TODO. Once the tag
-    /// is identified, decode it in `packets/inbound/state_update.rs` and wire
-    /// it through here and `Update`.
-    sound_modes: a3957::structures::SoundModes,
+    /// ambient sound mode is not yet known (a full state capture is pending),
+    /// so this is initialized to `Default` on connect. Writing works
+    /// regardless; only reading back the device's *current* mode is a TODO.
+    ambient_sound_mode: D1203AmbientSoundMode,
 }
 
 impl D1203State {
@@ -50,10 +49,11 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // The device does not report the current custom parametric EQ in
             // its state packet, so start flat; the value tracks what we write.
             custom_equalizer: D1203CustomEqualizer::default(),
-            // TODO: read the real current sound mode from the state packet once
-            // the TLV tag is identified. For now start at Default; writes still
-            // apply correctly (the device accepts the 06 81 command).
-            sound_modes: value.sound_modes,
+            // TODO: read the real current ambient sound mode from the state
+            // packet once the TLV tag is identified. For now start at Default;
+            // writes still apply correctly (the device accepts the 06 81
+            // command, including value 3 = Adaptive).
+            ambient_sound_mode: value.ambient_sound_mode,
         }
     }
 }

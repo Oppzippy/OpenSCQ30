@@ -36,21 +36,25 @@ soundcore_device!(
             level_offset: 0,
         });
         builder.serial_number_and_dual_firmware_version();
-        // Sound modes (ANC / ambient sound mode). The D1203 write command is
-        // byte-for-byte identical to the A3957 (`Command([0x06, 0x81])` with a
-        // 7-byte payload), so we reuse the A3957 sound-modes module wholesale.
-        // This registers the sound-modes setting handler plus a state modifier
+        // Ambient sound mode (ANC / Transparency / Normal / Adaptive). The
+        // D1203 write command is byte-for-byte identical to the A3957
+        // (`Command([0x06, 0x81])` with a 7-byte payload), BUT the D1203 has a
+        // fourth mode (`3 = Adaptive`) the A3957 `AmbientSoundMode` enum cannot
+        // represent (`from_repr(3)` -> `None` -> default, and no way to *send*
+        // 3). So instead of reusing `add_a3957_sound_modes`, the D1203 uses its
+        // own `D1203AmbientSoundMode` enum + handler, which registers an
+        // `ambientSoundMode` Select of all four variants plus a state modifier
         // that sends the standard `06 81` packet through the generic
         // `packet::Outbound` serializer (no raw framing needed -- unlike the EQ
         // `03 8a` command, the `06 81` length field is standard).
         //
-        // TODO(read): the current sound mode is initialized to Default on
-        // connect because the D1203 state-packet TLV tag for it is not yet
-        // identified. Writes apply correctly regardless.
+        // TODO(read): the current ambient sound mode is initialized to Default
+        // on connect because the D1203 state-packet TLV tag for it is not yet
+        // identified. Writes apply correctly regardless (including Adaptive=3).
         let sound_modes_packet_io = builder.packet_io_controller().clone();
         builder
             .module_collection()
-            .add_a3957_sound_modes(sound_modes_packet_io);
+            .add_d1203_ambient_sound_mode(sound_modes_packet_io);
         // Interactive custom 8-band parametric EQ. The write handler sends the
         // raw bytes from `set_eq` directly over RFCOMM (see `modules`), NOT
         // through the generic packet serializer, so the special
@@ -165,46 +169,59 @@ mod tests {
         assert_eq!(outbound.bytes_with_checksum(), EXPECTED_TRANSPARENCY);
     }
 
-    /// ANC vs Transparency map to the first payload byte exactly as the real
-    /// captures show (ANC = `[0, ...]`, Transparency = `[1, ...]`), and both go
-    /// out under command `06 81`. Uses the SAME `a3957::structures::SoundModes`
-    /// the D1203 state reuses for its write path.
+    /// All four ambient sound modes map to the first payload byte exactly as
+    /// the real captures show (NoiseCanceling = `[0, ...]`, Transparency =
+    /// `[1, ...]`, Normal = `[2, ...]`, Adaptive = `[3, ...]`), and all go out
+    /// under command `06 81`. Uses the D1203-specific `D1203AmbientSoundMode`
+    /// (NOT the A3957 enum, which cannot represent Adaptive = 3).
     #[test]
     fn ambient_sound_mode_byte_matches_captures() {
-        use crate::devices::soundcore::a3957::structures::SoundModes;
-        use crate::devices::soundcore::common::structures::AmbientSoundMode;
+        use super::modules::D1203AmbientSoundMode;
 
-        let anc = SoundModes {
-            ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
-            ..Default::default()
-        };
-        let transparency = SoundModes {
-            ambient_sound_mode: AmbientSoundMode::Transparency,
-            ..Default::default()
-        };
-
-        // Real captures: ANC = [0, ...], Transparency = [1, ...].
-        assert_eq!(anc.bytes()[0], 0, "ANC ambient byte must be 0");
+        // Real captures, byte-for-byte.
         assert_eq!(
-            transparency.bytes()[0],
-            1,
-            "Transparency ambient byte must be 1"
+            D1203AmbientSoundMode::NoiseCanceling.payload(),
+            [0, 0, 0, 5, 17, 1, 0]
         );
-        assert_eq!(anc.bytes().len(), 7, "payload is 7 bytes");
+        assert_eq!(
+            D1203AmbientSoundMode::Transparency.payload(),
+            [1, 0, 0, 5, 17, 1, 0]
+        );
+        assert_eq!(D1203AmbientSoundMode::Normal.payload(), [2, 0, 0, 1, 17, 0, 0]);
+        assert_eq!(
+            D1203AmbientSoundMode::Adaptive.payload(),
+            [3, 0, 0, 1, 17, 0, 0]
+        );
 
-        // Both serialize under command 06 81 with standard framing.
-        let anc_packet =
-            packet::Outbound::new(packet::Command([0x06, 0x81]), anc.bytes().to_vec());
-        let transparency_packet = packet::Outbound::new(
-            packet::Command([0x06, 0x81]),
-            transparency.bytes().to_vec(),
+        // The crucial cases the A3957 enum could not handle.
+        assert_eq!(
+            D1203AmbientSoundMode::Normal.payload()[0],
+            2,
+            "Normal ambient byte must be 2"
         );
-        // header(5) + command(2) + length(2) + body(7) + checksum(1) = 17 = 0x11
-        assert_eq!(anc_packet.bytes_with_checksum()[5..7], [0x06, 0x81]);
-        assert_eq!(anc_packet.bytes_with_checksum()[7], 0x11);
-        assert_eq!(anc_packet.bytes_with_checksum()[9], 0x00); // ambient = ANC
-        assert_eq!(transparency_packet.bytes_with_checksum()[5..7], [0x06, 0x81]);
-        assert_eq!(transparency_packet.bytes_with_checksum()[9], 0x01); // Transparency
+        assert_eq!(
+            D1203AmbientSoundMode::Adaptive.payload()[0],
+            3,
+            "Adaptive ambient byte must be 3"
+        );
+
+        // Every mode serializes under command 06 81 with standard framing
+        // (header 5 + command 2 + length 2 => ambient byte at offset 9).
+        for mode in [
+            D1203AmbientSoundMode::NoiseCanceling,
+            D1203AmbientSoundMode::Transparency,
+            D1203AmbientSoundMode::Normal,
+            D1203AmbientSoundMode::Adaptive,
+        ] {
+            let payload = mode.payload();
+            assert_eq!(payload.len(), 7, "payload is 7 bytes");
+            let out =
+                packet::Outbound::new(packet::Command([0x06, 0x81]), payload.to_vec());
+            let bytes = out.bytes_with_checksum();
+            assert_eq!(&bytes[5..7], &[0x06, 0x81]);
+            assert_eq!(bytes[7], 0x11, "length 0x11 (17)");
+            assert_eq!(bytes[9], mode.byte(), "ambient byte equals mode value");
+        }
     }
 
     /// End-to-end: driving the `ambientSoundMode` setting on a real D1203 device
@@ -258,5 +275,30 @@ mod tests {
         );
         let last_transparency = transparency_packets.last().unwrap();
         assert_eq!(last_transparency[9], 0x01, "Transparency payload[0] must be 1");
+
+        // Normal (2) and Adaptive (3) are the modes the old A3957 enum could
+        // NOT represent. Driving the setting must emit a 06 81 packet whose
+        // target ambient byte is 2 and 3 respectively.
+        let normal_packets = sent_06_81_payloads("Normal").await;
+        assert!(
+            !normal_packets.is_empty(),
+            "expected at least one 06 81 packet for Normal"
+        );
+        assert_eq!(
+            normal_packets.last().unwrap()[9],
+            0x02,
+            "Normal payload[0] must be 2"
+        );
+
+        let adaptive_packets = sent_06_81_payloads("Adaptive").await;
+        assert!(
+            !adaptive_packets.is_empty(),
+            "expected at least one 06 81 packet for Adaptive"
+        );
+        assert_eq!(
+            adaptive_packets.last().unwrap()[9],
+            0x03,
+            "Adaptive payload[0] must be 3"
+        );
     }
 }
