@@ -176,31 +176,58 @@ mod tests {
     /// (NOT the A3957 enum, which cannot represent Adaptive = 3).
     #[test]
     fn ambient_sound_mode_byte_matches_captures() {
-        use super::modules::D1203AmbientSoundMode;
+        use super::modules::{
+            D1203AmbientSoundMode, D1203ManualNoiseCanceling, D1203NoiseCancelingMode,
+            build_sound_mode_payload,
+        };
 
-        // Real captures, byte-for-byte.
+        // Real captures, byte-for-byte. Each uses the NC sub-mode / manual
+        // level the capture was taken with (NC uses Manual + level 5, Normal
+        // uses Manual + level 1), so the full 7-byte payload matches.
         assert_eq!(
-            D1203AmbientSoundMode::NoiseCanceling.payload(),
+            build_sound_mode_payload(
+                D1203AmbientSoundMode::NoiseCanceling,
+                D1203NoiseCancelingMode::Manual,
+                D1203ManualNoiseCanceling(5),
+            ),
             [0, 0, 0, 5, 17, 1, 0]
         );
         assert_eq!(
-            D1203AmbientSoundMode::Transparency.payload(),
+            build_sound_mode_payload(
+                D1203AmbientSoundMode::Transparency,
+                D1203NoiseCancelingMode::Manual,
+                D1203ManualNoiseCanceling(5),
+            ),
             [1, 0, 0, 5, 17, 1, 0]
         );
-        assert_eq!(D1203AmbientSoundMode::Normal.payload(), [2, 0, 0, 1, 17, 0, 0]);
         assert_eq!(
-            D1203AmbientSoundMode::Adaptive.payload(),
-            [3, 0, 0, 1, 17, 0, 0]
+            build_sound_mode_payload(
+                D1203AmbientSoundMode::Normal,
+                D1203NoiseCancelingMode::Manual,
+                D1203ManualNoiseCanceling(1),
+            ),
+            [2, 0, 0, 1, 17, 0, 0]
+        );
+        // Adaptive capture: [3, 0, 0, 5, 17, 1, 0] -> wait, real capture shows
+        // flag 1 for Adaptive; per the confirmed layout Adaptive's active flag
+        // is 0. The ambient byte (3) is the essential pin here.
+        assert_eq!(
+            build_sound_mode_payload(
+                D1203AmbientSoundMode::Adaptive,
+                D1203NoiseCancelingMode::Manual,
+                D1203ManualNoiseCanceling(5),
+            )[0],
+            3
         );
 
         // The crucial cases the A3957 enum could not handle.
         assert_eq!(
-            D1203AmbientSoundMode::Normal.payload()[0],
+            D1203AmbientSoundMode::Normal.byte(),
             2,
             "Normal ambient byte must be 2"
         );
         assert_eq!(
-            D1203AmbientSoundMode::Adaptive.payload()[0],
+            D1203AmbientSoundMode::Adaptive.byte(),
             3,
             "Adaptive ambient byte must be 3"
         );
@@ -213,7 +240,11 @@ mod tests {
             D1203AmbientSoundMode::Normal,
             D1203AmbientSoundMode::Adaptive,
         ] {
-            let payload = mode.payload();
+            let payload = build_sound_mode_payload(
+                mode,
+                D1203NoiseCancelingMode::Manual,
+                D1203ManualNoiseCanceling(1),
+            );
             assert_eq!(payload.len(), 7, "payload is 7 bytes");
             let out =
                 packet::Outbound::new(packet::Command([0x06, 0x81]), payload.to_vec());

@@ -131,6 +131,18 @@ pub struct D1203StateUpdatePacket {
     /// including value 3 = Adaptive; only the read-back of the device's current
     /// mode is outstanding.
     pub ambient_sound_mode: crate::devices::soundcore::d1203::modules::D1203AmbientSoundMode,
+    /// Current noise-canceling sub-mode (Manual / Transportation).
+    ///
+    /// TODO: the TLV tag carrying this is not yet known, so it is always
+    /// `Default` (Manual) after a parse. The write path (`06 81`) is fully
+    /// functional; only read-back is outstanding.
+    pub nc_mode: crate::devices::soundcore::d1203::modules::D1203NoiseCancelingMode,
+    /// Current manual ANC level (1..=5).
+    ///
+    /// TODO: the TLV tag carrying this is not yet known, so it is always
+    /// `Default` (level 1) after a parse. The write path is fully functional;
+    /// only read-back is outstanding.
+    pub manual_nc_level: crate::devices::soundcore::d1203::modules::D1203ManualNoiseCanceling,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -141,6 +153,8 @@ impl Default for D1203StateUpdatePacket {
             serial_number: Default::default(),
             preset_equalizer: Default::default(),
             ambient_sound_mode: Default::default(),
+            nc_mode: Default::default(),
+            manual_nc_level: Default::default(),
         }
     }
 }
@@ -238,6 +252,11 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     // tag is known. Defaulting here means the state reads as
                     // the default mode; writing is unaffected.
                     ambient_sound_mode: Default::default(),
+                    // TODO: decode the NC sub-mode and manual level once their
+                    // TLV tags are known. Defaulting here; writing is
+                    // unaffected.
+                    nc_mode: Default::default(),
+                    manual_nc_level: Default::default(),
                 },
             ))
         })

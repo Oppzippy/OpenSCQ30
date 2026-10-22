@@ -2,7 +2,10 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
     d1203::{
-        modules::{D1203AmbientSoundMode, D1203CustomEqualizer},
+        modules::{
+            D1203AmbientSoundMode, D1203CustomEqualizer, D1203ManualNoiseCanceling,
+            D1203NoiseCancelingMode,
+        },
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
     common::structures::{DualBattery, DualFirmwareVersion, SerialNumber},
@@ -29,6 +32,19 @@ pub struct D1203State {
     /// so this is initialized to `Default` on connect. Writing works
     /// regardless; only reading back the device's *current* mode is a TODO.
     ambient_sound_mode: D1203AmbientSoundMode,
+    /// Noise-canceling sub-mode (byte 1 of the `06 81` payload): Manual or
+    /// Transportation. Only meaningful when the ambient mode is NoiseCanceling,
+    /// but the device always carries a value here.
+    ///
+    /// TODO(read): like `ambient_sound_mode`, the state-packet TLV tag for this
+    /// is not yet identified, so it is initialized to `Default` (Manual) on
+    /// connect. Writing works regardless.
+    nc_mode: D1203NoiseCancelingMode,
+    /// Manual ANC level (byte 3 of the `06 81` payload), 1..=5.
+    ///
+    /// TODO(read): not yet decoded from the state packet (TLV tag unknown), so
+    /// initialized to `Default` (level 1) on connect. Writing works regardless.
+    manual_nc_level: D1203ManualNoiseCanceling,
 }
 
 impl D1203State {
@@ -54,6 +70,11 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // writes still apply correctly (the device accepts the 06 81
             // command, including value 3 = Adaptive).
             ambient_sound_mode: value.ambient_sound_mode,
+            // TODO: read the real NC sub-mode and manual level from the state
+            // packet once their TLV tags are identified. For now start at
+            // Default; writes still apply correctly.
+            nc_mode: value.nc_mode,
+            manual_nc_level: value.manual_nc_level,
         }
     }
 }
