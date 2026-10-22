@@ -8,6 +8,7 @@ mod wind_noise;
 
 pub use ambient_sound_mode::{
     D1203AmbientSoundMode, D1203ManualNoiseCanceling, D1203NoiseCancelingMode,
+    D1203TransportationMode,
 };
 // Re-exported for the device-level integration tests in `d1203.rs`; the
 // non-test code references it via its own module path, so it reads as unused

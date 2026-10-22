@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     d1203::{
         modules::{
             D1203AmbientSoundMode, D1203CustomEqualizer, D1203ManualNoiseCanceling,
-            D1203NoiseCancelingMode, D1203WindNoise,
+            D1203NoiseCancelingMode, D1203TransportationMode, D1203WindNoise,
         },
         packets::inbound::{D1203PresetEqualizer, D1203StateUpdatePacket},
     },
@@ -45,6 +45,15 @@ pub struct D1203State {
     /// TODO(read): not yet decoded from the state packet (TLV tag unknown), so
     /// initialized to `Default` (level 1) on connect. Writing works regardless.
     manual_nc_level: D1203ManualNoiseCanceling,
+    /// Transport type (Airplane / Car) that drives byte[5] of the `06 81`
+    /// payload WHILE the NC sub-mode is Transportation. Outside Transportation
+    /// byte[5] is the active flag and this field is ignored; see
+    /// `modules::ambient_sound_mode::build_sound_mode_payload`.
+    ///
+    /// TODO(read): the D1203 state packet does not expose the current transport
+    /// type (no TLV tag identified), so it is initialized to `Default`
+    /// (Airplane) on connect. Writing works regardless.
+    transportation_mode: D1203TransportationMode,
     /// Wind noise reduction toggle. Driven by its OWN dedicated command
     /// (`Command([0x41, 0x88])`, payload `[0x0b, 0|1]`), NOT the `06 81`
     /// sound-mode command. See `modules::wind_noise`.
@@ -83,6 +92,10 @@ impl From<D1203StateUpdatePacket> for D1203State {
             // Default; writes still apply correctly.
             nc_mode: value.nc_mode,
             manual_nc_level: value.manual_nc_level,
+            // TODO: read the real transport type from the state packet once its
+            // TLV tag is identified. For now start at Default (Airplane); writes
+            // still apply correctly (byte[5] inside Transportation).
+            transportation_mode: value.transportation_mode,
             // TODO: read the real wind-noise state from the state packet once
             // its TLV tag is identified. For now start at Default (OFF); writes
             // still apply correctly (the device accepts the 41 88 command).

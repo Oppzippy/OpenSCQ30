@@ -99,6 +99,7 @@ anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
 manual-update = Manual Update
 automatic-update = Automatic Update
 airplane-mode = Airplane Mode
+airplane = Airplane
 real-time-adaptive-noise-canceling = Real Time Adaptive Noise Canceling
 
 soundcore-signature = Soundcore Signature

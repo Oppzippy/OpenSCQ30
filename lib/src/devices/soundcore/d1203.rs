@@ -193,7 +193,7 @@ mod tests {
     fn ambient_sound_mode_byte_matches_captures() {
         use super::modules::{
             D1203AmbientSoundMode, D1203ManualNoiseCanceling, D1203NoiseCancelingMode,
-            build_sound_mode_payload,
+            D1203TransportationMode, build_sound_mode_payload,
         };
 
         // Real captures, byte-for-byte. Each uses the NC sub-mode / manual
@@ -204,6 +204,7 @@ mod tests {
                 D1203AmbientSoundMode::NoiseCanceling,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane,
             ),
             [0, 0, 0, 5, 17, 1, 0]
         );
@@ -212,6 +213,7 @@ mod tests {
                 D1203AmbientSoundMode::Transparency,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane,
             ),
             [1, 0, 0, 5, 17, 1, 0]
         );
@@ -220,6 +222,7 @@ mod tests {
                 D1203AmbientSoundMode::Normal,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(1),
+                D1203TransportationMode::Airplane,
             ),
             [2, 0, 0, 1, 17, 0, 0]
         );
@@ -231,6 +234,7 @@ mod tests {
                 D1203AmbientSoundMode::Adaptive,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane,
             )[0],
             3
         );
@@ -259,6 +263,7 @@ mod tests {
                 mode,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(1),
+                D1203TransportationMode::Airplane,
             );
             assert_eq!(payload.len(), 7, "payload is 7 bytes");
             let out =

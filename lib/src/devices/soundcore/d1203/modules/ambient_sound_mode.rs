@@ -101,6 +101,26 @@ sound_mode_enum!(
     }
 );
 
+// Transport type selected while the NC sub-mode is Transportation.
+//
+// Reverse engineering the real hardware confirmed that INSIDE the
+// Transportation sub-mode (`nc_mode = 2`), byte[5] of the `06 81` payload no
+// longer carries the "active flag" — it distinguishes the transport type:
+//
+//   Airplane: byte[5] = 0  ->  NC Transportation Airplane = [0, 2, 0, 5, 17, 0, 0]
+//   Car:      byte[5] = 1  ->  NC Transportation Car      = [0, 2, 0, 5, 17, 1, 0]
+//
+// So byte[5] is overloaded: outside Transportation it is the active flag (1 for
+// NoiseCanceling/Transparency, else 0), and inside Transportation it is this
+// transport type. See `build_sound_mode_payload`. The byte value equals the
+// enum repr (Airplane = 0, Car = 1), which `.byte()` returns directly.
+sound_mode_enum!(
+    pub enum D1203TransportationMode {
+        Airplane = 0,
+        Car = 1,
+    }
+);
+
 /// Manual ANC level (byte 3 of the `06 81` payload), 1..=5. The device never
 /// uses 0; the lowest real level observed in captures is 1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -129,22 +149,36 @@ impl Default for D1203ManualNoiseCanceling {
     }
 }
 
-/// Builds the full 7-byte `06 81` payload from the three sound-mode fields.
+/// Builds the full 7-byte `06 81` payload from the sound-mode fields.
 ///
-/// Layout (see module docs): `[ambient, nc_mode, 0, manual_level, 17, flag, 0]`
-/// where `flag` is 1 when the ambient mode is NoiseCanceling or Transparency,
-/// else 0.
+/// Layout (see module docs): `[ambient, nc_mode, 0, manual_level, 17, byte5, 0]`.
+///
+/// `byte5` is overloaded, which is the whole point of this builder:
+///
+/// - When `nc_mode == Transportation`, byte[5] is the transport TYPE:
+///   `transportation.byte()` (Airplane = 0, Car = 1). Confirmed by reverse
+///   engineering — e.g. NC Transportation Car = `[0, 2, 0, 5, 17, 1, 0]`,
+///   NC Transportation Airplane = `[0, 2, 0, 5, 17, 0, 0]`.
+/// - Otherwise byte[5] is the "active flag": 1 when the ambient mode is
+///   NoiseCanceling or Transparency, else 0 (unchanged legacy behaviour).
 ///
 /// This is the single source of truth for the write path: every one of the
-/// three settings recomputes the payload from the combined state through it.
+/// sound-mode settings recomputes the payload from the combined state through
+/// it.
 pub fn build_sound_mode_payload(
     ambient: D1203AmbientSoundMode,
     nc_mode: D1203NoiseCancelingMode,
     manual: D1203ManualNoiseCanceling,
+    transportation: D1203TransportationMode,
 ) -> [u8; 7] {
-    let flag = match ambient {
-        D1203AmbientSoundMode::NoiseCanceling | D1203AmbientSoundMode::Transparency => 1,
-        D1203AmbientSoundMode::Normal | D1203AmbientSoundMode::Adaptive => 0,
+    let byte5 = match nc_mode {
+        // Inside Transportation, byte[5] selects the transport type.
+        D1203NoiseCancelingMode::Transportation => transportation.byte(),
+        // Outside Transportation, byte[5] is the legacy active flag.
+        D1203NoiseCancelingMode::Manual => match ambient {
+            D1203AmbientSoundMode::NoiseCanceling | D1203AmbientSoundMode::Transparency => 1,
+            D1203AmbientSoundMode::Normal | D1203AmbientSoundMode::Adaptive => 0,
+        },
     };
     [
         ambient.byte(),
@@ -152,7 +186,7 @@ pub fn build_sound_mode_payload(
         0,
         manual.value(),
         17,
-        flag,
+        byte5,
         0,
     ]
 }
@@ -251,12 +285,46 @@ where
     }
 }
 
-/// On any change to the ambient mode, NC sub-mode, or manual NC level, sends
-/// the `06 81` write with the payload recomputed from ALL THREE fields of the
-/// combined state. Uses the generic serializer (standard framing), so
-/// `send_with_response` is correct here.
+/// Exposes the transport type (Airplane / Car) as a [`Setting::Select`]. This
+/// only affects byte[5] of the `06 81` payload while the NC sub-mode is
+/// Transportation; see [`build_sound_mode_payload`].
 ///
-/// A single modifier handles all three settings because the device accepts
+/// Read-back is a TODO: the D1203 state packet does not expose the current
+/// transport type (no TLV tag identified), so it is initialized to `Default`
+/// on connect. Writing works regardless.
+struct TransportationModeSettingHandler;
+
+#[async_trait]
+impl<T> SettingHandler<T> for TransportationModeSettingHandler
+where
+    T: Has<D1203TransportationMode> + Send,
+{
+    fn settings(&self) -> Vec<SettingId> {
+        vec![SettingId::TransportationMode]
+    }
+
+    fn get(&self, state: &T, _setting_id: &SettingId) -> Option<Setting> {
+        let mode: &D1203TransportationMode = state.get();
+        Some(Setting::select_from_enum_all_variants(*mode))
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        _setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        *state.get_mut() = value.try_as_enum_variant()?;
+        Ok(())
+    }
+}
+
+/// On any change to the ambient mode, NC sub-mode, manual NC level, or
+/// transport type, sends the `06 81` write with the payload recomputed from
+/// ALL FOUR fields of the combined state. Uses the generic serializer
+/// (standard framing), so `send_with_response` is correct here.
+///
+/// A single modifier handles all four settings because the device accepts
 /// only one combined 7-byte payload: changing any one field means re-sending
 /// the whole thing.
 struct SoundModeStateModifier {
@@ -269,6 +337,7 @@ where
     T: Has<D1203AmbientSoundMode>
         + Has<D1203NoiseCancelingMode>
         + Has<D1203ManualNoiseCanceling>
+        + Has<D1203TransportationMode>
         + Clone
         + Send
         + Sync,
@@ -281,21 +350,29 @@ where
         let target_ambient: D1203AmbientSoundMode = *target_state.get();
         let target_nc_mode: D1203NoiseCancelingMode = *target_state.get();
         let target_manual: D1203ManualNoiseCanceling = *target_state.get();
+        let target_transportation: D1203TransportationMode = *target_state.get();
 
         {
             let current = state_sender.borrow();
             let current_ambient: &D1203AmbientSoundMode = current.get();
             let current_nc_mode: &D1203NoiseCancelingMode = current.get();
             let current_manual: &D1203ManualNoiseCanceling = current.get();
+            let current_transportation: &D1203TransportationMode = current.get();
             if *current_ambient == target_ambient
                 && *current_nc_mode == target_nc_mode
                 && *current_manual == target_manual
+                && *current_transportation == target_transportation
             {
                 return Ok(());
             }
         }
 
-        let payload = build_sound_mode_payload(target_ambient, target_nc_mode, target_manual);
+        let payload = build_sound_mode_payload(
+            target_ambient,
+            target_nc_mode,
+            target_manual,
+            target_transportation,
+        );
         self.packet_io
             .send_with_response(&packet::Outbound::new(
                 packet::Command([0x06, 0x81]),
@@ -307,14 +384,16 @@ where
             *Has::<D1203AmbientSoundMode>::get_mut(state) = target_ambient;
             *Has::<D1203NoiseCancelingMode>::get_mut(state) = target_nc_mode;
             *Has::<D1203ManualNoiseCanceling>::get_mut(state) = target_manual;
+            *Has::<D1203TransportationMode>::get_mut(state) = target_transportation;
         });
         Ok(())
     }
 }
 
 impl ModuleCollection<D1203State> {
-    /// Registers the three D1203 sound-mode settings (ambient sound mode, NC
-    /// sub-mode, manual NC level) and their shared `06 81` state modifier.
+    /// Registers the four D1203 sound-mode settings (ambient sound mode, NC
+    /// sub-mode, manual NC level, transport type) and their shared `06 81`
+    /// state modifier.
     pub fn add_d1203_ambient_sound_mode(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager
             .add_handler(CategoryId::SoundModes, AmbientSoundModeSettingHandler);
@@ -322,6 +401,8 @@ impl ModuleCollection<D1203State> {
             .add_handler(CategoryId::SoundModes, NoiseCancelingModeSettingHandler);
         self.setting_manager
             .add_handler(CategoryId::SoundModes, ManualNoiseCancelingSettingHandler);
+        self.setting_manager
+            .add_handler(CategoryId::SoundModes, TransportationModeSettingHandler);
         self.state_modifiers
             .push(Box::new(SoundModeStateModifier { packet_io }));
     }
@@ -339,34 +420,140 @@ mod tests {
 
         // (a) NC + Manual + level 5 -> [0, 0, 0, 5, 17, 1, 0]
         assert_eq!(
-            build_sound_mode_payload(NoiseCanceling, Manual, D1203ManualNoiseCanceling(5)),
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Manual,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane
+            ),
             [0, 0, 0, 5, 17, 1, 0]
         );
         // NC + Manual + level 1 -> [0, 0, 0, 1, 17, 1, 0]
         assert_eq!(
-            build_sound_mode_payload(NoiseCanceling, Manual, D1203ManualNoiseCanceling(1)),
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Manual,
+                D1203ManualNoiseCanceling(1),
+                D1203TransportationMode::Airplane
+            ),
             [0, 0, 0, 1, 17, 1, 0]
         );
-        // (b) NC + Transportation -> byte[1] = 2 (full: [0, 2, 0, 5, 17, 1, 0])
+        // (b) NC + Transportation + Car -> byte[5] = 1 (full: [0, 2, 0, 5, 17, 1, 0])
         assert_eq!(
-            build_sound_mode_payload(NoiseCanceling, Transportation, D1203ManualNoiseCanceling(5)),
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Transportation,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Car
+            ),
             [0, 2, 0, 5, 17, 1, 0]
+        );
+        // NC + Transportation + Airplane -> byte[5] = 0 (full: [0, 2, 0, 5, 17, 0, 0])
+        assert_eq!(
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Transportation,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane
+            ),
+            [0, 2, 0, 5, 17, 0, 0]
         );
         // (d) Transparency -> [1, 0, 0, ?, 17, 1, 0]
         assert_eq!(
-            build_sound_mode_payload(Transparency, Manual, D1203ManualNoiseCanceling(5)),
+            build_sound_mode_payload(
+                Transparency,
+                Manual,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane
+            ),
             [1, 0, 0, 5, 17, 1, 0]
         );
         // (e) Normal -> byte[0] = 2, byte[5] = 0
         assert_eq!(
-            build_sound_mode_payload(Normal, Manual, D1203ManualNoiseCanceling(1)),
+            build_sound_mode_payload(
+                Normal,
+                Manual,
+                D1203ManualNoiseCanceling(1),
+                D1203TransportationMode::Airplane
+            ),
             [2, 0, 0, 1, 17, 0, 0]
         );
         // Adaptive -> byte[0] = 3, byte[5] = 0
         assert_eq!(
-            build_sound_mode_payload(Adaptive, Manual, D1203ManualNoiseCanceling(5)),
+            build_sound_mode_payload(
+                Adaptive,
+                Manual,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane
+            ),
             [3, 0, 0, 5, 17, 0, 0]
         );
+    }
+
+    /// Inside the Transportation sub-mode, byte[5] is the transport TYPE, NOT
+    /// the active flag: Car = 1, Airplane = 0. Confirmed by reverse engineering.
+    #[test]
+    fn transportation_mode_drives_byte_five() {
+        use D1203AmbientSoundMode::*;
+        use D1203NoiseCancelingMode::*;
+
+        // NC + Transportation + Car -> [0, 2, 0, 5, 17, 1, 0]
+        assert_eq!(
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Transportation,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Car
+            ),
+            [0, 2, 0, 5, 17, 1, 0]
+        );
+        // NC + Transportation + Airplane -> [0, 2, 0, 5, 17, 0, 0]
+        assert_eq!(
+            build_sound_mode_payload(
+                NoiseCanceling,
+                Transportation,
+                D1203ManualNoiseCanceling(5),
+                D1203TransportationMode::Airplane
+            ),
+            [0, 2, 0, 5, 17, 0, 0]
+        );
+        // The transport byte values themselves: Airplane = 0, Car = 1.
+        assert_eq!(D1203TransportationMode::Airplane.byte(), 0);
+        assert_eq!(D1203TransportationMode::Car.byte(), 1);
+    }
+
+    /// Outside Transportation (i.e. Manual sub-mode), byte[5] stays the legacy
+    /// active flag and is unaffected by the transport-type field.
+    #[test]
+    fn transportation_mode_ignored_outside_transportation() {
+        use D1203AmbientSoundMode::*;
+        use D1203NoiseCancelingMode::*;
+
+        // NC Manual lvl5 -> [0, 0, 0, 5, 17, 1, 0] regardless of transport type.
+        for transportation in [D1203TransportationMode::Airplane, D1203TransportationMode::Car] {
+            assert_eq!(
+                build_sound_mode_payload(
+                    NoiseCanceling,
+                    Manual,
+                    D1203ManualNoiseCanceling(5),
+                    transportation
+                ),
+                [0, 0, 0, 5, 17, 1, 0],
+                "byte[5] must follow the active flag outside Transportation"
+            );
+        }
+        // Normal keeps flag 0 regardless of transport type.
+        for transportation in [D1203TransportationMode::Airplane, D1203TransportationMode::Car] {
+            assert_eq!(
+                build_sound_mode_payload(
+                    Normal,
+                    Manual,
+                    D1203ManualNoiseCanceling(1),
+                    transportation
+                )[5],
+                0,
+            );
+        }
     }
 
     /// (b) The NC sub-mode drives byte[1] exactly (Manual=0, Transportation=2).
@@ -379,12 +566,14 @@ mod tests {
             D1203AmbientSoundMode::NoiseCanceling,
             D1203NoiseCancelingMode::Manual,
             D1203ManualNoiseCanceling(5),
+            D1203TransportationMode::Airplane,
         );
         assert_eq!(manual[1], 0);
         let transportation = build_sound_mode_payload(
             D1203AmbientSoundMode::NoiseCanceling,
             D1203NoiseCancelingMode::Transportation,
             D1203ManualNoiseCanceling(5),
+            D1203TransportationMode::Airplane,
         );
         assert_eq!(transportation[1], 2);
     }
@@ -397,6 +586,7 @@ mod tests {
                 D1203AmbientSoundMode::NoiseCanceling,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(level),
+                D1203TransportationMode::Airplane,
             );
             assert_eq!(payload[3], level, "byte[3] must equal the manual level");
         }
@@ -411,6 +601,7 @@ mod tests {
                 ambient,
                 D1203NoiseCancelingMode::Manual,
                 D1203ManualNoiseCanceling(1),
+                D1203TransportationMode::Airplane,
             )[5]
         };
         assert_eq!(flag(NoiseCanceling), 1);
@@ -447,6 +638,7 @@ mod tests {
             D1203AmbientSoundMode::NoiseCanceling,
             D1203NoiseCancelingMode::Transportation,
             D1203ManualNoiseCanceling(5),
+            D1203TransportationMode::Car,
         );
         let outbound = packet::Outbound::new(packet::Command([0x06, 0x81]), payload.to_vec());
         let bytes = outbound.bytes_with_checksum();
