@@ -197,6 +197,26 @@ impl PacketIOController {
 
         Ok(())
     }
+
+    /// Writes already-complete packet bytes to the connection, VERBATIM.
+    ///
+    /// Unlike [`Self::send_without_response`] (and `send_with_response`), this
+    /// does NOT run the bytes through the generic `packet::Outbound::bytes()`
+    /// serializer, so it neither prepends a length field nor appends a
+    /// checksum. The caller is responsible for providing a fully-formed packet
+    /// (header + length + body + checksum).
+    ///
+    /// This exists for devices whose on-wire framing differs from the generic
+    /// serializer's. The Soundcore Liberty 5 Pro (D1203) custom EQ packet is
+    /// one such case: its length field EXCLUDES the trailing checksum byte,
+    /// whereas the generic serializer's length field includes it. Routing the
+    /// D1203 EQ bytes through the generic serializer would recompute a
+    /// different (wrong) length and checksum, so the raw bytes produced by
+    /// `d1203::packets::outbound::set_eq` must be sent through here instead.
+    pub async fn send_raw(&self, bytes: &[u8]) -> device::Result<()> {
+        self.connection.write(bytes).await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

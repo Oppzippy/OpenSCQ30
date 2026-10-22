@@ -37,6 +37,7 @@ soundcore-a3957 = Soundcore Liberty 5
 soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
+soundcore-d1203 = Soundcore Liberty 5 Pro
 soundcore-d1301 = Soundcore Sleep A30
 soundcore-development = Soundcore Development Information
 
