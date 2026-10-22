@@ -18,7 +18,7 @@ use crate::devices::soundcore::common::{
 mod modules;
 mod packets;
 mod state;
-mod structures;
+pub mod structures;
 
 soundcore_device!(
     state::A3957State,

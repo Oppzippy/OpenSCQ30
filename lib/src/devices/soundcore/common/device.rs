@@ -974,7 +974,7 @@ pub mod test_utils {
         }
 
         #[must_use]
-        async fn set_settings_and_gather_sent_packets(
+        pub async fn set_settings_and_gather_sent_packets(
             &mut self,
             settings: Vec<(SettingId, Value)>,
         ) -> Vec<Vec<u8>> {

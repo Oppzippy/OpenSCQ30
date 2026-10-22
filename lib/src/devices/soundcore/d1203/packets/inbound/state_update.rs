@@ -123,6 +123,13 @@ pub struct D1203StateUpdatePacket {
     pub serial_number: SerialNumber,
     /// EQ preset reported by tag 11 (read-only/informational).
     pub preset_equalizer: D1203PresetEqualizer,
+    /// Current ANC / ambient sound modes.
+    ///
+    /// TODO: the D1203 state packet TLV tag carrying the sound mode is not yet
+    /// known (a full capture is pending), so this is always `Default` after a
+    /// parse. The write path (command `06 81`) is fully functional; only the
+    /// read-back of the device's current sound mode is outstanding.
+    pub sound_modes: crate::devices::soundcore::a3957::structures::SoundModes,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -132,6 +139,7 @@ impl Default for D1203StateUpdatePacket {
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
             preset_equalizer: Default::default(),
+            sound_modes: Default::default(),
         }
     }
 }
@@ -225,6 +233,10 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     dual_firmware_version,
                     serial_number: serial_number.unwrap_or_default(),
                     preset_equalizer,
+                    // TODO: decode the real sound mode once its TLV tag is
+                    // known. Defaulting here means the state reads as the
+                    // default sound mode; writing is unaffected.
+                    sound_modes: Default::default(),
                 },
             ))
         })

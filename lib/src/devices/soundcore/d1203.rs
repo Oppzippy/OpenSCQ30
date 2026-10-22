@@ -36,6 +36,21 @@ soundcore_device!(
             level_offset: 0,
         });
         builder.serial_number_and_dual_firmware_version();
+        // Sound modes (ANC / ambient sound mode). The D1203 write command is
+        // byte-for-byte identical to the A3957 (`Command([0x06, 0x81])` with a
+        // 7-byte payload), so we reuse the A3957 sound-modes module wholesale.
+        // This registers the sound-modes setting handler plus a state modifier
+        // that sends the standard `06 81` packet through the generic
+        // `packet::Outbound` serializer (no raw framing needed -- unlike the EQ
+        // `03 8a` command, the `06 81` length field is standard).
+        //
+        // TODO(read): the current sound mode is initialized to Default on
+        // connect because the D1203 state-packet TLV tag for it is not yet
+        // identified. Writes apply correctly regardless.
+        let sound_modes_packet_io = builder.packet_io_controller().clone();
+        builder
+            .module_collection()
+            .add_a3957_sound_modes(sound_modes_packet_io);
         // Interactive custom 8-band parametric EQ. The write handler sends the
         // raw bytes from `set_eq` directly over RFCOMM (see `modules`), NOT
         // through the generic packet serializer, so the special
@@ -124,5 +139,124 @@ mod tests {
             (SettingId::FirmwareVersionRight, "04.52".into()),
             (SettingId::SerialNumber, "12037CE9137AA9B6".into()),
         ]);
+    }
+
+    /// The D1203 sound-mode write command is byte-for-byte identical to the
+    /// A3957: `Command([0x06, 0x81])` with a 7-byte payload serialized through
+    /// the generic `packet::Outbound` (standard length field, checksum = sum %
+    /// 256). This test pins that framing against a REAL RFCOMM capture of the
+    /// Liberty 5 Pro switching to Transparency:
+    ///
+    /// `08 ee 00 00 00 06 81 11 00 01 00 00 05 11 01 00 a6`
+    ///
+    /// header `08 ee 00 00 00` | command `06 81` | length `11 00` (=17 LE) |
+    /// 7-byte payload `01 00 00 05 11 01 00` | checksum `a6`.
+    #[test]
+    fn write_command_framing_matches_real_transparency_capture() {
+        // Exact 7-byte payload from the real capture (ambient_sound_mode = 1 =
+        // Transparency, followed by the device's other sound-mode fields).
+        let payload = vec![0x01, 0x00, 0x00, 0x05, 0x11, 0x01, 0x00];
+        let outbound = packet::Outbound::new(packet::Command([0x06, 0x81]), payload);
+
+        const EXPECTED_TRANSPARENCY: &[u8] = &[
+            0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81, 0x11, 0x00, 0x01, 0x00, 0x00, 0x05, 0x11,
+            0x01, 0x00, 0xa6,
+        ];
+        assert_eq!(outbound.bytes_with_checksum(), EXPECTED_TRANSPARENCY);
+    }
+
+    /// ANC vs Transparency map to the first payload byte exactly as the real
+    /// captures show (ANC = `[0, ...]`, Transparency = `[1, ...]`), and both go
+    /// out under command `06 81`. Uses the SAME `a3957::structures::SoundModes`
+    /// the D1203 state reuses for its write path.
+    #[test]
+    fn ambient_sound_mode_byte_matches_captures() {
+        use crate::devices::soundcore::a3957::structures::SoundModes;
+        use crate::devices::soundcore::common::structures::AmbientSoundMode;
+
+        let anc = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
+            ..Default::default()
+        };
+        let transparency = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::Transparency,
+            ..Default::default()
+        };
+
+        // Real captures: ANC = [0, ...], Transparency = [1, ...].
+        assert_eq!(anc.bytes()[0], 0, "ANC ambient byte must be 0");
+        assert_eq!(
+            transparency.bytes()[0],
+            1,
+            "Transparency ambient byte must be 1"
+        );
+        assert_eq!(anc.bytes().len(), 7, "payload is 7 bytes");
+
+        // Both serialize under command 06 81 with standard framing.
+        let anc_packet =
+            packet::Outbound::new(packet::Command([0x06, 0x81]), anc.bytes().to_vec());
+        let transparency_packet = packet::Outbound::new(
+            packet::Command([0x06, 0x81]),
+            transparency.bytes().to_vec(),
+        );
+        // header(5) + command(2) + length(2) + body(7) + checksum(1) = 17 = 0x11
+        assert_eq!(anc_packet.bytes_with_checksum()[5..7], [0x06, 0x81]);
+        assert_eq!(anc_packet.bytes_with_checksum()[7], 0x11);
+        assert_eq!(anc_packet.bytes_with_checksum()[9], 0x00); // ambient = ANC
+        assert_eq!(transparency_packet.bytes_with_checksum()[5..7], [0x06, 0x81]);
+        assert_eq!(transparency_packet.bytes_with_checksum()[9], 0x01); // Transparency
+    }
+
+    /// End-to-end: driving the `ambientSoundMode` setting on a real D1203 device
+    /// instance emits a `06 81` write whose final (target) packet carries the
+    /// expected ambient byte. The migration planner may emit intermediate
+    /// steps, so we only assert that a `06 81` packet with the target ambient
+    /// byte was sent.
+    #[tokio::test(start_paused = true)]
+    async fn setting_ambient_sound_mode_sends_06_81() {
+        use crate::settings::Value;
+
+        async fn sent_06_81_payloads(target: &str) -> Vec<Vec<u8>> {
+            let mut device = TestSoundcoreDevice::new(
+                super::device_registry,
+                DeviceModel::SoundcoreD1203,
+                HashMap::from([(
+                    packet::Command([1, 1]),
+                    packet::Inbound::new(packet::Command([1, 1]), real_state_update_body()),
+                )]),
+                SoundcoreDeviceConfig::default(),
+            )
+            .await;
+
+            let sent = device
+                .set_settings_and_gather_sent_packets(vec![(
+                    SettingId::AmbientSoundMode,
+                    Value::String(target.to_string().into()),
+                )])
+                .await;
+            sent.into_iter()
+                // keep only 06 81 (sound mode) packets
+                .filter(|bytes| bytes.len() >= 7 && bytes[5] == 0x06 && bytes[6] == 0x81)
+                .collect()
+        }
+
+        // The device state is initialized to the default sound mode
+        // (NoiseCanceling), so setting NoiseCanceling again is a no-op and may
+        // emit no packet. When a 06 81 packet IS emitted it must carry ambient
+        // byte 0. (The deterministic byte test above already pins ANC -> 0.)
+        let anc_packets = sent_06_81_payloads("NoiseCanceling").await;
+        for pkt in &anc_packets {
+            assert_eq!(pkt[9], 0x00, "ANC payload[0] must be 0");
+        }
+
+        // Transparency differs from the default, so it MUST emit at least one
+        // 06 81 packet, and the target (last) packet carries ambient byte 1.
+        let transparency_packets = sent_06_81_payloads("Transparency").await;
+        assert!(
+            !transparency_packets.is_empty(),
+            "expected at least one 06 81 packet for Transparency"
+        );
+        let last_transparency = transparency_packets.last().unwrap();
+        assert_eq!(last_transparency[9], 0x01, "Transparency payload[0] must be 1");
     }
 }

@@ -8,9 +8,11 @@
 
 - Add support for Soundcore Liberty 5 Pro (D1203): reads firmware, serial number
   and per-earbud battery level, reads the active equalizer preset, and reads/writes
-  an 8-band parametric custom equalizer (100–12800 Hz, -6..+6 dB). The D1203 uses a
-  TLV-based state packet and a distinct parametric EQ write command (category 0x03,
-  command 0x8a), both decoded via reverse engineering.
+  an 8-band parametric custom equalizer (100–12800 Hz, -6..+6 dB), and controls sound
+  modes (noise cancelling / transparency / normal, with manual ANC level). The D1203
+  uses a TLV-based state packet and a distinct parametric EQ write command (category
+  0x03, command 0x8a); its sound-mode command (0x06 0x81) matches the Liberty 5. Decoded
+  via reverse engineering.
 
 ## v2.13.0
 
