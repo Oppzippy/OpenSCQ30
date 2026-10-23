@@ -153,7 +153,7 @@ response = [
     0x01, # Wearing detection
     0x00, # Touch tone
     0x01, # Gaming mode
-    0x00, # Pressure sensitivity
+    0x00, # Pressure sensitivity (0=softest, 1=medium, 2=firmest)
     0xff,
     0xff,
     0xff,

@@ -5,6 +5,7 @@ use crate::devices::soundcore::{
 
 mod equalizer;
 mod flag;
+mod pressure_sensitivity;
 mod sound_modes;
 
 impl SoundcoreDeviceBuilder<A3957State> {
@@ -32,5 +33,11 @@ impl SoundcoreDeviceBuilder<A3957State> {
         let packet_io_controller = self.packet_io_controller().clone();
         self.module_collection()
             .add_a3957_gaming_mode(packet_io_controller);
+    }
+
+    pub fn a3957_pressure_sensitivity(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_a3957_pressure_sensitivity(packet_io_controller);
     }
 }
