@@ -160,7 +160,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_liberty5_packet_from_issue_226() {
-        let device = TestSoundcoreDevice::new(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3957,
             HashMap::from([(
@@ -223,9 +223,19 @@ mod tests {
             (SettingId::LimitHighVolumeDbLimit, 90.into()),
             (SettingId::DualConnections, true.into()),
             // (SettingId::DolbyAudio, Value::OptionalString(None)),
-            // (SettingId::InCallSoundAwareness, true.into()),
+            (SettingId::InCallSoundAwareness, false.into()),
             // (SettingId::EarbudPressureSensitivity, "Medium".into()),
         ]);
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::InCallSoundAwareness, true.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([6, 129]),
+                    vec![0, 0x50, 1, 0, 0, 0, 0],
+                )],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]
