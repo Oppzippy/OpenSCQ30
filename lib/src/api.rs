@@ -1,3 +1,5 @@
+#[cfg(target_os = "linux")]
+pub mod adaptive_eq;
 pub mod connection;
 pub mod device;
 pub mod quick_presets;
