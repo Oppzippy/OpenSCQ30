@@ -1,7 +1,11 @@
+#[cfg(target_os = "linux")]
+mod adaptive_eq;
 mod controls;
 mod legacy_migration;
 mod quick_presets;
 
+#[cfg(target_os = "linux")]
+use std::time::Duration;
 use std::{
     borrow::Cow,
     collections::{HashMap, hash_map},
@@ -33,6 +37,8 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    #[cfg(target_os = "linux")]
+    AdaptiveEq(adaptive_eq::Message),
     QuickPresets(quick_presets::Message),
     Throttle(throttle::Message),
     SetSetting(SettingId, Value),
@@ -57,6 +63,13 @@ pub enum Message {
     SetTimeMinute(SettingId, String),
     SetTimePm(SettingId, bool),
     RefreshTimeTwelveHour(SettingId),
+}
+
+#[cfg(target_os = "linux")]
+impl From<adaptive_eq::Message> for Message {
+    fn from(message: adaptive_eq::Message) -> Self {
+        Self::AdaptiveEq(message)
+    }
 }
 
 impl From<quick_presets::Message> for Message {
@@ -88,6 +101,8 @@ pub struct DeviceSettingsModel {
     dialog: Option<Dialog>,
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
     quick_presets_model: quick_presets::QuickPresetsModel,
+    #[cfg(target_os = "linux")]
+    adaptive_eq_model: adaptive_eq::AdaptiveEqModel,
     throttle: throttle::Throttle,
     key_binds: HashMap<KeyBind, KeyBindAction>,
 }
@@ -302,6 +317,8 @@ enum Dialog {
 
 enum CustomCategory {
     QuickPresets,
+    #[cfg(target_os = "linux")]
+    AdaptiveEq,
     LegacyEqualizerMigration,
 }
 
@@ -352,6 +369,11 @@ impl DeviceSettingsModel {
             .insert()
             .text(fl!("quick-presets"))
             .data(CustomCategory::QuickPresets);
+        #[cfg(target_os = "linux")]
+        nav_model
+            .insert()
+            .text(fl!("adaptive-eq"))
+            .data(CustomCategory::AdaptiveEq);
         nav_model.activate_position(0);
 
         // watch will close when we drop the device, so this will clean itself up
@@ -366,8 +388,24 @@ impl DeviceSettingsModel {
             debug!("stopping state change watcher task");
         });
 
+        #[cfg(target_os = "linux")]
+        let adaptive_poll_stream = cosmic::iced::stream::channel(1, async move |mut output| {
+            let mut interval = tokio::time::interval(Duration::from_millis(2000));
+            loop {
+                interval.tick().await;
+                match output.try_send(Message::AdaptiveEq(adaptive_eq::Message::PollTick)) {
+                    Err(err) if err.is_disconnected() => return,
+                    _ => (),
+                }
+            }
+        });
+
         let (quick_presets_model, quick_presets_refresh_task) =
             quick_presets::QuickPresetsModel::new(device.clone(), quick_presets_handler);
+
+        #[cfg(target_os = "linux")]
+        let (adaptive_eq_model, adaptive_eq_init_task) =
+            adaptive_eq::AdaptiveEqModel::new(device.clone(), config_dir.clone());
 
         let mut connection_status = device.0.connection_status();
         let watch_for_disconnect_task = Task::future(
@@ -397,13 +435,19 @@ impl DeviceSettingsModel {
             dialog: None,
             legacy_equalizer_migration: None,
             quick_presets_model,
+            #[cfg(target_os = "linux")]
+            adaptive_eq_model,
             key_binds: key_binds(),
         };
         let task = Task::batch([
             model.refresh(),
             quick_presets_refresh_task.map(Into::into),
+            #[cfg(target_os = "linux")]
+            adaptive_eq_init_task.map(Into::into),
             Self::initialize_legacy_migration(config_dir),
             Task::stream(stream),
+            #[cfg(target_os = "linux")]
+            Task::stream(adaptive_poll_stream),
             watch_for_disconnect_task,
         ]);
         (model, task)
@@ -437,6 +481,8 @@ impl DeviceSettingsModel {
     }
 
     fn refresh_settings(&mut self) -> Task<Message> {
+        #[cfg(target_os = "linux")]
+        self.adaptive_eq_model.refresh_device_profiles();
         if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
             let mut settings_order = self.device.settings_in_category(category_id);
             let settings = settings_order
@@ -553,6 +599,8 @@ impl DeviceSettingsModel {
         if let Some(custom_category) = self.nav_model.active_data::<CustomCategory>() {
             match custom_category {
                 CustomCategory::QuickPresets => self.quick_presets_model.view().map(Into::into),
+                #[cfg(target_os = "linux")]
+                CustomCategory::AdaptiveEq => self.adaptive_eq_model.view().map(Into::into),
                 CustomCategory::LegacyEqualizerMigration => {
                     if let Some(model) = &self.legacy_equalizer_migration {
                         model.view().map(Message::LegacyMigration)
@@ -758,6 +806,13 @@ impl DeviceSettingsModel {
 
     pub fn update(&mut self, message: Message) -> Action {
         match message {
+            #[cfg(target_os = "linux")]
+            Message::AdaptiveEq(inner) => match self.adaptive_eq_model.update(inner) {
+                adaptive_eq::Action::None => Action::None,
+                adaptive_eq::Action::Task(task) => Action::Task(task.map(Into::into)),
+                adaptive_eq::Action::RefreshDeviceSettings => Action::Task(self.refresh_settings()),
+                adaptive_eq::Action::Warning(text) => Action::Warning(text),
+            },
             Message::QuickPresets(inner) => match self.quick_presets_model.update(inner) {
                 quick_presets::Action::Warning(text) => Action::Warning(text),
                 quick_presets::Action::None => Action::None,
