@@ -123,10 +123,23 @@ pub async fn handle(matches: &ArgMatches, explicit_mac: Option<MacAddr6>) -> any
                     resolve_profile_for_track(&track, &config, &mut online_cache).await;
                 let mut applied = false;
                 if let Some(dev) = &device {
-                    applied =
-                        apply_preset_profile(dev.as_ref(), &resolution.target_profile).await?;
+                    match apply_preset_profile(dev.as_ref(), &resolution.target_profile).await {
+                        Ok(changed) => {
+                            applied = changed;
+                            last_track_key = Some(key);
+                        }
+                        Err(err) if once => return Err(err.into()),
+                        Err(err) => {
+                            eprintln!("Failed to apply EQ profile (will retry): {err:#}");
+                            last_track_key = None;
+                            tokio::time::sleep(Duration::from_millis(config.poll_interval_ms))
+                                .await;
+                            continue;
+                        }
+                    }
+                } else {
+                    last_track_key = Some(key);
                 }
-                last_track_key = Some(key);
 
                 if json {
                     let event = AdaptiveCliEvent {

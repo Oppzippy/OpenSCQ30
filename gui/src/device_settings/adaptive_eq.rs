@@ -1,6 +1,10 @@
 use std::{
     collections::{HashMap, VecDeque},
     path::PathBuf,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+    },
 };
 
 use cosmic::{
@@ -73,6 +77,7 @@ pub enum Message {
     PollTick,
     ForceRefreshNow,
     MediaStateUpdated {
+        generation: u64,
         track: Option<MediaTrackInfo>,
         resolution: Option<(ResolutionResult, HashMap<String, Option<(String, String)>>)>,
         applied: bool,
@@ -115,6 +120,9 @@ pub struct AdaptiveEqModel {
     online_cache: HashMap<String, Option<(String, String)>>,
     history: VecDeque<AdaptiveHistoryEntry>,
     poll_in_flight: bool,
+    poll_generation: u64,
+    active_generation: Arc<AtomicU64>,
+    enabled_flag: Arc<AtomicBool>,
 }
 
 impl AdaptiveEqModel {
@@ -127,6 +135,8 @@ impl AdaptiveEqModel {
             .collect();
 
         let default_rock_idx = profile_ids.iter().position(|p| p == "Rock").unwrap_or(0);
+        let enabled_flag = Arc::new(AtomicBool::new(config.enabled));
+        let active_generation = Arc::new(AtomicU64::new(0));
 
         let mut model = Self {
             device,
@@ -144,9 +154,16 @@ impl AdaptiveEqModel {
             online_cache: HashMap::new(),
             history: VecDeque::with_capacity(12),
             poll_in_flight: false,
+            poll_generation: 0,
+            active_generation,
+            enabled_flag,
         };
 
-        let initial_task = model.trigger_poll(true);
+        let initial_task = if model.config.enabled {
+            model.trigger_poll(true)
+        } else {
+            Task::none()
+        };
         (model, initial_task)
     }
 
@@ -175,14 +192,29 @@ impl AdaptiveEqModel {
         }
     }
 
+    fn invalidate_in_flight(&mut self) {
+        self.poll_generation = self.poll_generation.wrapping_add(1);
+        self.active_generation
+            .store(self.poll_generation, Ordering::SeqCst);
+        self.poll_in_flight = false;
+    }
+
     fn trigger_poll(&mut self, force: bool) -> Task<Message> {
+        if !self.config.enabled && !force {
+            return Task::none();
+        }
         if self.poll_in_flight && !force {
             return Task::none();
         }
+        self.poll_generation = self.poll_generation.wrapping_add(1);
+        let generation = self.poll_generation;
+        self.active_generation.store(generation, Ordering::SeqCst);
         self.poll_in_flight = true;
 
         let device = self.device.0.clone();
         let config = self.config.clone();
+        let active_generation = self.active_generation.clone();
+        let enabled_flag = self.enabled_flag.clone();
         let last_track_key = if force {
             None
         } else {
@@ -199,6 +231,7 @@ impl AdaptiveEqModel {
 
             let Some(track) = track else {
                 return Message::MediaStateUpdated {
+                    generation,
                     track: None,
                     resolution: None,
                     applied: false,
@@ -209,6 +242,7 @@ impl AdaptiveEqModel {
             let key = track.track_key();
             if last_track_key.as_deref() == Some(key.as_str()) {
                 return Message::MediaStateUpdated {
+                    generation,
                     track: Some(track),
                     resolution: None,
                     applied: false,
@@ -221,7 +255,11 @@ impl AdaptiveEqModel {
 
             let mut applied = false;
             let mut error = None;
-            if config.enabled {
+            let still_current_and_enabled = config.enabled
+                && enabled_flag.load(Ordering::SeqCst)
+                && active_generation.load(Ordering::SeqCst) == generation;
+
+            if still_current_and_enabled {
                 match adaptive_eq::apply_preset_profile(device.as_ref(), &resolution.target_profile)
                     .await
                 {
@@ -231,6 +269,7 @@ impl AdaptiveEqModel {
             }
 
             Message::MediaStateUpdated {
+                generation,
                 track: Some(track),
                 resolution: Some((resolution, cache)),
                 applied,
@@ -244,20 +283,29 @@ impl AdaptiveEqModel {
             Message::PollTick => Action::Task(self.trigger_poll(false)),
             Message::ForceRefreshNow => Action::Task(self.trigger_poll(true)),
             Message::MediaStateUpdated {
+                generation,
                 track,
                 resolution,
                 applied,
                 error,
             } => {
+                if let Some((_, ref updated_cache)) = resolution {
+                    self.online_cache.extend(updated_cache.clone());
+                }
+                if generation != self.poll_generation {
+                    return Action::None;
+                }
+
                 self.poll_in_flight = false;
                 if track.is_none() {
                     self.last_track_key = None;
                 }
                 self.current_track = track;
 
-                if let Some((res, updated_cache)) = resolution {
-                    self.online_cache = updated_cache;
-                    if let Some(t) = &self.current_track {
+                if let Some((res, _)) = resolution {
+                    if error.is_none()
+                        && let Some(t) = &self.current_track
+                    {
                         self.last_track_key = Some(t.track_key());
                         let display = t.display_title();
                         let should_push = self.history.front().is_none_or(|front| {
@@ -275,6 +323,9 @@ impl AdaptiveEqModel {
                                 applied_profile: res.target_profile.clone(),
                             });
                         }
+                    } else if error.is_some() {
+                        // Allow retry on the next poll tick if Bluetooth profile application failed
+                        self.last_track_key = None;
                     }
                     self.current_resolution = Some(res);
                 }
@@ -289,10 +340,12 @@ impl AdaptiveEqModel {
             }
             Message::ToggleEnabled(enabled) => {
                 self.config.enabled = enabled;
+                self.enabled_flag.store(enabled, Ordering::SeqCst);
                 self.save_config();
                 if enabled {
                     Action::Task(self.trigger_poll(true))
                 } else {
+                    self.invalidate_in_flight();
                     Action::None
                 }
             }

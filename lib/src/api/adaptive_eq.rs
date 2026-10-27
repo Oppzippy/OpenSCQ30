@@ -132,7 +132,7 @@ pub struct AdaptiveEqConfig {
 impl Default for AdaptiveEqConfig {
     fn default() -> Self {
         Self {
-            enabled: true,
+            enabled: false,
             yt_music_or_browser_only: true,
             online_lookup_enabled: true,
             only_when_playing: true,
@@ -636,9 +636,15 @@ pub fn parse_yt_music_metadata(raw_artist: &str, raw_title: &str) -> (String, St
 fn strip_artist_suffixes(artist: &str) -> String {
     let mut s = artist.trim().to_string();
     for suffix in [" - Topic", " - Konu", "VEVO", " Official", " Resmi"] {
-        if s.len() > suffix.len() && s.to_lowercase().ends_with(&suffix.to_lowercase()) {
-            s.truncate(s.len() - suffix.len());
-            s = s.trim().to_string();
+        if s.len() > suffix.len()
+            && s.to_ascii_lowercase()
+                .ends_with(&suffix.to_ascii_lowercase())
+        {
+            let new_len = s.len() - suffix.len();
+            if s.is_char_boundary(new_len) {
+                s.truncate(new_len);
+                s = s.trim().to_string();
+            }
         }
     }
     s
@@ -676,10 +682,13 @@ fn strip_youtube_title_noise(title: &str) -> String {
     ];
 
     loop {
-        let lower = s.to_lowercase();
+        let lower = s.to_ascii_lowercase();
         let mut changed = false;
         for tag in noise_tags {
-            if let Some(idx) = lower.find(tag) {
+            if let Some(idx) = lower.find(tag)
+                && s.is_char_boundary(idx)
+                && s.is_char_boundary(idx + tag.len())
+            {
                 s.replace_range(idx..idx + tag.len(), "");
                 s = s.trim().to_string();
                 changed = true;
@@ -698,8 +707,10 @@ fn strip_feat_and_quotes(track: &str) -> String {
 
     // Remove (feat. ...), (ft. ...), [feat. ...], [ft. ...]
     for marker in ["(feat.", "(ft.", "[feat.", "[ft.", "(with "] {
-        let lower = s.to_lowercase();
-        if let Some(start) = lower.find(marker) {
+        let lower = s.to_ascii_lowercase();
+        if let Some(start) = lower.find(marker)
+            && s.is_char_boundary(start)
+        {
             let closing = if marker.starts_with('(') { ')' } else { ']' };
             if let Some(end_rel) = s[start..].find(closing) {
                 s.replace_range(start..=start + end_rel, "");
@@ -1671,5 +1682,22 @@ mod tests {
             map_genre_to_profile("Electronic", &mappings).as_deref(),
             Some("Electronic")
         );
+    }
+
+    #[test]
+    fn parses_unicode_turkish_dotted_i_without_panic() {
+        let (artist, title) = parse_yt_music_metadata(
+            "İbrahim Tatlıses - Topic",
+            "İrem Derici - Şarkı (Official Video)",
+        );
+        assert_eq!(artist, "İrem Derici");
+        assert_eq!(title, "Şarkı");
+
+        let (artist2, title2) = parse_yt_music_metadata(
+            "İsmail YK Resmi",
+            "İsmail YK - \"İstiyorum (feat. İzel)\" (Resmi Klip)",
+        );
+        assert_eq!(artist2, "İsmail YK");
+        assert_eq!(title2, "İstiyorum");
     }
 }
