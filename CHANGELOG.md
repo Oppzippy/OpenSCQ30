@@ -10,6 +10,7 @@
 - Add support for Soundcore C30i
 - Add support for Soundcore AeroClip
 - Add support for Soundcore Liberty 4
+- Add support for Soundcore A30i
 - Add alarms and "Auto-switch Once Asleep" settings for Soundcore Sleep A30
 
 #### Fixes

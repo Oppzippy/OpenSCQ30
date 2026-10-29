@@ -48,6 +48,7 @@ If there's a device not in this list that you want to see supported, check if th
 | A3954  | Soundcore Liberty 4 Pro      |
 | A3955  | Soundcore P40i               |
 | A3957  | Soundcore Liberty 5          |
+| A3958  | Soundcore A30i               |
 | A3959  | Soundcore P30i / R50i NC     |
 | A3968  | Soundcore Sport X20          |
 | D1101  | Soundcore C50i               |
