@@ -27,7 +27,8 @@ impl SoundcoreDeviceBuilder<D1301State> {
     flag!(noise_canceling_prompt);
 
     pub fn d1301_alarms(&mut self) {
-        self.module_collection().add_d1301_alarms();
+        let packet_io = self.packet_io_controller().clone();
+        self.module_collection().add_d1301_alarms(packet_io);
     }
 
     pub fn d1301_auto_stop_timer(&mut self) {

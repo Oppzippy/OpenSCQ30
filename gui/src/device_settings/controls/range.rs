@@ -1,11 +1,12 @@
+use std::borrow::Cow;
+
 use cosmic::{Element, iced::alignment, widget};
-use openscq30_i18n::Translate;
-use openscq30_lib::settings::{self, SettingId};
+use openscq30_lib::settings;
 
 use crate::device_settings::labeled_setting_row;
 
 pub fn i32_range<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     range: settings::Range<i32>,
     value: i32,
     on_change: impl Fn(i32) -> M + 'a,
@@ -14,7 +15,7 @@ where
     M: Clone + 'static,
 {
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::row![
             widget::text::body(value.to_string()).width(40),
             widget::slider(range.range, value, on_change).step(range.step),

@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     device::OpenSCQ30Device,
-    settings::{self, CategoryId, SettingId},
+    settings::{self, CategoryId, Setting, SettingId},
 };
 use serde::Serialize;
 use strum::VariantArray;
@@ -174,6 +174,7 @@ enum JsonSetting {
     Information,
     ImportString,
     Action,
+    TimeOfDay { hours: i32, minutes: i32 },
 }
 
 impl From<settings::Setting> for JsonSetting {
@@ -198,6 +199,12 @@ impl From<settings::Setting> for JsonSetting {
             settings::Setting::Information { .. } => Self::Information,
             settings::Setting::ImportString { .. } => Self::ImportString,
             settings::Setting::Action => Self::Action,
+            settings::Setting::TimeOfDay {
+                minutes_after_midnight,
+            } => Self::TimeOfDay {
+                hours: minutes_after_midnight / 60,
+                minutes: minutes_after_midnight % 60,
+            },
         }
     }
 }
@@ -209,13 +216,24 @@ async fn handle_setting(matches: &ArgMatches, device: &dyn OpenSCQ30Device) -> a
 
     // Whether this fails at any point or not, we still want to print the table, so make sure to
     // do that before returning the error.
-    let mut table_items = Vec::new();
-    let result = execute_commands(device, commands, &mut table_items).await;
+    let mut command_results = Vec::new();
+    let result = execute_commands(device, commands, &mut command_results).await;
 
     if json {
+        let table_items = command_results
+            .into_iter()
+            .map(|(setting_id, setting)| SettingIdValue {
+                setting_id,
+                value: setting.into(),
+            })
+            .collect::<Vec<_>>();
         println!("{}", serde_json::to_string_pretty(&table_items)?);
-    } else if !table_items.is_empty() {
-        let mut table = Table::new(table_items.into_iter().map(SettingIdValueTableItem::from));
+    } else if !command_results.is_empty() {
+        let mut table = Table::new(
+            command_results
+                .into_iter()
+                .map(|(setting_id, setting)| SettingIdValueTableItem::new(setting_id, setting)),
+        );
         crate::fmt::apply_tabled_settings(&mut table);
         println!("{table}");
     } else if result.is_ok() {
@@ -287,7 +305,7 @@ fn setting_id_from_str(setting_id: &str) -> anyhow::Result<SettingId> {
 async fn execute_commands(
     device: &dyn OpenSCQ30Device,
     commands: Vec<ExecCommand>,
-    table_items: &mut Vec<SettingIdValue>,
+    table_items: &mut Vec<(SettingId, settings::Setting)>,
 ) -> anyhow::Result<()> {
     for command in commands {
         match command {
@@ -296,10 +314,7 @@ async fn execute_commands(
                     "{} does not use setting id {setting_id}.",
                     device.model(),
                 ))?;
-                table_items.push(SettingIdValue {
-                    setting_id,
-                    value: setting.into(),
-                });
+                table_items.push((setting_id, setting));
             }
             ExecCommand::Set(setting_id, unparsed_value) => {
                 let setting = device.setting(&setting_id).ok_or(anyhow!(
@@ -334,11 +349,17 @@ struct SettingIdValueTableItem {
     value: DisplayableValue,
 }
 
-impl From<SettingIdValue> for SettingIdValueTableItem {
-    fn from(value: SettingIdValue) -> Self {
+impl SettingIdValueTableItem {
+    pub fn new(setting_id: SettingId, setting: settings::Setting) -> Self {
+        let displayable_value = match setting {
+            Setting::TimeOfDay {
+                minutes_after_midnight,
+            } => DisplayableValue::MinutesAfterMidnight(minutes_after_midnight),
+            _ => DisplayableValue::Passthrough(setting.into()),
+        };
         Self {
-            setting_id: value.setting_id,
-            value: DisplayableValue(value.value),
+            setting_id,
+            value: displayable_value,
         }
     }
 }

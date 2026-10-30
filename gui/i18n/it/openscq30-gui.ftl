@@ -45,3 +45,7 @@ confirm = Conferma
 execute = Esegui
 default = Predefinito
 preferred-language = Lingua preferita
+theme = Tema
+system-theme = Tema di sistema
+light-theme = Chiaro
+dark-theme = Scuro

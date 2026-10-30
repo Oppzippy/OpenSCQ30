@@ -1226,6 +1226,33 @@ fn setting_action_get() {
 }
 
 #[test]
+fn setting_time_set() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreD1301");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("setting")
+        .arg("--set")
+        .arg("createAlarm=")
+        .arg("--set")
+        .arg("alarm1Time=15:30")
+        .arg("--get")
+        .arg("alarm1Time");
+    assert_cmd_snapshot!(command, @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID	Value
+    alarm1Time	15:30
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
 fn setting_set_and_get_race_condition() {
     thread::scope(|scope| {
         for i in 0..500 {
@@ -1308,6 +1335,41 @@ fn hue_color_picker_json() {
         "value": {
           "type": "f32",
           "value": 0.0
+        }
+      }
+    ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn time_json() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreD1301");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("setting")
+        .arg("--json")
+        .arg("--set")
+        .arg("createAlarm=")
+        .arg("--set")
+        .arg("alarm1Time=15:30")
+        .arg("--get")
+        .arg("alarm1Time");
+    assert_cmd_snapshot!(command, @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      {
+        "settingId": "alarm1Time",
+        "value": {
+          "type": "i32",
+          "value": 930
         }
       }
     ]

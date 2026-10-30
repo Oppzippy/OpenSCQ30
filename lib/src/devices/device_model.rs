@@ -43,6 +43,7 @@ pub enum DeviceModel {
     SoundcoreA3062,
     SoundcoreA3116,
     SoundcoreA3330,
+    SoundcoreA3388,
     SoundcoreA3876,
     SoundcoreA3909,
     SoundcoreA3926,
@@ -54,6 +55,7 @@ pub enum DeviceModel {
     SoundcoreA3945,
     SoundcoreA3951,
     SoundcoreA3952,
+    SoundcoreA3953,
     SoundcoreA3939,
     SoundcoreA3935,
     SoundcoreA3954,
@@ -68,6 +70,7 @@ pub enum DeviceModel {
     SoundcoreD1202,
     SoundcoreD1202C,
     SoundcoreD1301,
+    SoundcoreD1402,
     SoundcoreDevelopment,
 }
 
@@ -102,6 +105,7 @@ impl DeviceModel {
             Self::SoundcoreA3062 => new_soundcore_device!(soundcore::a3062),
             Self::SoundcoreA3116 => new_soundcore_device!(soundcore::a3116),
             Self::SoundcoreA3330 => new_soundcore_device!(soundcore::a3330),
+            Self::SoundcoreA3388 => new_soundcore_device!(soundcore::a3388),
             Self::SoundcoreA3876 => new_soundcore_device!(soundcore::a3876),
             Self::SoundcoreA3909 => new_soundcore_device!(soundcore::a3909),
             Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
@@ -120,6 +124,7 @@ impl DeviceModel {
             Self::SoundcoreA3949 => new_soundcore_device!(soundcore::a3949),
             Self::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
             Self::SoundcoreA3952 => new_soundcore_device!(soundcore::a3952),
+            Self::SoundcoreA3953 => new_soundcore_device!(soundcore::a3953),
             Self::SoundcoreA3954 => new_soundcore_device!(soundcore::a3954),
             Self::SoundcoreA3955 => new_soundcore_device!(soundcore::a3955),
             Self::SoundcoreA3957 => new_soundcore_device!(soundcore::a3957),
@@ -129,6 +134,7 @@ impl DeviceModel {
             Self::SoundcoreD1202 => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1202C => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1301 => new_soundcore_device!(soundcore::d1301),
+            Self::SoundcoreD1402 => new_soundcore_device!(soundcore::d1402),
             Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }
@@ -158,6 +164,7 @@ impl DeviceModel {
             Self::SoundcoreA3062 => new_soundcore_device!(soundcore::a3062),
             Self::SoundcoreA3116 => new_soundcore_device!(soundcore::a3116),
             Self::SoundcoreA3330 => new_soundcore_device!(soundcore::a3330),
+            Self::SoundcoreA3388 => new_soundcore_device!(soundcore::a3388),
             Self::SoundcoreA3876 => new_soundcore_device!(soundcore::a3876),
             Self::SoundcoreA3909 => new_soundcore_device!(soundcore::a3909),
             Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
@@ -176,6 +183,7 @@ impl DeviceModel {
             Self::SoundcoreA3949 => new_soundcore_device!(soundcore::a3949),
             Self::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
             Self::SoundcoreA3952 => new_soundcore_device!(soundcore::a3952),
+            Self::SoundcoreA3953 => new_soundcore_device!(soundcore::a3953),
             Self::SoundcoreA3954 => new_soundcore_device!(soundcore::a3954),
             Self::SoundcoreA3955 => new_soundcore_device!(soundcore::a3955),
             Self::SoundcoreA3957 => new_soundcore_device!(soundcore::a3957),
@@ -185,6 +193,7 @@ impl DeviceModel {
             Self::SoundcoreD1202 => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1202C => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1301 => new_soundcore_device!(soundcore::d1301),
+            Self::SoundcoreD1402 => new_soundcore_device!(soundcore::d1402),
             Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }
@@ -242,6 +251,9 @@ mod tests {
                             | Setting::Information { .. }
                             | Setting::ImportString { .. } => None,
                             Setting::Action => Some(true.into()),
+                            Setting::TimeOfDay {
+                                minutes_after_midnight,
+                            } => Some(minutes_after_midnight.into()),
                         };
                         if let Some(value) = value {
                             device

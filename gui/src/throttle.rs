@@ -79,6 +79,13 @@ impl Throttle {
                 }
             }
             Setting::Action => (),
+            Setting::TimeOfDay {
+                minutes_after_midnight,
+            } => {
+                if let Some(v) = queued_value {
+                    *minutes_after_midnight = v.try_as_i32().unwrap();
+                }
+            }
         }
 
         Some(setting)

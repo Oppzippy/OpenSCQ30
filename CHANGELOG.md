@@ -7,6 +7,37 @@
 #### Features
 
 - Add macOS support (beta)
+- Add support for Soundcore Space 2 (D1402)
+
+## v2.13.0
+
+### General
+
+#### Features
+
+- Add support for Soundcore Q11i
+- Add support for Soundcore C30i
+- Add support for Soundcore AeroClip
+- Add support for Soundcore Liberty 4
+- Add alarms and "Auto-switch Once Asleep" settings for Soundcore Sleep A30
+
+#### Fixes
+
+- Show a message in the Equalizer category when only one earbud is connected indicating that the equalizer settings are only available when both earbuds are connected.
+- Don't show case battery level with nonsensical value when unavailable
+
+### GUI
+
+#### Features
+
+- When adding a new device, you can now search by model name (for example, a3957 for Soundcore Liberty 5)
+- Add setting to force light/dark theme, overriding the system setting
+
+### Android
+
+#### Fixes
+
+- Fix bluetooth permission issue on Android 11 and older
 
 ## v2.12.0
 

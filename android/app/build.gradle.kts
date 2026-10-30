@@ -51,8 +51,8 @@ android {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1028
-        versionName = "2.12.0"
+        versionCode = 1029
+        versionName = "2.13.0"
 
         testInstrumentationRunner = "com.oppzippy.openscq30.HiltTestRunner"
         vectorDrawables {
@@ -64,6 +64,16 @@ android {
     productFlavors {
         abis.forEach { abi ->
             create(abi.android) {
+                val buildMachineArch = System.getProperty("os.arch")
+                // since isDefault is only relevant for Android Studio, set it such that it matches the architecture of
+                // an android emulator running on the same machine.
+                isDefault = abi.android == when (buildMachineArch) {
+                    "arm" -> "armeabi-v7a"
+                    "aarch64" -> "arm64-v8a"
+                    "x86" -> "x86"
+                    "amd64" -> "x86_64"
+                    else -> null
+                }
                 dimension = "abi"
                 ndk {
                     abiFilters.clear()
@@ -114,7 +124,7 @@ android {
         compose = true
         buildConfig = true
     }
-    ndkVersion = "29.0.14206865"
+    ndkVersion = "30.0.16248370"
     packaging {
         resources {
             excludes += "/META-INF/*"
@@ -257,9 +267,7 @@ gradleToCargoProfiles.forEach { (gradleBuildProfile, cargoProfile) ->
                     .withBuildType(gradleBuildProfile)
                     .withFlavor("abi" to abi.android),
             ) { variant ->
-                // TODO switch to variant.sources.kotlin when this issue is fixed:
-                // https://github.com/google/ksp/issues/2494
-                variant.sources.java!!.addGeneratedSourceDirectory(
+                variant.sources.kotlin!!.addGeneratedSourceDirectory(
                     generateTask,
                     GenerateUniffiBindingsTask::outputDirectory,
                 )

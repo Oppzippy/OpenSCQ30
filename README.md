@@ -28,6 +28,7 @@ If there's a device not in this list that you want to see supported, check if th
 | A3062  | Soundcore Space One Pro      |
 | A3116  | Soundcore Motion+            |
 | A3330  | Soundcore C30i               |
+| A3388  | Soundcore AeroClip           |
 | A3876  | Soundcore V20i               |
 | A3909  | Soundcore Liberty 2 Pro      |
 | A3926  | Soundcore Life Dot 2S        |
@@ -44,6 +45,7 @@ If there's a device not in this list that you want to see supported, check if th
 | A3949  | Soundcore P20i / P25i / R50i |
 | A3951  | Soundcore Liberty Air 2 Pro  |
 | A3952  | Soundcore Liberty 3 Pro      |
+| A3953  | Soundcore Liberty 4          |
 | A3954  | Soundcore Liberty 4 Pro      |
 | A3955  | Soundcore P40i               |
 | A3957  | Soundcore Liberty 5          |
@@ -53,6 +55,7 @@ If there's a device not in this list that you want to see supported, check if th
 | D1202  | Soundcore P31i               |
 | D1202C | Soundcore R60i NC            |
 | D1301  | Soundcore Sleep A30          |
+| D1402  | Soundcore Space 2            |
 
 ## Installing
 

@@ -76,6 +76,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import java.math.BigDecimal
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -510,6 +512,15 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting, i
                 Text(translateSettingId(settingId), style = defaultTextStyle())
                 Spacer(GlanceModifier.defaultWeight())
                 Spacer(GlanceModifier.background(Color.hsv(setting.hue, 1f, 1f)).size(16.dp))
+            }
+        }
+
+        is Setting.TimeOfDay -> {
+            Row(GlanceModifier.fillMaxWidth()) {
+                Text(translateSettingId(settingId), style = defaultTextStyle())
+
+                val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+                Text(setting.getLocalTime().format(formatter), style = defaultTextStyle())
             }
         }
     }

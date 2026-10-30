@@ -18,11 +18,12 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
 use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
+use strum::VariantArray;
 use tokio::{select, sync::Semaphore};
 
 use crate::{
     add_device::{self, AddDeviceModel},
-    config::Config,
+    config::{AppTheme, Config},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
     utils::coalesce_result,
@@ -40,6 +41,7 @@ pub struct AppModel {
     context_drawer_screen: Option<ContextDrawerScreen>,
     available_language_names: Vec<Cow<'static, str>>,
     available_languages: Vec<Option<LanguageIdentifier>>,
+    theme_names: Vec<String>,
     key_binds: HashMap<KeyBind, KeyBindAction>,
 }
 
@@ -80,6 +82,7 @@ pub enum Message {
     ToggleSettings,
     None,
     SetPreferredLanguage(usize),
+    SetTheme(usize),
     KeyPressed {
         modifiers: keyboard::Modifiers,
         key: keyboard::Key,
@@ -194,6 +197,10 @@ impl Application for AppModel {
             context_drawer_screen: None,
             available_language_names,
             available_languages,
+            theme_names: AppTheme::VARIANTS
+                .iter()
+                .map(|theme| theme.translate())
+                .collect(),
             key_binds: key_binds(),
         };
         let command = app.update_title();
@@ -352,6 +359,15 @@ impl Application for AppModel {
                                     ),
                                     Message::SetPreferredLanguage,
                                 )),
+                            widget::settings::item::builder(fl!("theme")).flex_control(
+                                widget::dropdown(
+                                    &self.theme_names,
+                                    AppTheme::VARIANTS
+                                        .iter()
+                                        .position(|theme| *theme == self.config.get().theme),
+                                    Message::SetTheme,
+                                )
+                            ),
                         ],
                         Message::CloseContextDrawer,
                     )
@@ -594,12 +610,38 @@ impl Application for AppModel {
                 })
                 .map(Into::into);
             }
+            Message::SetTheme(theme_index) => {
+                let result_receiver = self.config.modify(|inner| {
+                    inner.theme = AppTheme::VARIANTS[theme_index];
+                });
+
+                return Task::batch([
+                    self.apply_theme(),
+                    Task::future(async move {
+                        if let Err(err) = result_receiver.await.unwrap() {
+                            tracing::error!("error writing to config file: {err:?}");
+                            Message::Warning(err.to_string())
+                        } else {
+                            Message::None
+                        }
+                    })
+                    .map(Into::into),
+                ]);
+            }
         }
         Task::none()
     }
 }
 
 impl AppModel {
+    fn apply_theme(&self) -> cosmic::app::Task<Message> {
+        cosmic::command::set_theme(match self.config.get().theme {
+            AppTheme::System => self.core.system_theme().clone(),
+            AppTheme::Light => cosmic::Theme::light(),
+            AppTheme::Dark => cosmic::Theme::dark(),
+        })
+    }
+
     pub fn update_title(&mut self) -> cosmic::app::Task<Message> {
         if let Some(id) = self.core.main_window_id() {
             self.set_header_title(fl!("openscq30"));

@@ -41,7 +41,7 @@ mod state_modifier;
 
 enum_subset!(
     SettingId,
-    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    #[derive(Eq, PartialEq, EnumString, EnumIter, IntoStaticStr)]
     enum EqualizerSetting {
         PresetEqualizerProfile,
         CustomEqualizerProfile,

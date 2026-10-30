@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import java.time.LocalTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -89,6 +90,14 @@ sealed class Setting {
     @SerialName("action")
     class Action : Setting() {
         override fun toValue() = false.toValue()
+    }
+
+    @Serializable
+    @SerialName("timeOfDay")
+    data class TimeOfDay(val minutesAfterMidnight: Int) : Setting() {
+        override fun toValue() = minutesAfterMidnight.toValue()
+
+        fun getLocalTime(): LocalTime = LocalTime.of(minutesAfterMidnight / 60, minutesAfterMidnight % 60)
     }
 }
 

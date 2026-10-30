@@ -1,16 +1,16 @@
+use std::borrow::Cow;
+
 use cosmic::{
     Element,
     cosmic_theme::palette::{Hsv, IntoColor, Srgb},
     iced::{Color, alignment},
     widget::{self, canvas},
 };
-use openscq30_i18n::Translate;
-use openscq30_lib::settings::SettingId;
 
 use crate::{device_settings::labeled_setting_row, fl};
 
 pub fn hue_color_picker<'a, M>(
-    setting_id: SettingId,
+    name: Cow<'a, str>,
     hue: f32,
     on_change: impl Fn(f32) -> M + 'a,
 ) -> Element<'a, M>
@@ -21,7 +21,7 @@ where
     // not done yet since iced's gradients only support rgb and not hsv, so something custom would
     // be necessary.
     labeled_setting_row(
-        setting_id.translate(),
+        name,
         widget::row![
             widget::canvas(HueBox(hue)).width(24).height(24),
             widget::slider(0.0..=360.0, hue, on_change).description(fl!("color-hue-in-degrees")),

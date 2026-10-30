@@ -4,6 +4,7 @@ package com.oppzippy.openscq30.ui.devicesettings.screens
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.text.format.DateFormat
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,10 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDialog
+import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +63,9 @@ import com.oppzippy.openscq30.ui.utils.MultiSelect
 import com.oppzippy.openscq30.ui.utils.OptionalSelect
 import com.oppzippy.openscq30.ui.utils.Select
 import com.oppzippy.openscq30.ui.utils.throttledState
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlin.math.roundToInt
 
 @Composable
@@ -162,6 +170,12 @@ private fun FallbackSettingCategoryScreen(
                 is Setting.Action -> Action(
                     name = name,
                     onExecute = { setSetting(settingId, true.toValue()) },
+                )
+
+                is Setting.TimeOfDay -> TimeOfDay(
+                    name = name,
+                    time = setting.getLocalTime(),
+                    onChange = { setSetting(settingId, (it.hour * 60 + it.minute).toValue()) },
                 )
             }
         }
@@ -430,4 +444,51 @@ private fun ImportString(name: String, confirmationMessage: String?, onImport: (
 @Composable
 private fun Action(name: String, onExecute: () -> Unit) {
     Button(modifier = Modifier.fillMaxWidth(), onClick = onExecute) { Text(name) }
+}
+
+@Composable
+private fun TimeOfDay(name: String, time: LocalTime, onChange: (LocalTime) -> Unit) {
+    var timePickerState by remember { mutableStateOf<TimePickerState?>(null) }
+
+    val userPrefers24HourTime = DateFormat.is24HourFormat(LocalContext.current)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(name)
+        rememberTimePickerState()
+        Button(
+            onClick = {
+                timePickerState = TimePickerState(
+                    initialHour = time.hour,
+                    initialMinute = time.minute,
+                    is24Hour = userPrefers24HourTime,
+                )
+            },
+        ) {
+            val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+            val formattedTime = time.format(formatter)
+            Text(formattedTime)
+        }
+
+        timePickerState?.let { currentTimePickerState ->
+            TimePickerDialog(
+                onDismissRequest = { timePickerState = null },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onChange(LocalTime.of(currentTimePickerState.hour, currentTimePickerState.minute))
+                            timePickerState = null
+                        },
+                    ) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                title = { Text(name) },
+            ) {
+                TimePicker(currentTimePickerState)
+            }
+        }
+    }
 }

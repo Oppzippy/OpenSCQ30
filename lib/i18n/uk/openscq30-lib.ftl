@@ -200,3 +200,7 @@ soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 music = Музика
 movie = Кіно
+soundcore-a3005 = Soundcore Q11i
+soundcore-a3330 = Soundcore C30i
+soundcore-a3944 = Soundcore Life P2 Mini
+soundcore-d1301 = Soundcore Sleep A30

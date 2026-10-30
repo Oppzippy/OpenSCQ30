@@ -172,3 +172,4 @@ soundcore-d1202c = Soundcore R60i NC
 soundcore-d1301 = Soundcore Sleep A30
 soundcore-a3062 = Soundcore Space One Pro
 find-device = Trova dispositivo
+both-earbuds-must-be-connected = Entrambi gli auricolari devono essere connessi.

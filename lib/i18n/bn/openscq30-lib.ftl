@@ -4,3 +4,4 @@ equalizer = ইকুয়ালাইজার
 soundcore-a3028 = Soundcore Q30 / Life Q30
 soundcore-a3029 = সাউন্ডকোর লাইফ টিউন
 none = নেই
+disconnected = সংজক বিচ্ছিন্ন

@@ -57,6 +57,17 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 return emptyList()
             }
 
+            if (
+                Build.VERSION.SDK_INT in Build.VERSION_CODES.Q..Build.VERSION_CODES.R &&
+                ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.e(TAG, "Missing ACCESS_FINE_LOCATION permission on Android 10-11")
+                return emptyList()
+            }
+
             val bondedDevices: Set<BluetoothDevice>? = bluetoothManager.adapter.bondedDevices
             if (bondedDevices == null) {
                 Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
@@ -92,6 +103,16 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+            return
+        }
+
+        if (Build.VERSION.SDK_INT in Build.VERSION_CODES.Q..Build.VERSION_CODES.R &&
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e(TAG, "Missing ACCESS_FINE_LOCATION permission on Android 10-11")
             return
         }
 

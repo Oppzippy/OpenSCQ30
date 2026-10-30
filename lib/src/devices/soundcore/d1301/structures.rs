@@ -109,6 +109,18 @@ pub struct Alarm {
 }
 
 impl Alarm {
+    pub fn default_with_id(id: u8) -> Self {
+        Self {
+            id,
+            is_enabled: false,
+            time: 0,
+            repeat: AlarmRepeat::empty(),
+            wake_up_tune: AlarmWakeUpTune::Nature,
+            volume: AlarmVolume::new(50),
+            snooze_duration_in_minutes: 10,
+        }
+    }
+
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
