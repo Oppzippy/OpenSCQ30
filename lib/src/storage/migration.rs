@@ -11,7 +11,7 @@ macro_rules! migration_file {
     };
 }
 
-pub const MIGRATIONS: &[Migration] = &[migration_file!("0.sql")];
+pub const MIGRATIONS: &[Migration] = &[migration_file!("0.sql"), migration_file!("1.sql")];
 
 #[instrument(skip(connection, migrations))]
 pub fn migrate(
