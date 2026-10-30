@@ -23,12 +23,17 @@ enum_subset! {
     enum ButtonConfigurationSetting {
         SinglePress,
         DoublePress,
+        MfbLongPress,
     }
 }
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<d1402::structures::ButtonConfiguration> + Clone + Send + Sync,
+    T: Has<d1402::structures::ButtonConfiguration>
+        + Has<d1402::structures::MfbButtonConfiguration>
+        + Clone
+        + Send
+        + Sync,
 {
     pub fn add_d1402_button_configuration(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(

@@ -133,6 +133,7 @@ mod tests {
             (SettingId::TransparencyModeInCycle, true.into()),
             (SettingId::NormalModeInCycle, false.into()),
             (SettingId::DoublePress, Some("BassUp").into()),
+            (SettingId::MfbLongPress, Some("SystemVoiceAssistant").into()),
             (SettingId::AutoPowerOff, "30m".into()),
             (SettingId::LimitHighVolume, false.into()),
             (SettingId::LimitHighVolumeRefreshRate, "RealTime".into()),
@@ -164,6 +165,7 @@ mod tests {
             (SettingId::TransparencyModeInCycle, true.into()),
             (SettingId::NormalModeInCycle, false.into()),
             (SettingId::DoublePress, None::<&str>.into()),
+            (SettingId::MfbLongPress, Some("SystemVoiceAssistant").into()),
             (SettingId::AutoPowerOff, "300m".into()),
             (SettingId::LimitHighVolume, true.into()),
             (SettingId::LimitHighVolumeRefreshRate, "RealTime".into()),
@@ -475,5 +477,20 @@ mod tests {
                     .unwrap();
             assert_eq!(parsed, reparsed);
         }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_mfb_long_press_to_nap_mode() {
+        let mut device = new_device(&ISSUE_PACKET_1).await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::MfbLongPress, Some("NapMode").into())],
+                vec![packet::Outbound::new(
+                    packet::Command([4, 97]),
+                    vec![0, 1, 13],
+                )],
+            )
+            .await;
     }
 }

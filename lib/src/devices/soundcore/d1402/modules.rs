@@ -62,7 +62,12 @@ where
 
 impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    StateType: Has<d1402::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
+    StateType: Has<d1402::structures::ButtonConfiguration>
+        + Has<d1402::structures::MfbButtonConfiguration>
+        + Send
+        + Sync
+        + Clone
+        + 'static,
 {
     pub fn d1402_button_configuration(&mut self) {
         let packet_io_controller = self.packet_io_controller().clone();

@@ -26,6 +26,7 @@ pub struct D1402State {
     age_range: AgeRange,
     hear_id: CustomHearId<1, 10>,
     button_configuration: d1402::structures::ButtonConfiguration,
+    mfb_button_configuration: d1402::structures::MfbButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: d1402::structures::SoundModes,
     three_d_sound: SurroundSound,
@@ -53,6 +54,7 @@ impl D1402State {
             age_range: state_update_packet.age_range,
             hear_id: state_update_packet.hear_id,
             button_configuration: state_update_packet.button_configuration,
+            mfb_button_configuration: state_update_packet.mfb_button_configuration,
             ambient_sound_mode_cycle: state_update_packet.ambient_sound_mode_cycle,
             sound_modes: state_update_packet.sound_modes,
             three_d_sound: state_update_packet.three_d_sound,
@@ -83,7 +85,7 @@ impl Update<D1402StateUpdatePacket> for D1402State {
             hear_id,
             button_configuration,
             ambient_sound_mode_cycle,
-            mfb_long_press_action: _,
+            mfb_button_configuration,
             sound_modes,
             three_d_sound,
             ambient_sound_mode_voice_prompt,
@@ -103,6 +105,7 @@ impl Update<D1402StateUpdatePacket> for D1402State {
         self.age_range = age_range;
         self.hear_id = hear_id;
         self.button_configuration = button_configuration;
+        self.mfb_button_configuration = mfb_button_configuration;
         self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;
         self.sound_modes = sound_modes;
         self.three_d_sound = three_d_sound;

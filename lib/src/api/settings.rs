@@ -81,6 +81,7 @@ pub enum SettingId {
     VolumeAdjustments,
     SinglePress,
     DoublePress,
+    MfbLongPress,
     LeftSinglePress,
     LeftDoublePress,
     LeftTriplePress,

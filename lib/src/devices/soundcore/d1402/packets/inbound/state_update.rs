@@ -3,7 +3,6 @@ use nom::{
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
-    number::complete::le_u8,
 };
 
 use crate::devices::soundcore::{
@@ -16,7 +15,7 @@ use crate::devices::soundcore::{
             Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery, SurroundSound,
         },
     },
-    d1402::{self, packets::outbound, state::D1402State},
+    d1402::{self, packets::outbound, state::D1402State, structures::MfbButtonConfiguration},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -33,7 +32,7 @@ pub struct D1402StateUpdatePacket {
     pub button_configuration: d1402::structures::ButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     /// Not configurable in the official app's UI for us to expose, so it's only parsed.
-    pub mfb_long_press_action: u8,
+    pub mfb_button_configuration: d1402::structures::MfbButtonConfiguration,
     pub sound_modes: d1402::structures::SoundModes,
     pub three_d_sound: SurroundSound,
     pub ambient_sound_mode_voice_prompt: d1402::structures::AmbientSoundModeVoicePrompt,
@@ -61,7 +60,7 @@ impl Default for D1402StateUpdatePacket {
             button_configuration: d1402::structures::ButtonConfiguration::default(),
             ambient_sound_mode_cycle: AmbientSoundModeCycle::default(),
             // System voice assistant, the value seen from hardware before it was changed.
-            mfb_long_press_action: 5,
+            mfb_button_configuration: MfbButtonConfiguration::default(),
             sound_modes: d1402::structures::SoundModes::default(),
             three_d_sound: SurroundSound::default(),
             ambient_sound_mode_voice_prompt:
@@ -103,7 +102,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     d1402::structures::ButtonConfiguration::take,
                     take(1usize), // unknown
                     AmbientSoundModeCycle::take,
-                    le_u8, // mfb long press action
+                    MfbButtonConfiguration::take,
                     d1402::structures::SoundModes::take,
                     take(1usize), // unknown
                     SurroundSound::take,
@@ -132,7 +131,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     button_configuration,
                     _unknown2,
                     ambient_sound_mode_cycle,
-                    mfb_long_press_action,
+                    mfb_button_configuration,
                     sound_modes,
                     _unknown3,
                     three_d_sound,
@@ -153,7 +152,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     hear_id,
                     button_configuration,
                     ambient_sound_mode_cycle,
-                    mfb_long_press_action,
+                    mfb_button_configuration,
                     sound_modes,
                     three_d_sound,
                     ambient_sound_mode_voice_prompt,
@@ -193,7 +192,7 @@ impl ToPacket for D1402StateUpdatePacket {
             .chain(self.button_configuration.bytes())
             .chain([255]) // unknown
             .chain(self.ambient_sound_mode_cycle.bytes())
-            .chain([self.mfb_long_press_action])
+            .chain(self.mfb_button_configuration.bytes())
             .chain(self.sound_modes.bytes())
             .chain([49]) // unknown
             .chain(self.three_d_sound.bytes())

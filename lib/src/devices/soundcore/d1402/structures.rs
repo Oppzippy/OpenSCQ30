@@ -193,6 +193,53 @@ pub enum ButtonAction {
     BassUp = 7,
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Default)]
+pub struct MfbButtonConfiguration {
+    pub action: Option<MfbButtonAction>,
+}
+
+impl MfbButtonConfiguration {
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        map(le_u8, |action_byte| {
+            let action = if action_byte == 15 {
+                None
+            } else {
+                Some(MfbButtonAction::from_repr(action_byte).unwrap_or_default())
+            };
+            Self { action }
+        })
+        .parse_complete(input)
+    }
+
+    pub fn bytes(&self) -> [u8; 1] {
+        [self.action.map_or(15, |action| action as u8)]
+    }
+}
+
+#[repr(u8)]
+#[derive(
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Debug,
+    Default,
+    FromRepr,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
+    Translate,
+)]
+pub enum MfbButtonAction {
+    #[default]
+    SystemVoiceAssistant = 5,
+    AnkaVoiceAssistant = 11,
+    AiTranslation = 10,
+    NapMode = 13,
+}
+
 #[cfg(test)]
 mod tests {
     use nom_language::error::VerboseError;
