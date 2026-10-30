@@ -68,6 +68,22 @@ windows = { workspace = true, features = [
 rusqlite = { workspace = true, features = ["bundled"] }
 rust-embed = { workspace = true, features = ["debug-embed"] }
 
+[target.'cfg(target_os = "macos")'.dependencies]
+# The system sqlite on macOS 15 (3.43) is too old for the migrations (json_valid with 2 args needs 3.45+)
+rusqlite = { workspace = true, features = ["bundled"] }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+objc2 = { workspace = true }
+objc2-foundation = { workspace = true }
+objc2-core-foundation = { workspace = true }
+objc2-io-bluetooth = { workspace = true, features = [
+    "Bluetooth",
+    "IOBluetoothDevice",
+    "IOBluetoothRFCOMMChannel",
+    "IOBluetoothSDPServiceRecord",
+    "IOBluetoothSDPUUID",
+    "IOBluetoothSDPDataElement",
+] }
+
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "test-util"] }
 proptest = { workspace = true, default-features = false, features = ["std"] }
