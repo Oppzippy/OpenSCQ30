@@ -54,6 +54,7 @@ soundcore_device!(
         builder.auto_play_pause();
         builder.low_battery_prompt();
         builder.d1402_ambient_sound_mode_voice_prompt();
+        builder.d1402_hey_anka_wake_word();
 
         builder.single_battery_custom(
             common::modules::single_battery::SingleBatteryConfiguration {
@@ -144,6 +145,7 @@ mod tests {
             (SettingId::SurroundSound, false.into()),
             (SettingId::DualConnections, true.into()),
             (SettingId::AutoPlayPause, true.into()),
+            (SettingId::HeyAnkaWakeWord, false.into()),
         ]);
     }
 
@@ -176,6 +178,7 @@ mod tests {
             (SettingId::SurroundSound, false.into()),
             (SettingId::DualConnections, true.into()),
             (SettingId::AutoPlayPause, false.into()),
+            (SettingId::HeyAnkaWakeWord, false.into()),
         ]);
     }
 

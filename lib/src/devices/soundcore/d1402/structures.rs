@@ -16,6 +16,7 @@ use crate::devices::soundcore::common::{
 };
 
 common::structures::flag!(AmbientSoundModeVoicePrompt);
+common::structures::flag!(HeyAnkaWakeWord);
 
 /// Unknown byte between the equalizer and the age range. It has only been seen as 30. The
 /// equalizer command writes it back where the Space One Pro has gender.

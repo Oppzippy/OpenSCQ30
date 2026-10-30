@@ -36,6 +36,7 @@ pub struct D1402State {
     auto_power_off: AutoPowerOff,
     limit_high_volume: LimitHighVolume,
     auto_play_pause: AutoPlayPause,
+    hey_anka_wake_word: d1402::structures::HeyAnkaWakeWord,
     dual_connections: DualConnections,
     button_configuration_reset: ResetButtonConfigurationPending,
 }
@@ -64,6 +65,7 @@ impl D1402State {
             auto_power_off: state_update_packet.auto_power_off,
             limit_high_volume: state_update_packet.limit_high_volume,
             auto_play_pause: state_update_packet.auto_play_pause,
+            hey_anka_wake_word: state_update_packet.hey_anka_wake_word,
             dual_connections: DualConnections {
                 is_enabled: state_update_packet.dual_connections_enabled,
                 devices: dual_connections_devices,
@@ -95,7 +97,7 @@ impl Update<D1402StateUpdatePacket> for D1402State {
             auto_power_off,
             limit_high_volume,
             auto_play_pause,
-            hey_anka_enabled: _,
+            hey_anka_wake_word,
         } = partial;
         self.battery = battery;
         self.firmware_version = firmware_version;
@@ -116,5 +118,6 @@ impl Update<D1402StateUpdatePacket> for D1402State {
         self.auto_power_off = auto_power_off;
         self.limit_high_volume = limit_high_volume;
         self.auto_play_pause = auto_play_pause;
+        self.hey_anka_wake_word = hey_anka_wake_word;
     }
 }

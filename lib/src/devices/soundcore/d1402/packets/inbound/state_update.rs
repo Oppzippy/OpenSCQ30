@@ -15,7 +15,12 @@ use crate::devices::soundcore::{
             Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery, SurroundSound,
         },
     },
-    d1402::{self, packets::outbound, state::D1402State, structures::MfbButtonConfiguration},
+    d1402::{
+        self,
+        packets::outbound,
+        state::D1402State,
+        structures::{HeyAnkaWakeWord, MfbButtonConfiguration},
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -42,7 +47,7 @@ pub struct D1402StateUpdatePacket {
     pub auto_power_off: AutoPowerOff,
     pub limit_high_volume: LimitHighVolume,
     pub auto_play_pause: AutoPlayPause,
-    pub hey_anka_enabled: bool,
+    pub hey_anka_wake_word: HeyAnkaWakeWord,
 }
 
 impl Default for D1402StateUpdatePacket {
@@ -71,7 +76,7 @@ impl Default for D1402StateUpdatePacket {
             auto_power_off: AutoPowerOff::default(),
             limit_high_volume: LimitHighVolume::default(),
             auto_play_pause: AutoPlayPause::default(),
-            hey_anka_enabled: false,
+            hey_anka_wake_word: HeyAnkaWakeWord::default(),
         }
     }
 }
@@ -116,7 +121,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                         LimitHighVolume::take,
                         take(3usize), // audio streaming status and unknown
                         AutoPlayPause::take,
-                        take_bool,    // hey anka
+                        HeyAnkaWakeWord::take,
                         take(8usize), // unknown
                     ),
                 ),
@@ -141,7 +146,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     ldac,
                     dual_connections_enabled,
                     auto_power_off,
-                    (limit_high_volume, _unknown5, auto_play_pause, hey_anka_enabled, _unknown6),
+                    (limit_high_volume, _unknown5, auto_play_pause, hey_anka_wake_word, _unknown6),
                 )| Self {
                     battery,
                     firmware_version,
@@ -162,7 +167,7 @@ impl FromPacketBody for D1402StateUpdatePacket {
                     auto_power_off,
                     limit_high_volume,
                     auto_play_pause,
-                    hey_anka_enabled,
+                    hey_anka_wake_word,
                 },
             ),
         )
@@ -205,7 +210,7 @@ impl ToPacket for D1402StateUpdatePacket {
             .chain(self.limit_high_volume.bytes())
             .chain([0, 1, 0]) // audio streaming status and unknown
             .chain(self.auto_play_pause.bytes())
-            .chain([self.hey_anka_enabled.into()])
+            .chain(self.hey_anka_wake_word.bytes())
             .chain([0, 0, 0, 255, 255, 255, 255, 255]) // unknown
             .collect()
     }

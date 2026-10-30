@@ -86,3 +86,14 @@ where
             .add_d1402_ambient_sound_mode_voice_prompt(packet_io_controller);
     }
 }
+
+impl<StateType> SoundcoreDeviceBuilder<StateType>
+where
+    StateType: Has<d1402::structures::HeyAnkaWakeWord> + Send + Sync + Clone + 'static,
+{
+    pub fn d1402_hey_anka_wake_word(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_d1402_hey_anka_wake_word(packet_io_controller);
+    }
+}

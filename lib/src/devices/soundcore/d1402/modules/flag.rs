@@ -33,3 +33,21 @@ where
         );
     }
 }
+
+impl<T> ModuleCollection<T>
+where
+    T: Has<d1402::structures::HeyAnkaWakeWord> + Clone + Send + Sync,
+{
+    pub fn add_d1402_hey_anka_wake_word(&mut self, packet_io: Arc<PacketIOController>) {
+        self.add_flag(
+            packet_io,
+            FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
+                setting_id: SettingId::HeyAnkaWakeWord,
+                set_command: packet::Command([24, 131]),
+                update_command: None,
+                is_inverted: false,
+            },
+        );
+    }
+}
