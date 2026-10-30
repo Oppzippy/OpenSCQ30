@@ -38,6 +38,7 @@ soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 soundcore-d1301 = Soundcore Sleep A30
+soundcore-d1402 = Soundcore Space 2
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -148,12 +149,17 @@ right-triple-press = Right Triple Press
 right-long-press = Right Long Press
 right-slide-up = Right Slide Up
 right-slide-down = Right Slide Down
+mfb-long-press = MFB Long Press
 volume-up = Volume Up
 volume-down = Volume Down
 previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
+system-voice-assistant = System Voice Assistant
+anka-voice-assistant = Anka Voice Assistant
 play-pause = Play Pause
+ai-translation = AI Translation
+nap-mode = Nap Mode
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
@@ -323,3 +329,5 @@ alarm-n-volume = Alarm { $number } Volume
 alarm-n-snooze-duration-minutes = Alarm { $number } Snooze Duration (minutes)
 
 both-earbuds-must-be-connected = Both earbuds must be connected.
+
+hey-anka-wake-word = "Hey Anka" Wake Word
