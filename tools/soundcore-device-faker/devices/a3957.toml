@@ -143,9 +143,9 @@ response = [
     0x5a, # DB limit (90)
     0x00, # Decibel reading refresh rate
     0x00, # Immersive experience (Dolby) (0=disabled, 1=enabled)
-    0x01,
-    0x00,
-    0x00,
+    0x01, # Unknown (always 1)
+    0x00, # Dolby mode (0=music, 1=podcast, 2=movie)
+    0x00, # Unknown
     0xff,
     0x01,
     0x00,
