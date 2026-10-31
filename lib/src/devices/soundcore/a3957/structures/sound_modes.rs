@@ -10,7 +10,7 @@ use crate::devices::soundcore::common::{
     self,
     macros::sound_mode_enum,
     modules::sound_modes_v2,
-    packet::{self, inbound::FromPacketBody},
+    packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::{
         AdaptiveNoiseCancelingNamedStrength, ManualNoiseCanceling, WindNoise,
         manual_adaptive_noise_canceling_byte, take_manual_adaptive_noise_canceling,
@@ -20,8 +20,8 @@ use crate::devices::soundcore::common::{
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct SoundModes {
     pub ambient_sound_mode: common::structures::AmbientSoundMode,
-    #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::Transparency)]
-    pub transparency_mode: common::structures::TransparencyMode,
+    // Liberty 5 has no transparency sub-mode; this byte is In-Call Sound Awareness.
+    pub in_call_sound_awareness: bool,
     #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: NoiseCancelingMode,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
@@ -48,7 +48,7 @@ impl SoundModes {
                 self.manual_noise_canceling,
                 self.adaptive_noise_canceling,
             ),
-            self.transparency_mode.byte(),
+            u8::from(self.in_call_sound_awareness),
             self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
@@ -69,7 +69,7 @@ impl FromPacketBody for SoundModes {
                 (
                     common::structures::AmbientSoundMode::take,
                     take_manual_adaptive_noise_canceling,
-                    common::structures::TransparencyMode::take,
+                    take_bool,
                     NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
@@ -78,7 +78,7 @@ impl FromPacketBody for SoundModes {
                 |(
                     ambient_sound_mode,
                     (manual_noise_canceling, adaptive_noise_canceling),
-                    transparency_mode,
+                    in_call_sound_awareness,
                     noise_canceling_mode,
                     wind_noise,
                     noise_canceling_adaptive_sensitivity_level,
@@ -86,7 +86,7 @@ impl FromPacketBody for SoundModes {
                 )| {
                     Self {
                         ambient_sound_mode,
-                        transparency_mode,
+                        in_call_sound_awareness,
                         adaptive_noise_canceling,
                         manual_noise_canceling,
                         noise_canceling_mode,
@@ -121,3 +121,22 @@ sound_mode_enum!(
         Car = 3,
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use super::SoundModes;
+    use crate::devices::soundcore::common::packet::inbound::FromPacketBody;
+
+    #[test]
+    fn in_call_sound_awareness_round_trip() {
+        let cases: [([u8; 7], bool); 2] = [
+            ([2, 0x50, 0, 0, 1, 0, 3], false),
+            ([2, 0x50, 1, 0, 1, 0, 3], true),
+        ];
+        for (wire, expected) in cases {
+            let (_, parsed) = SoundModes::take::<nom::error::Error<&[u8]>>(&wire).unwrap();
+            assert_eq!(parsed.in_call_sound_awareness, expected);
+            assert_eq!(parsed.bytes(), wire);
+        }
+    }
+}
