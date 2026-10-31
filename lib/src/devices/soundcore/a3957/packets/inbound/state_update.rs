@@ -110,10 +110,10 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         take_bool,                           // 130: dual connections enabled
                         common::structures::AutoPowerOff::take, // 131-132
                         common::structures::LimitHighVolume::take, // 133-135
-                        a3957::structures::ImmersiveExperience::take, // 136
+                        a3957::structures::ImmersiveExperience::take, // 136-139
                     ),
                     (
-                        take(6usize),                                    // unknown: 137-142
+                        take(3usize),                                    // unknown: 140-142
                         common::structures::SoundLeakCompensation::take, // 143
                         common::structures::WearingDetection::take,      // 144
                         common::structures::TouchTone::take,             // 145
@@ -223,8 +223,8 @@ impl ToPacket for A3957StateUpdatePacket {
             .chain([self.dual_connections_enabled.into()]) // 130
             .chain(self.auto_power_off.bytes()) // 131-132
             .chain(self.limit_high_volume.bytes()) // 133-135
-            .chain(iter::once(self.immersive_experience as u8)) // 136
-            .chain([0; 6]) // unknown: 137-142
+            .chain(self.immersive_experience.bytes()) // 136-138
+            .chain([0; 4]) // unknown: 139-142
             .chain(self.sound_leak_compensation.bytes()) // 143
             .chain(self.wearing_detection.bytes()) // 144
             .chain([self.touch_tone.0.into()]) // 145
