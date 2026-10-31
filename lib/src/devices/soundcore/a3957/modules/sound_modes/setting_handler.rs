@@ -35,9 +35,9 @@ where
             SoundModeSetting::AmbientSoundMode => Some(Setting::select_from_enum_all_variants(
                 sound_modes.ambient_sound_mode,
             )),
-            SoundModeSetting::TransparencyMode => Some(Setting::select_from_enum_all_variants(
-                sound_modes.transparency_mode,
-            )),
+            SoundModeSetting::InCallSoundAwareness => Some(Setting::Toggle {
+                value: sound_modes.in_call_sound_awareness,
+            }),
             SoundModeSetting::NoiseCancelingMode => Some(Setting::select_from_enum(
                 &[
                     NoiseCancelingMode::Manual,
@@ -83,9 +83,9 @@ where
                 let sound_modes: &mut SoundModes = state.get_mut();
                 sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
             }
-            SoundModeSetting::TransparencyMode => {
+            SoundModeSetting::InCallSoundAwareness => {
                 let sound_modes: &mut SoundModes = state.get_mut();
-                sound_modes.transparency_mode = value.try_as_enum_variant()?;
+                sound_modes.in_call_sound_awareness = value.try_as_bool()?;
             }
             SoundModeSetting::NoiseCancelingMode => {
                 let sound_modes: &mut SoundModes = state.get_mut();

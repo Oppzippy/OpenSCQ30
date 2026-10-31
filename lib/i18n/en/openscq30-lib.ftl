@@ -50,6 +50,7 @@ miscellaneous = Miscellaneous
 
 ambient-sound-mode = Ambient Sound Mode
 transparency-mode = Transparency Mode
+in-call-sound-awareness = In-Call Sound Awareness
 noise-canceling-mode = Noise Canceling Mode
 custom-noise-canceling = Custom Noise Canceling
 preset-profile = Preset Profile

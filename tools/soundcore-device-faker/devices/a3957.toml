@@ -127,7 +127,7 @@ response = [
     0x33, # Ambient sound mode cycle
     0x00, # Ambient sound mode (0=noise canceling, 1=transparency, 2=normal)
     0x50, # Noise canceling settings: manual << 4 | adaptive (manual=5, adaptive=0)
-    0x00, # Transparency mode (0=fully transparent, 1=vocal)
+    0x00, # In-call sound awareness (0=disabled, 1=enabled)
     0x00, # Noise canceling mode (0=manual, 1=adaptive, 2=transportation)
     0x00, # Wind noise (bit 0=suppression enabled, bit 1=detected)
     0x00, # Adaptive noise canceling sensitivity level
