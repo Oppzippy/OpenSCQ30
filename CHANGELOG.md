@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Space 2 (D1402)
+
 ## v2.13.0
 
 ### General

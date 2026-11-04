@@ -81,6 +81,7 @@ pub enum SettingId {
     VolumeAdjustments,
     SinglePress,
     DoublePress,
+    MfbLongPress,
     LeftSinglePress,
     LeftDoublePress,
     LeftTriplePress,
@@ -264,6 +265,7 @@ pub enum SettingId {
     Alarm5Volume,
     #[translate("alarm-n-snooze-duration-minutes", number = 5)]
     Alarm5SnoozeDuration,
+    HeyAnkaWakeWord,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

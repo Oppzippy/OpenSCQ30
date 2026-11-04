@@ -68,6 +68,10 @@ pub enum AutoPowerOffDuration {
     NinetyMinutes,
     #[strum(serialize = "120m")]
     OneHundredTwentyMinutes,
+    #[strum(serialize = "180m")]
+    OneHundredEightyMinutes,
+    #[strum(serialize = "300m")]
+    ThreeHundredMinutes,
 }
 
 impl Translate for AutoPowerOffDuration {
@@ -79,6 +83,8 @@ impl Translate for AutoPowerOffDuration {
             Self::SixtyMinutes => fl!("x-minutes", minutes = 60),
             Self::NinetyMinutes => fl!("x-minutes", minutes = 90),
             Self::OneHundredTwentyMinutes => fl!("x-minutes", minutes = 120),
+            Self::OneHundredEightyMinutes => fl!("x-minutes", minutes = 180),
+            Self::ThreeHundredMinutes => fl!("x-minutes", minutes = 300),
         }
     }
 }
@@ -99,6 +105,15 @@ impl AutoPowerOffDuration {
             Self::TwentyMinutes,
             Self::ThirtyMinutes,
             Self::SixtyMinutes,
+        ]
+    }
+
+    pub fn thirty_sixty_one_eighty_three_hundred() -> &'static [Self] {
+        &[
+            Self::ThirtyMinutes,
+            Self::SixtyMinutes,
+            Self::OneHundredEightyMinutes,
+            Self::ThreeHundredMinutes,
         ]
     }
 }

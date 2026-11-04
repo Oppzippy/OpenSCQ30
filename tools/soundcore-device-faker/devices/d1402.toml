@@ -1,0 +1,111 @@
+name = "Soundcore Space 2"
+mac_address = "00:00:00:0d:14:02"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7D1402"
+
+[[responses]]
+command = [1, 1]
+response = [
+    2,   # battery level (0=10%, 9=100%)
+    0,   # battery charging
+    48,  # firmware version start
+    50,
+    46,
+    53,
+    57,  # firmware version end
+    49,  # serial number start
+    52,
+    48,
+    50,
+    56,
+    52,
+    57,
+    68,
+    52,
+    66,
+    56,
+    55,
+    48,
+    54,
+    65,
+    56,  # serial number end
+    1,   # equalizer preset id
+    0,   # equalizer preset id
+    160, # equalizer band 1
+    130,
+    140,
+    140,
+    160,
+    160,
+    160,
+    140,
+    120,
+    0,   # equalizer band 10
+    30,  # unknown (written back by the equalizer command)
+    255, # hear id age range (0-based index: 13-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+; 255=not set)
+    0,   # hear id enabled
+    255, # hear id start
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,   # hear id end
+    0,   # hear id time start
+    0,
+    0,
+    0,   # hear id time end
+    0,   # hear id type (0=initial, 1=custom, 2=favorite music genre)
+    255, # hear id custom start
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,   # hear id custom end
+    0,   # hear id favorite music genre
+    0,   # hear id favorite music genre
+    6,   # unknown
+    4,   # unknown
+    7,   # press twice (7=bassup on/off, 15=none)
+    255, # unknown
+    3,   # ambient sound mode cycle
+    5,   # mfb long press
+    0,   # 0=noise canceling, 1=transparency, 2=normal
+    95,  # custom noise canceling level in high nibble
+    255, # unknown
+    0,   # unknown
+    0,   # unknown
+    1,   # unknown
+    49,  # unknown
+    0,   # 3d sound
+    0,   # unknown
+    0,   # unknown
+    1,   # ambient sound mode voice prompt
+    1,   # low battery prompt
+    1,   # LDAC
+    1,   # dual connections
+    1,   # auto power off
+    0,   # auto power off duration
+    0,   # safe volume enabled
+    90,  # safe volume limit
+    0,   # safe volume refresh rate
+    0,   # audio streaming status
+    1,   # unknown
+    0,   # unknown
+    1,   # auto play/pause
+    0,   # hey anka
+    0,   # unknown
+    0,
+    0,
+    255,
+    255,
+    255,
+    255,
+    255,
+]
