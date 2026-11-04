@@ -26,7 +26,9 @@ pub struct A3954State {
     case_serial_number: a3954::structures::CaseSerialNumber,
     equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     hear_id: CustomHearId<2, 10>,
-    button_configuration: ButtonStatusCollection<12>,
+    button_configuration: ButtonStatusCollection<8>,
+    #[has(maybe)]
+    slide_button_configuration: Option<ButtonStatusCollection<4>>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3954::structures::SoundModes,
     case_features: a3954::structures::CaseFeatures,
@@ -62,6 +64,7 @@ impl A3954State {
             equalizer_configuration: packet.equalizer_configuration,
             hear_id: packet.hear_id,
             button_configuration: packet.button_configuration,
+            slide_button_configuration: packet.slide_button_configuration,
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
             sound_modes: packet.sound_modes,
             case_features: packet.case_features,
@@ -99,6 +102,7 @@ impl Update<a3954::packets::inbound::A3954StateUpdatePacket> for A3954State {
             equalizer_configuration,
             hear_id,
             button_configuration,
+            slide_button_configuration,
             ambient_sound_mode_cycle,
             sound_modes,
             case_features,
@@ -125,6 +129,7 @@ impl Update<a3954::packets::inbound::A3954StateUpdatePacket> for A3954State {
         self.equalizer_configuration = equalizer_configuration;
         self.hear_id = hear_id;
         self.button_configuration = button_configuration;
+        self.slide_button_configuration = slide_button_configuration;
         self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;
         self.sound_modes = sound_modes;
         self.case_features = case_features;

@@ -512,7 +512,7 @@ where
         &mut self,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) where
-        StateType: Has<ButtonStatusCollection<NUM_BUTTONS>>
+        StateType: MaybeHas<ButtonStatusCollection<NUM_BUTTONS>>
             + Has<TwsStatus>
             + Has<ResetButtonConfigurationPending>,
     {
@@ -971,6 +971,25 @@ pub mod test_utils {
                 .collect::<Vec<_>>();
             let sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
             assert_eq!(sent_packets_bytes, expected_packets_bytes);
+        }
+
+        /// Asserts that setting the values fails, and that no packets are sent in the process
+        pub async fn assert_set_settings_fails_without_sending_packets(
+            &mut self,
+            settings: Vec<(SettingId, Value)>,
+        ) {
+            self.clear_sent_packets().await;
+            let device = self.device.clone();
+            let join_handle =
+                tokio::spawn(async move { device.set_setting_values(settings).await });
+
+            let mut sent_packets = Vec::new();
+            let result = select! {
+                 _ = self.gather_sent_packets(&mut sent_packets) => None,
+                 result = join_handle => Some(result.unwrap()),
+            };
+            assert!(matches!(result, Some(Err(_))), "setting values should fail");
+            assert_eq!(sent_packets, Vec::<Vec<u8>>::new());
         }
 
         #[must_use]

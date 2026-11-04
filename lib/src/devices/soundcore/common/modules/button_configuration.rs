@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use openscq30_lib_has::Has;
+use openscq30_lib_has::{Has, MaybeHas};
 use setting_handler::ButtonConfigurationSettingHandler;
 use state_modifier::ButtonConfigurationStateModifier;
 
@@ -280,7 +280,7 @@ where
         packet_io: Arc<PacketIOController>,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) where
-        T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<ResetButtonConfigurationPending>,
+        T: MaybeHas<ButtonStatusCollection<NUM_BUTTONS>> + Has<ResetButtonConfigurationPending>,
     {
         const {
             assert!(

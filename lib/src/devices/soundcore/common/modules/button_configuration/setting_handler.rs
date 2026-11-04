@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use async_trait::async_trait;
-use openscq30_lib_has::Has;
+use openscq30_lib_has::{Has, MaybeHas};
 
 use crate::{
     api::settings::{Setting, SettingId, Value},
@@ -35,7 +35,7 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
 impl<T, const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize> SettingHandler<T>
     for ButtonConfigurationSettingHandler<NUM_BUTTONS, NUM_PRESS_KINDS>
 where
-    T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus> + Send,
+    T: MaybeHas<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         self.settings_inner()
@@ -43,7 +43,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let tws_status: TwsStatus = *state.get();
-        let statuses: &ButtonStatusCollection<_> = state.get();
+        let statuses: &ButtonStatusCollection<_> = state.maybe_get()?;
 
         self.get_inner(tws_status, statuses, *setting_id)
     }
@@ -55,7 +55,9 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         let tws_status: TwsStatus = *state.get();
-        let statuses: &mut ButtonStatusCollection<_> = state.get_mut();
+        let statuses: &mut ButtonStatusCollection<_> = state
+            .maybe_get_mut()
+            .ok_or(SettingHandlerError::MissingData)?;
 
         self.set_inner(tws_status, statuses, *setting_id, value)
     }
