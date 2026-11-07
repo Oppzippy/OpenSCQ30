@@ -7,6 +7,7 @@
 #### Features
 
 - Add support for Soundcore Space 2 (D1402)
+- Add support for Soundcore Boom 2 Plus (A3134)
 
 ## v2.13.0
 
