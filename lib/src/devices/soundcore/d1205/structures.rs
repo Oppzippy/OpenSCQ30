@@ -35,8 +35,9 @@ pub struct SoundModes {
     pub manual_noise_canceling: ManualNoiseCanceling,
     /// Low nibble of the noise canceling byte, always 0xF in captures
     pub unknown_low_nibble: u8,
-    /// Transparency mode option, not exposed yet since its name in the app is not confirmed
-    pub transparency_option: u8,
+    /// "Hearguard" toggle shown in transparency mode in the Soundcore app. Not exposed yet, since there is no
+    /// matching setting in openscq30.
+    pub hearguard: u8,
     /// Always 0 in captures. On the D1202 this byte selects manual/adaptive/multi-scene.
     pub noise_canceling_mode: u8,
     pub wind_noise: WindNoise,
@@ -63,7 +64,7 @@ impl FromPacketBody for SoundModes {
                 |(
                     ambient_sound_mode,
                     noise_canceling,
-                    transparency_option,
+                    hearguard,
                     noise_canceling_mode,
                     wind_noise,
                     unknown,
@@ -71,7 +72,7 @@ impl FromPacketBody for SoundModes {
                     ambient_sound_mode,
                     manual_noise_canceling: ManualNoiseCanceling::new(noise_canceling >> 4),
                     unknown_low_nibble: noise_canceling & 0x0F,
-                    transparency_option,
+                    hearguard,
                     noise_canceling_mode,
                     wind_noise,
                     unknown: unknown.try_into().expect("take(3) returns 3 bytes"),
@@ -87,7 +88,7 @@ impl SoundModes {
         [
             self.ambient_sound_mode.byte(),
             (self.manual_noise_canceling.inner() << 4) | (self.unknown_low_nibble & 0x0F),
-            self.transparency_option,
+            self.hearguard,
             self.noise_canceling_mode,
             self.wind_noise.byte(),
         ]
