@@ -1,0 +1,39 @@
+name = "soundcore Boom 2 Plus"
+mac_address = "00:00:00:00:31:34"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3134"
+
+[[responses]]
+command = [1, 1]
+response = [
+    0,                                                              # unknown
+    4,                                                              # battery level (0-5)
+    0,                                                              # battery charging
+    0, 1, 1, 2,                                                     # unknown
+    48, 51, 46, 49, 50,                                             # firmware version
+    65, 66, 67, 68, 69, 70, 65, 66, 67, 68, 69, 70, 65, 66, 67, 68, # serial number
+    0,                                                              # bass up
+    49, 255, 255, 255,                                              # unknown
+    0,                                                              # equalizer preset (0 signature, 1 voice, 2 treble boost, 3 balanced, 254 custom)
+    120, 7, 10,                                                     # band 1 gain of the custom profile (60-180 is -6 to +6 dB), frequency step, unknown
+    120, 7, 10,                                                     # band 2
+    120, 7, 10,                                                     # band 3
+    120, 7, 10,                                                     # band 4
+    120, 7, 10,                                                     # band 5
+    120, 7, 10,                                                     # band 6
+    120, 7, 10,                                                     # band 7
+    120, 6, 10,                                                     # band 8
+    120, 1, 10,                                                     # band 9
+    0, 0, 0, 86,                                                    # unknown
+    3,                                                              # lights effect (lightning)
+    100,                                                            # lights brightness (1-100)
+    0,                                                              # lights enabled
+    0, 6, 255, 0, 216, 138, 0, 255, 0, 20, 255, 0, 255, 204, 255, 252, 0, 255, 58, 0, # effect rainbow (id, color count, colors)
+    1, 1, 0, 178, 255,                                              # effect flash
+    2, 4, 255, 30, 0, 255, 122, 0, 255, 168, 0, 255, 226, 0,        # effect flame
+    3, 1, 255, 255, 255,                                            # effect lightning
+    4, 4, 0, 20, 255, 94, 0, 255, 138, 0, 255, 204, 0, 255,         # effect energy
+    5, 2, 255, 252, 0, 0, 255, 41,                                  # effect scan
+    6, 2, 0, 20, 255, 204, 0, 255,                                  # effect cyclone
+    7, 2, 0, 173, 255, 0, 255, 204,                                 # effect bounce
+    0, 0, 0, 0,                                                     # unknown
+]
