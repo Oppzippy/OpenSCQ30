@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.view.accessibility.AccessibilityEvent
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -58,6 +59,14 @@ open class TestBase<A : ComponentActivity>(
     }
 
     fun getString(id: Int): String = composeRule.activity.getString(id)
+
+    /**
+     * Waits for a node matching [matcher] to appear. Needed for content that is loaded asynchronously, such as the
+     * settings shown right after connecting to a device.
+     */
+    fun waitForNode(matcher: SemanticsMatcher, timeoutMillis: Long = 5000) {
+        composeRule.waitUntil(timeoutMillis) { composeRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+    }
     fun getString(id: Int, vararg formatArgs: Any): String = composeRule.activity.getString(id, *formatArgs)
 }
 

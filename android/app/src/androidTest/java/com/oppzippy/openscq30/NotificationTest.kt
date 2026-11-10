@@ -1,5 +1,11 @@
 package com.oppzippy.openscq30
 
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -101,11 +107,12 @@ class NotificationTest : OpenSCQ30RootTestBase() {
         composeRule.onNodeWithTag(getString(R.string.quick_preset_slot_x, 1) + " select").performClick()
         composeRule.onNodeWithText("My Preset 1").performClick()
         composeRule.onNodeWithContentDescription(getString(R.string.back)).performClick()
-        // Change the ambient sound mode away from the quick preset
-        composeRule.onNodeWithText("Sound Modes").performClick()
-        composeRule.onNodeWithText("Noise Canceling").performClick()
-        composeRule.onNodeWithText("Normal").performClick()
-        composeRule.onNodeWithText("Noise Canceling").assertDoesNotExist()
+        // Change the ambient sound mode away from the quick preset (sound modes are on the device's home screen)
+        val noiseCanceling = hasText("Noise Canceling") and isSelectable()
+        waitForNode(noiseCanceling)
+        composeRule.onNode(noiseCanceling).assertIsSelected()
+        composeRule.onNode(hasText("Normal") and isSelectable()).performClick().assertIsSelected()
+        composeRule.onNode(noiseCanceling).assertIsNotSelected()
         composeRule.waitForIdle()
 
         // Activate the quick preset via the notification
@@ -115,7 +122,10 @@ class NotificationTest : OpenSCQ30RootTestBase() {
         notification.findObject(By.text(Pattern.compile("My Preset 1", Pattern.CASE_INSENSITIVE))).click()
         uiDevice.pressBack()
 
-        composeRule.onNodeWithText("Noise Canceling")
-            .assertExists("ambient sound mode should change when activating quick preset")
+        composeRule.waitUntil(5000) {
+            composeRule.onAllNodes(noiseCanceling and isSelected()).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNode(noiseCanceling)
+            .assert(isSelected()) { "ambient sound mode should change when activating quick preset" }
     }
 }
