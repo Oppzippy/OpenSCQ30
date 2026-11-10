@@ -121,6 +121,7 @@ private fun DeviceCardContainer(
 private fun DeviceModelIcon(modifier: Modifier, model: String) {
     // TODO lint that checks DeviceModel rust enum and ensures all variants are listed here
     // or even better, generate a kotlin sealed class from the rust enum
+    // Until then, unlisted models fall back on their model number: A39xx models are earbuds (e.g. A3957 Liberty 5).
     when (model) {
         "SoundcoreA3004" -> HeadphonesIcon(modifier)
         "SoundcoreA3027" -> HeadphonesIcon(modifier)
@@ -147,7 +148,7 @@ private fun DeviceModelIcon(modifier: Modifier, model: String) {
         "SoundcoreA3955" -> EarbudsIcon(modifier)
         "SoundcoreA3959" -> EarbudsIcon(modifier)
         "SoundcoreDevelopment" -> HeadphonesIcon(modifier)
-        else -> HeadphonesIcon(modifier)
+        else -> if (model.startsWith("SoundcoreA39")) EarbudsIcon(modifier) else HeadphonesIcon(modifier)
     }
 }
 

@@ -1,13 +1,17 @@
 package com.oppzippy.openscq30
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
@@ -15,6 +19,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
@@ -32,8 +38,10 @@ class SettingTest : OpenSCQ30RootTestBase() {
     @Test
     fun testWindNoiseSuppression() {
         addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3959"))
-        composeRule.onNodeWithText(translateCategoryId("soundModes")).performClick()
+        // Sound mode settings are on the device's home screen
+        waitForNode(hasText(translateSettingId("windNoiseSuppression")))
         composeRule.onNodeWithText(translateSettingId("windNoiseSuppression"))
+            .performScrollTo()
             .assertIsOff()
             .performClick()
             .assertIsOn()
@@ -42,20 +50,25 @@ class SettingTest : OpenSCQ30RootTestBase() {
     @Test
     fun testCustomNoiseCanceling() {
         addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3951"))
-        composeRule.onNodeWithText(translateCategoryId("soundModes")).performClick()
+        waitForNode(hasTestTag(translateSettingId("customNoiseCanceling") + " slider"))
         composeRule.onNodeWithTag(translateSettingId("customNoiseCanceling") + " slider")
+            .performScrollTo()
             .assertRangeValueApproxEquals(0f)
-            .performTouchInput { click(centerRight) }
+            // Use the accessibility action rather than tapping the very edge of the node: the slider's touch target
+            // extends past the padding of the card it's in, so taps at the outermost pixels don't reach it.
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(10f) }
             .assertRangeValueApproxEquals(10f)
     }
 
     @Test
     fun testNoiseCancelingMode() {
         addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3951"))
-        composeRule.onNodeWithText(translateCategoryId("soundModes")).performClick()
-        composeRule.onNodeWithText("Noise Canceling").performClick()
-        composeRule.onNodeWithText("Normal").performClick().assertExists()
-        composeRule.onNodeWithText("Noise Canceling").assertDoesNotExist()
+        val noiseCanceling = hasText("Noise Canceling") and isSelectable()
+        val normal = hasText("Normal") and isSelectable()
+        waitForNode(noiseCanceling)
+        composeRule.onNode(noiseCanceling).assertIsSelected()
+        composeRule.onNode(normal).performClick().assertIsSelected()
+        composeRule.onNode(noiseCanceling).assertIsNotSelected()
     }
 
     @Test
