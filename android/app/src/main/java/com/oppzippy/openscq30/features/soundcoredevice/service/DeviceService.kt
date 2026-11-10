@@ -293,7 +293,7 @@ class DeviceService : LifecycleService() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            "Device Connection Service",
+            getString(R.string.device_connection_service),
             NotificationManager.IMPORTANCE_LOW,
         )
         channel.enableVibration(false)

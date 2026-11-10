@@ -117,4 +117,5 @@
     <string name="visible_settings">Visible Settings</string>
     <string name="appearance">Appearance</string>
     <string name="compact_layout">Compact Layout</string>
+    <string name="device_connection_service">Device Connection Service</string>
 </resources>
