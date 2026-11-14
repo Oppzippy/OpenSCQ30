@@ -37,6 +37,7 @@ const SERVICE_CLASS_ID_LIST_ATTRIBUTE_ID: BluetoothSDPServiceAttributeID = 0x000
 // retry budget is generous rather than tight.
 const IO_RETURN_NOT_OPEN: c_int = 0xE00002CDu32 as c_int;
 const WRITE_NOT_OPEN_RETRIES: u32 = 50;
+const WRITE_NOT_OPEN_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(200);
 
 const SDP_QUERY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
 
@@ -285,6 +286,10 @@ fn perform_sdp_query(device: &IOBluetoothDevice) -> connection::Result<()> {
     let (done_sender, done_receiver) = std::sync::mpsc::channel();
     let delegate = SdpQueryDelegate::new(done_sender);
     let delegate_object: &AnyObject = &delegate;
+    // SAFETY: Apple doesn't document whether the target is retained, so the delegate must outlive
+    // the query. If the query fails to start, no callback is pending. Otherwise `delegate` is only
+    // dropped after sdpQueryComplete: has sent on done_sender (its last use of self), or leaked on
+    // timeout below.
     let status = unsafe { device.performSDPQuery(Some(delegate_object)) };
     if status != 0 {
         return Err(connection::Error::DeviceNotFound {
@@ -449,9 +454,6 @@ define_class!(
             self.ivars()
                 .status_sender
                 .send_replace(connection::ConnectionStatus::Disconnected);
-            if let Some(run_loop) = CFRunLoop::current() {
-                run_loop.stop();
-            }
         }
     }
 );
@@ -473,6 +475,9 @@ impl RfcommDelegate {
     }
 }
 
+// objc2 bases Send on Apple's Sendable annotations, and IOBluetooth has none. Moving it is fine:
+// retain/release are atomic, and the connection thread only uses it for openRFCOMMChannelAsync
+// while open() blocks the caller, so our code never uses it from two threads at once.
 struct SendableDevice(Retained<IOBluetoothDevice>);
 unsafe impl Send for SendableDevice {}
 
@@ -594,11 +599,9 @@ fn write_chunk(channel: &IOBluetoothRFCOMMChannel, chunk: &[u8]) -> connection::
             break;
         }
         debug!("channel not open yet, retrying write ({attempt})");
-        // wait_for_open_complete already confirmed the channel opened once before any write is
-        // attempted, so a not-open status here is a transient stall on a live connection, not
-        // the initial-open race: pump so a real rfcommChannelClosed: during the stall is caught
-        // instead of blocking through it.
-        pump_run_loop();
+        // Delegate callbacks are delivered on the main thread, so this thread's run loop has
+        // nothing scheduled and pumping it returns immediately; wait in real time instead.
+        thread::sleep(WRITE_NOT_OPEN_RETRY_DELAY);
     }
     debug!("writeSync status: {status}, channel isOpen: {}", unsafe {
         channel.isOpen()
@@ -671,9 +674,8 @@ fn run_connection_thread(
 
     let _ = open_result_sender.send(Ok(()));
 
-    // Empirically, channel callbacks (rfcommChannelData etc.) are delivered on whichever thread
-    // pumps the run loop here, unlike SDP query callbacks which need the real main thread
-    // (see perform_sdp_query), so writes and pumping stay on this dedicated thread.
+    // Delegate callbacks (rfcommChannelData etc.) are delivered on the main thread's run loop (see
+    // cli/src/main.rs), not this one. Writes stay on this dedicated thread.
     debug!("channel opened, running write/pump loop");
 
     // Service any write requests queued while the channel was still opening.
