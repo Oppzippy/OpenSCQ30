@@ -51,12 +51,11 @@ const RFCOMM_OPEN_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(
 const BASEBAND_CLOSE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
 const BASEBAND_CLOSE_POLL_INTERVAL: std::time::Duration = std::time::Duration::from_millis(50);
 
-// CFRunLoopRun() returns immediately if nothing is scheduled at the moment it's called, so the
-// connection's event loop re-enters it in short bursts instead of once indefinitely.
+// Upper bound for each pump of the connection thread's run loop (it returns immediately when
+// nothing is scheduled).
 const RFCOMM_EVENT_POLL_SECONDS: CFTimeInterval = 0.1;
 
-// How long the connection thread waits for a write request before falling back to pumping the
-// run loop; bounds how stale an unpumped inbound callback can get, so kept short.
+// How long the connection thread waits for a write request before rechecking `running`.
 const WRITE_DRAIN_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(10);
 
 #[derive(Default)]
@@ -308,10 +307,9 @@ fn perform_sdp_query(device: &IOBluetoothDevice) -> connection::Result<()> {
             location: Location::caller(),
         }),
         Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
-            // IOBluetoothDevice doesn't retain the target passed to performSDPQuery, and there's
-            // no way to cancel it, so the query may still be in flight here. Dropping delegate
-            // normally would risk sdpQueryComplete: firing into deallocated memory later; leak it
-            // instead (bounded: at most once per timed-out query).
+            // The query may still be in flight here and can't be cancelled, so dropping delegate
+            // would risk sdpQueryComplete: firing into freed memory later; leak it instead (at
+            // most once per timed-out query).
             std::mem::forget(delegate);
             Err(connection::Error::TimedOut {
                 action: "SDP query",
@@ -433,9 +431,9 @@ define_class!(
         ) {
             let bytes = unsafe { std::slice::from_raw_parts(data.cast::<u8>(), length) }.to_vec();
             trace!("received packet: {bytes:?}");
-            // This callback runs on the connection thread, which also services writes and pumps
-            // the run loop, so blocking here would freeze the whole connection if the reader
-            // ever stalls: drop the packet instead of waiting for buffer space.
+            // This callback runs on the main thread, so blocking here would stall every other
+            // IOBluetooth callback (and the GUI's event loop): drop the packet instead of waiting
+            // for buffer space.
             match self.ivars().data_sender.try_send(bytes) {
                 Ok(()) => {}
                 Err(mpsc::error::TrySendError::Full(_)) => {
@@ -575,7 +573,7 @@ fn pump_run_loop() {
 
 // writeSync:length: must not be called with more bytes than the channel's negotiated MTU (per
 // IOBluetoothRFCOMMChannel's own documented contract). MTU can read back as 0 in the brief
-// window right after connecting before it's negotiated (see WRITE_NOT_OPEN_RETRIES below);
+// window right after connecting before it's negotiated (see WRITE_NOT_OPEN_RETRIES above);
 // fall back to one unsplit write in that case rather than guessing a default.
 fn do_write(channel: &IOBluetoothRFCOMMChannel, data: &[u8]) -> connection::Result<()> {
     let mtu = usize::from(unsafe { channel.getMTU() });
