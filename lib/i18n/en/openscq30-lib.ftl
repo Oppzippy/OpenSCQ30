@@ -39,6 +39,7 @@ soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 soundcore-d1301 = Soundcore Sleep A30
 soundcore-d1402 = Soundcore Space 2
+soundcore-d1404 = Soundcore Q31i
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -102,6 +103,8 @@ airplane-mode = Airplane Mode
 real-time-adaptive-noise-canceling = Real Time Adaptive Noise Canceling
 
 soundcore-signature = Soundcore Signature
+vocal-boost = Vocal Boost
+calming = Calming
 acoustic = Acoustic
 bass-booster = Bass Booster
 bass-reducer = Bass Reducer
