@@ -43,7 +43,7 @@ where
         let new_sound_modes: SoundModesT = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let sound_modes = state.get_mut();
-            let modified = new_sound_modes == *sound_modes;
+            let modified = new_sound_modes != *sound_modes;
             *sound_modes = new_sound_modes;
             modified
         });
