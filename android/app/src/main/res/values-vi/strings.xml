@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="activate">Kích hoạt</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="name">Tên</string>
+    <string name="create">Tạo</string>
+    <string name="migrate">Chuyển đổi</string>
+    <string name="delete">Xoá</string>
+    <string name="none">Trống</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="settings">Cài đặt</string>
+</resources>
