@@ -12,7 +12,6 @@ use std::{
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 use objc2::{AnyThread, DefinedClass, define_class, rc::Retained, runtime::AnyObject};
-use objc2_core_foundation::{CFRunLoop, CFTimeInterval, kCFRunLoopDefaultMode};
 use objc2_foundation::{NSArray, NSObject, NSObjectProtocol, NSString};
 use objc2_io_bluetooth::{
     BluetoothRFCOMMChannelID, BluetoothSDPServiceAttributeID, IOBluetoothDevice,
@@ -31,10 +30,8 @@ use crate::{
 // Bluetooth SDP spec: the ServiceClassIDList attribute, which holds the UUIDs a service record advertises.
 const SERVICE_CLASS_ID_LIST_ATTRIBUTE_ID: BluetoothSDPServiceAttributeID = 0x0001;
 
-// A channel can briefly report "not open" right after connecting while IOBluetooth finishes the
-// underlying L2CAP negotiation, even though openRFCOMMChannelAsync already returned success. How
-// long this takes is inconsistent in practice (observed anywhere from ~200ms to over 2s), so the
-// retry budget is generous rather than tight.
+// writeSync can return "not open" before rfcommChannelOpenComplete fires (~200ms to over 2s).
+// Writes wait for that callback (see wait_for_open_complete), so this retry is only a safety net.
 const IO_RETURN_NOT_OPEN: c_int = 0xE00002CDu32 as c_int;
 const WRITE_NOT_OPEN_RETRIES: u32 = 50;
 const WRITE_NOT_OPEN_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(200);
@@ -51,12 +48,8 @@ const RFCOMM_OPEN_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(
 const BASEBAND_CLOSE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
 const BASEBAND_CLOSE_POLL_INTERVAL: std::time::Duration = std::time::Duration::from_millis(50);
 
-// Upper bound for each pump of the connection thread's run loop (it returns immediately when
-// nothing is scheduled).
-const RFCOMM_EVENT_POLL_SECONDS: CFTimeInterval = 0.1;
-
 // How long the connection thread waits for a write request before rechecking `running`.
-const WRITE_DRAIN_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(10);
+const WRITE_REQUEST_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(10);
 
 #[derive(Default)]
 pub struct MacosRfcommBackend;
@@ -297,9 +290,8 @@ fn perform_sdp_query(device: &IOBluetoothDevice) -> connection::Result<()> {
         });
     }
 
-    // sdpQueryComplete: is delivered on the process main thread (pumped continuously by
-    // cli/src/main.rs's run loop), not this thread, so a run loop pumped here would never see
-    // it; recv_timeout on the plain mpsc channel is what actually bounds the wait.
+    // sdpQueryComplete: is delivered on the main thread (pumped by cli/src/main.rs or the GUI's
+    // event loop), not this one, so recv_timeout on the plain mpsc channel is what bounds the wait.
     match done_receiver.recv_timeout(SDP_QUERY_TIMEOUT) {
         Ok(0) => Ok(()),
         Ok(_) => Err(connection::Error::DeviceNotFound {
@@ -381,7 +373,8 @@ fn service_class_uuids(record: &IOBluetoothSDPServiceRecord) -> Vec<Uuid> {
             if uuid.is_none() {
                 debug!("ServiceClassIDList entry is not a UUID");
             }
-            uuid.and_then(|uuid| uuid_from_sdp_uuid(&uuid))
+            let uuid = uuid?;
+            uuid_from_sdp_uuid(&uuid)
         })
         .collect()
 }
@@ -511,7 +504,7 @@ impl MacosRfcommConnection {
                     open_result_sender,
                     write_request_receiver,
                     running,
-                )
+                );
             }
         });
 
@@ -536,45 +529,33 @@ impl MacosRfcommConnection {
 fn wait_for_open_complete(
     open_complete_receiver: &std::sync::mpsc::Receiver<c_int>,
 ) -> connection::Result<()> {
-    let started_at = std::time::Instant::now();
-    loop {
-        match open_complete_receiver.try_recv() {
-            Ok(0) => return Ok(()),
-            Ok(status) => {
-                debug!("RFCOMM channel failed to open with status {status}");
-                return Err(connection::Error::DeviceNotFound {
-                    source: None,
-                    location: Location::caller(),
-                });
-            }
-            Err(std::sync::mpsc::TryRecvError::Empty) => {}
-            Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                return Err(connection::Error::DeviceNotFound {
-                    source: None,
-                    location: Location::caller(),
-                });
-            }
+    match open_complete_receiver.recv_timeout(RFCOMM_OPEN_TIMEOUT) {
+        Ok(0) => Ok(()),
+        Ok(status) => {
+            debug!("RFCOMM channel failed to open with status {status}");
+            Err(connection::Error::DeviceNotFound {
+                source: None,
+                location: Location::caller(),
+            })
         }
-        if started_at.elapsed() >= RFCOMM_OPEN_TIMEOUT {
+        Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
             debug!("timed out waiting for rfcommChannelOpenComplete");
-            return Err(connection::Error::TimedOut {
+            Err(connection::Error::TimedOut {
                 action: "open RFCOMM channel",
-            });
+            })
         }
-        pump_run_loop();
-    }
-}
-
-fn pump_run_loop() {
-    unsafe {
-        CFRunLoop::run_in_mode(kCFRunLoopDefaultMode, RFCOMM_EVENT_POLL_SECONDS, false);
+        Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+            Err(connection::Error::DeviceNotFound {
+                source: None,
+                location: Location::caller(),
+            })
+        }
     }
 }
 
 // writeSync:length: must not be called with more bytes than the channel's negotiated MTU (per
-// IOBluetoothRFCOMMChannel's own documented contract). MTU can read back as 0 in the brief
-// window right after connecting before it's negotiated (see WRITE_NOT_OPEN_RETRIES above);
-// fall back to one unsplit write in that case rather than guessing a default.
+// IOBluetoothRFCOMMChannel's own documented contract). If the MTU reads back as 0, send one
+// unsplit write rather than guessing a default.
 fn do_write(channel: &IOBluetoothRFCOMMChannel, data: &[u8]) -> connection::Result<()> {
     let mtu = usize::from(unsafe { channel.getMTU() });
     let chunk_size = if mtu == 0 { data.len().max(1) } else { mtu };
@@ -597,8 +578,6 @@ fn write_chunk(channel: &IOBluetoothRFCOMMChannel, chunk: &[u8]) -> connection::
             break;
         }
         debug!("channel not open yet, retrying write ({attempt})");
-        // Delegate callbacks are delivered on the main thread, so this thread's run loop has
-        // nothing scheduled and pumping it returns immediately; wait in real time instead.
         thread::sleep(WRITE_NOT_OPEN_RETRY_DELAY);
     }
     debug!("writeSync status: {status}, channel isOpen: {}", unsafe {
@@ -658,9 +637,8 @@ fn run_connection_thread(
     // openRFCOMMChannelAsync returning kIOReturnSuccess only means the open was started. The
     // channel isn't usable until rfcommChannelOpenComplete fires, and if it never does (see
     // cycle_baseband_connection) writes fail with kIOReturnNotOpen forever, so wait for it here
-    // rather than discovering that on the first write. The callback may be delivered on this
-    // thread's run loop or the main thread's depending on macOS version, so pump ours while
-    // waiting and let the channel carry the result either way.
+    // rather than discovering that on the first write. The callback is delivered on the main
+    // thread, so it reports back through a channel.
     if let Err(err) = wait_for_open_complete(&open_complete_receiver) {
         unsafe {
             channel.setDelegate(None);
@@ -672,29 +650,19 @@ fn run_connection_thread(
 
     let _ = open_result_sender.send(Ok(()));
 
-    // Delegate callbacks (rfcommChannelData etc.) are delivered on the main thread's run loop (see
-    // cli/src/main.rs), not this one. Writes stay on this dedicated thread.
-    debug!("channel opened, running write/pump loop");
-
-    // Service any write requests queued while the channel was still opening.
-    for (data, response_sender) in write_request_receiver.try_iter() {
-        let _ = response_sender.send(do_write(&channel, &data));
-    }
+    debug!("channel opened, running write loop");
 
     while running.load(Ordering::Relaxed) {
-        match write_request_receiver.recv_timeout(WRITE_DRAIN_TIMEOUT) {
+        match write_request_receiver.recv_timeout(WRITE_REQUEST_TIMEOUT) {
             Ok((data, response_sender)) => {
                 let _ = response_sender.send(do_write(&channel, &data));
             }
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
         }
-        if running.load(Ordering::Relaxed) {
-            pump_run_loop();
-        }
     }
 
-    debug!("run loop stopped, draining pending write requests");
+    debug!("write loop stopped, draining pending write requests");
     // The caller's `write()` is blocked on recv() waiting for a status. If we exit without a
     // response it would hang forever, so answer all still-queued writes with a clean failure
     // before closing the channel.

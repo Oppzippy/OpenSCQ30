@@ -74,7 +74,6 @@ rusqlite = { workspace = true, features = ["bundled"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 objc2 = { workspace = true }
 objc2-foundation = { workspace = true }
-objc2-core-foundation = { workspace = true }
 objc2-io-bluetooth = { workspace = true, features = [
     "Bluetooth",
     "IOBluetoothDevice",

@@ -4208,7 +4208,6 @@ dependencies = [
  "nom 8.0.0",
  "nom-language",
  "objc2 0.6.5",
- "objc2-core-foundation",
  "objc2-foundation 0.3.2",
  "objc2-io-bluetooth",
  "openscq30-i18n",
