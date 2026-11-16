@@ -16,11 +16,15 @@ use crate::{
 };
 
 pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
-    let session = openscq30_session().await?;
     let mac_address = matches
         .get_one::<MacAddr6>("mac-address")
         .unwrap()
         .to_owned();
+    #[cfg(target_os = "linux")]
+    if let Some(("adaptive-eq", sub_matches)) = matches.subcommand() {
+        return super::adaptive_eq::handle(sub_matches, Some(mac_address)).await;
+    }
+    let session = openscq30_session().await?;
     let device = session.connect(mac_address).await?;
     match matches.subcommand().unwrap() {
         ("list-settings", matches) => {
