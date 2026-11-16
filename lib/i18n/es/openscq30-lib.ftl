@@ -285,3 +285,7 @@ alarm-n-repeat = Repetir la alarma { $number }
 alarm-n-wake-up-tune = Sonido para la alarma { $number }
 alarm-n-volume = Volumen de la alarma { $number }
 alarm-n-snooze-duration-minutes = Posponer la alarma (minutos) { $number }
+soundcore-a3953 = Soundcore Liberty 4
+press-sensitivity = Sensibilidad a la presión
+ambient-sound-prompt = Sonido ambiental
+both-earbuds-must-be-connected = Ambos auriculares deben estar conectados.
