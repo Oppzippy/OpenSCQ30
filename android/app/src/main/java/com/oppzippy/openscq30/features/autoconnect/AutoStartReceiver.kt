@@ -12,7 +12,11 @@ class AutoStartReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context != null && intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+        // MY_PACKAGE_REPLACED is needed as well, otherwise auto connect stops working after an app update until the
+        // next reboot.
+        val isStartupAction = intent?.action == Intent.ACTION_BOOT_COMPLETED ||
+            intent?.action == Intent.ACTION_MY_PACKAGE_REPLACED
+        if (context != null && isStartupAction) {
             val preferences = Preferences(context.applicationContext)
             if (preferences.autoConnect) {
                 Log.d(TAG, "starting background service")

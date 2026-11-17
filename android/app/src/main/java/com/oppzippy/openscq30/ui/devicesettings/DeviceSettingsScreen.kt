@@ -14,6 +14,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,7 +32,7 @@ import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
-import com.oppzippy.openscq30.ui.devicesettings.screens.CategorySelectionScreen
+import com.oppzippy.openscq30.ui.devicesettings.screens.DeviceHomeScreen
 import com.oppzippy.openscq30.ui.devicesettings.screens.Disconnected
 import com.oppzippy.openscq30.ui.devicesettings.screens.EditQuickPresetPage
 import com.oppzippy.openscq30.ui.devicesettings.screens.MigrateLegacyEqualizerProfilesScreen
@@ -40,6 +41,7 @@ import com.oppzippy.openscq30.ui.devicesettings.screens.SettingCategoryScreen
 import com.oppzippy.openscq30.ui.devicesettings.screens.StatusNotificationScreen
 import com.oppzippy.openscq30.ui.utils.Loading
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun DeviceSettingsScreen(
@@ -117,12 +119,16 @@ private fun DeviceSettingsNavigationScreen(
     onMigrateLegacyEqualizerProfile: (LegacyEqualizerProfile) -> Unit,
 ) {
     val categoryIds by categoryIdsFlow.collectAsState(emptyList())
+    val legacyEqualizerProfiles by legacyEqualizerProfilesFlow.collectAsState(emptyList())
 
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
     listedScreens.add(Screen.QuickPresets.screenInfo)
     listedScreens.add(Screen.StatusNotification.screenInfo)
-    listedScreens.add(Screen.MigrateLegacyEqualizerProfiles.screenInfo)
+    // Only relevant to people upgrading from v1, so don't clutter the list for everyone else
+    if (legacyEqualizerProfiles.isNotEmpty()) {
+        listedScreens.add(Screen.MigrateLegacyEqualizerProfiles.screenInfo)
+    }
 
     // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
     // class path to route name is kept
@@ -192,14 +198,38 @@ private fun DeviceSettingsNavigationScreen(
             },
         ) {
             composable<Screen.ScreenSelection> {
-                CategorySelectionScreen(
-                    screens = listedScreens,
+                val soundModeSettingsFlow = remember(categoryIds) {
+                    if (categoryIds.contains("soundModes")) {
+                        getSettingsInCategoryFlow("soundModes")
+                    } else {
+                        flowOf(emptyList())
+                    }
+                }
+                val deviceInformationSettingsFlow = remember(categoryIds) {
+                    if (categoryIds.contains("deviceInformation")) {
+                        getSettingsInCategoryFlow("deviceInformation")
+                    } else {
+                        flowOf(emptyList())
+                    }
+                }
+                val soundModeSettings by soundModeSettingsFlow.collectAsState(emptyList())
+                val deviceInformationSettings by deviceInformationSettingsFlow.collectAsState(emptyList())
+                DeviceHomeScreen(
+                    // Every sound mode setting is already on the home screen, so a separate page would be redundant
+                    screens = if (soundModeSettings.isNotEmpty()) {
+                        listedScreens.filter { it.baseRoute != Screen.SettingsCategory("soundModes") }
+                    } else {
+                        listedScreens
+                    },
                     onNavigation = { screen ->
                         navController.navigate(screen) {
                             popUpTo(Screen.ScreenSelection)
                             launchSingleTop = true
                         }
                     },
+                    soundModeSettings = soundModeSettings,
+                    deviceInformationSettings = deviceInformationSettings,
+                    setSettings = setSettingValues,
                 )
             }
             composable<Screen.SettingsCategory> { backStackEntry ->
@@ -255,7 +285,6 @@ private fun DeviceSettingsNavigationScreen(
             }
 
             composable<Screen.MigrateLegacyEqualizerProfiles> {
-                val legacyEqualizerProfiles by legacyEqualizerProfilesFlow.collectAsState(emptyList())
                 MigrateLegacyEqualizerProfilesScreen(
                     legacyEqualizerProfiles = legacyEqualizerProfiles,
                     onMigrateLegacyEqualizerProfile = onMigrateLegacyEqualizerProfile,

@@ -117,4 +117,13 @@
     <string name="visible_settings">Visible Settings</string>
     <string name="appearance">Appearance</string>
     <string name="compact_layout">Compact Layout</string>
+    <string name="more_settings">More Settings</string>
+    <string name="battery">Battery</string>
+    <string name="battery_left">Left</string>
+    <string name="battery_right">Right</string>
+    <string name="battery_case">Case</string>
+    <string name="charging">Charging</string>
+    <string name="sound_mode">Sound Mode</string>
+    <string name="device_connection_service">Device Connection Service</string>
+    <string name="level_x">Level %d</string>
 </resources>

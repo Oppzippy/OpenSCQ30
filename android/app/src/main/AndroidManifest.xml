@@ -45,6 +45,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Long pressing the quick settings tile opens the app -->
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
 
             <meta-data
                 android:name="android.app.lib_name"
@@ -64,6 +68,18 @@
             android:name=".features.autoconnect.AutoConnectService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- Only the system UI can bind to this, since BIND_QUICK_SETTINGS_TILE is a signature permission -->
+        <service
+            android:name=".features.tile.SoundModeTileService"
+            android:exported="true"
+            android:icon="@drawable/noise_control_off_24px"
+            android:label="@string/sound_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".features.autoconnect.AutoStartReceiver"

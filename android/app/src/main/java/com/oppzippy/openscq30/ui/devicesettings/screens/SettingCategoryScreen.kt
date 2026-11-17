@@ -8,11 +8,13 @@ import android.text.format.DateFormat
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -56,12 +59,16 @@ import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.devicesettings.composables.Equalizer
 import com.oppzippy.openscq30.ui.devicesettings.composables.ReadOnlyEqualizer
 import com.oppzippy.openscq30.ui.devicesettings.screens.categoryoverrides.categoryScreenOverrides
+import com.oppzippy.openscq30.ui.utils.AdaptiveSelect
+import com.oppzippy.openscq30.ui.utils.INACTIVE_ALPHA
 import com.oppzippy.openscq30.ui.utils.Labeled
+import com.oppzippy.openscq30.ui.utils.LabeledChoice
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
+import com.oppzippy.openscq30.ui.utils.MAX_DISCRETE_RANGE_BUTTONS
 import com.oppzippy.openscq30.ui.utils.ModifiableSelect
 import com.oppzippy.openscq30.ui.utils.MultiSelect
 import com.oppzippy.openscq30.ui.utils.OptionalSelect
-import com.oppzippy.openscq30.ui.utils.Select
+import com.oppzippy.openscq30.ui.utils.SegmentedSelect
 import com.oppzippy.openscq30.ui.utils.throttledState
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -88,96 +95,120 @@ private fun FallbackSettingCategoryScreen(
     settings: List<Pair<String, Setting>>,
     setSettings: (List<Pair<String, Value>>) -> Unit,
 ) {
-    fun setSetting(settingId: String, value: Value) {
-        setSettings(listOf(Pair(settingId, value)))
-    }
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         settings.forEach { (settingId, setting) ->
-            val name = translateSettingId(settingId)
-            when (setting) {
-                is Setting.ToggleSetting -> Toggle(
-                    name = name,
-                    isEnabled = setting.value,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            SettingControl(
+                settingId = settingId,
+                setting = setting,
+                setSetting = { value -> setSettings(listOf(Pair(settingId, value))) },
+            )
+        }
+    }
+}
 
-                is Setting.EqualizerSetting -> Equalizer(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+/**
+ * Renders the appropriate control for a single setting.
+ *
+ * @param isActive false if the setting is not currently in effect (for example, the noise canceling level while in
+ * transparency mode). The control is dimmed but remains usable.
+ */
+@Composable
+fun SettingControl(
+    settingId: String,
+    setting: Setting,
+    setSetting: (Value) -> Unit,
+    modifier: Modifier = Modifier,
+    isActive: Boolean = true,
+) {
+    val name = translateSettingId(settingId)
+    Box(modifier) {
+        when (setting) {
+            is Setting.ToggleSetting -> Toggle(
+                name = name,
+                isEnabled = setting.value,
+                onChange = { setSetting(it.toValue()) },
+            )
 
-                is Setting.I32RangeSetting -> I32Range(
-                    name = name,
-                    range = setting.setting,
-                    value = setting.value,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.EqualizerSetting -> Equalizer(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it.toValue()) },
+            )
 
-                is Setting.InformationSetting -> InformationSetting(name, setting.translatedValue)
+            is Setting.I32RangeSetting -> I32Range(
+                name = name,
+                range = setting.setting,
+                value = setting.value,
+                onChange = { setSetting(it.toValue()) },
+                isActive = isActive,
+            )
 
-                is Setting.SelectSetting -> StandardSelect(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.InformationSetting -> InformationSetting(name, setting.translatedValue)
 
-                is Setting.OptionalSelectSetting -> OptionalSelect(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.SelectSetting -> StandardSelect(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it.toValue()) },
+                isActive = isActive,
+            )
 
-                is Setting.PresetEqualizerProfileSelect -> OptionalSelect(
-                    name = name,
-                    setting = Setting.OptionalSelectSetting(setting = setting.select, value = setting.value),
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.OptionalSelectSetting -> OptionalSelect(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it.toValue()) },
+            )
 
-                is Setting.ModifiableSelectSetting -> ModifiableSelect(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it) },
-                )
+            is Setting.PresetEqualizerProfileSelect -> OptionalSelect(
+                name = name,
+                setting = Setting.OptionalSelectSetting(setting = setting.select, value = setting.value),
+                onChange = { setSetting(it.toValue()) },
+            )
 
-                is Setting.MultiSelectSetting -> MultiSelect(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it) },
-                )
+            is Setting.ModifiableSelectSetting -> ModifiableSelect(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it) },
+            )
 
-                is Setting.HueColorPicker -> HueColorPicker(
-                    name = name,
-                    hue = setting.hue,
-                    onChange = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.MultiSelectSetting -> MultiSelect(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it) },
+            )
 
-                is Setting.MultiSelectWithRemoveSetting -> MultiSelectWithRemove(
-                    name = name,
-                    setting = setting,
-                    onChange = { setSetting(settingId, it) },
-                )
+            is Setting.HueColorPicker -> HueColorPicker(
+                name = name,
+                hue = setting.hue,
+                onChange = { setSetting(it.toValue()) },
+            )
 
-                is Setting.ImportStringSetting -> ImportString(
-                    name = name,
-                    confirmationMessage = setting.confirmationMessage,
-                    onImport = { setSetting(settingId, it.toValue()) },
-                )
+            is Setting.MultiSelectWithRemoveSetting -> MultiSelectWithRemove(
+                name = name,
+                setting = setting,
+                onChange = { setSetting(it) },
+            )
 
-                is Setting.Action -> Action(
-                    name = name,
-                    onExecute = { setSetting(settingId, true.toValue()) },
-                )
+            is Setting.ImportStringSetting -> ImportString(
+                name = name,
+                confirmationMessage = setting.confirmationMessage,
+                onImport = { setSetting(it.toValue()) },
+            )
 
-                is Setting.TimeOfDay -> TimeOfDay(
-                    name = name,
-                    time = setting.getLocalTime(),
-                    onChange = { setSetting(settingId, (it.hour * 60 + it.minute).toValue()) },
-                )
-            }
+            is Setting.Action -> Action(
+                name = name,
+                onExecute = { setSetting(true.toValue()) },
+            )
+
+            is Setting.TimeOfDay -> TimeOfDay(
+                name = name,
+                time = setting.getLocalTime(),
+                onChange = { setSetting((it.hour * 60 + it.minute).toValue()) },
+            )
         }
     }
 }
@@ -220,13 +251,32 @@ private fun InformationSetting(name: String, text: String) {
 }
 
 @Composable
-private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int) -> Unit) {
+private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int) -> Unit, isActive: Boolean = true) {
+    val numberOfValues = if (range.step > 0) (range.end - range.start) / range.step + 1 else Int.MAX_VALUE
+    val discreteValues = if (numberOfValues in 1..MAX_DISCRETE_RANGE_BUTTONS) {
+        (range.start..range.end step range.step).toList()
+    } else {
+        null
+    }
+    if (discreteValues != null) {
+        // A handful of levels (such as noise canceling strength 1-5) is easier to pick precisely with one tap than
+        // with a slider.
+        LabeledChoice(label = name, isActive = isActive) {
+            SegmentedSelect(
+                options = discreteValues.map { it.toString() },
+                selectedIndex = discreteValues.indexOf(value).takeIf { it != -1 },
+                onSelect = { onChange(discreteValues[it]) },
+                testTagPrefix = "$name option",
+            )
+        }
+        return
+    }
     val (displayedValue, setDisplayedValue) = throttledState(
         value = value,
         duration = 250,
         onValueChange = { onChange(it) },
     )
-    Column {
+    Column(modifier = Modifier.alpha(if (isActive) 1f else INACTIVE_ALPHA)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -286,12 +336,18 @@ private fun Equalizer(name: String, setting: Setting.EqualizerSetting, onChange:
 }
 
 @Composable
-private fun StandardSelect(name: String, setting: Setting.SelectSetting, onChange: (String) -> Unit) {
-    Select(
+private fun StandardSelect(
+    name: String,
+    setting: Setting.SelectSetting,
+    onChange: (String) -> Unit,
+    isActive: Boolean = true,
+) {
+    AdaptiveSelect(
         name = name,
         options = setting.setting.localizedOptions,
-        selectedIndex = setting.setting.options.indexOf(setting.value),
+        selectedIndex = setting.setting.options.indexOf(setting.value).takeIf { it != -1 },
         onSelect = { onChange(setting.setting.options[it]) },
+        isActive = isActive,
     )
 }
 

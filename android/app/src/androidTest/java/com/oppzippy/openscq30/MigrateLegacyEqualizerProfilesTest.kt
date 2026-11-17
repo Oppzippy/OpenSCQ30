@@ -1,9 +1,11 @@
 package com.oppzippy.openscq30
 
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
@@ -36,7 +38,11 @@ class MigrateLegacyEqualizerProfilesTest : OpenSCQ30RootTestBase() {
         )
         addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
 
-        composeRule.onNodeWithText(getString(R.string.migrate_legacy_equalizer_profiles)).performClick()
+        // The entry is only listed once the legacy profiles have been loaded from the database, which happens
+        // asynchronously, so wait for it to show up.
+        val migrateEntry = hasText(getString(R.string.migrate_legacy_equalizer_profiles))
+        waitForNode(migrateEntry)
+        composeRule.onNode(migrateEntry).performScrollTo().performClick()
         composeRule.onNodeWithText(getString(R.string.migrate)).performClick()
         composeRule.onNodeWithContentDescription(getString(R.string.back)).performClick()
         composeRule.onNodeWithText(getString(R.string.equalizer)).performClick()

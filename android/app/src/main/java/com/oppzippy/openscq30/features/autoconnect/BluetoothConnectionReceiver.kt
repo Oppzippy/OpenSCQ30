@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30.features.autoconnect
 
 import android.bluetooth.BluetoothDevice
-import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -42,22 +41,18 @@ class BluetoothConnectionReceiver(
             )
             if (device != null) {
                 coroutineScope.launch {
-                    if (isPaired(context, device.address)) {
-                        Log.d(TAG, "auto connecting to ${device.address}")
-                        val serviceIntent = Intent(context, DeviceService::class.java)
-                        serviceIntent.putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, device.address)
-                        context.startForegroundService(serviceIntent)
+                    if (isAutoConnectCandidate(context, session, device.address)) {
+                        startDeviceService(context, device.address)
                     }
                 }
             }
         }
     }
+}
 
-    private suspend fun isPaired(context: Context, macAddress: String): Boolean {
-        val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
-        val isAssociated = deviceManager.associations.find { it.equals(macAddress, ignoreCase = true) } != null
-        val isPairedWithOpenSCQ30 =
-            session.pairedDevices().find { it.macAddress.equals(macAddress, ignoreCase = true) } != null
-        return isAssociated && isPairedWithOpenSCQ30
-    }
+fun startDeviceService(context: Context, macAddress: String) {
+    Log.d("AutoConnect", "auto connecting to $macAddress")
+    val serviceIntent = Intent(context, DeviceService::class.java)
+    serviceIntent.putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, macAddress)
+    context.startForegroundService(serviceIntent)
 }

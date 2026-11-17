@@ -7,8 +7,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.android.IntentFactory
+import com.oppzippy.openscq30.features.autoconnect.connectedPairedDevices
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
+import com.oppzippy.openscq30.features.preferences.Preferences
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
@@ -48,6 +50,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
     private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
+    private val preferences: Preferences,
     val version2BreakingChangesMessage: Version2BreakingChangesMessage,
     val toastHandler: ToastHandler = ToastHandler(),
 ) : AndroidViewModel(application) {
@@ -67,6 +70,17 @@ class OpenSCQ30RootViewModel @Inject constructor(
                 if (isRunning) {
                     bindDeviceService()
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            // When the app is opened while exactly one paired device is already connected over Bluetooth, go straight
+            // to its settings instead of making the user pick it from the list.
+            if (DeviceService.isRunning.value) return@launch
+            val connectedDevices = connectedPairedDevices(application, session)
+            if (connectedDevices.size == 1 && !DeviceService.isRunning.value) {
+                Log.i(TAG, "connecting to the only connected paired device")
+                selectDevice(connectedDevices.single().macAddress)
             }
         }
 
@@ -111,7 +125,16 @@ class OpenSCQ30RootViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        stopDeviceService()
+        try {
+            application.unbindService(deviceServiceConnection)
+        } catch (_: IllegalArgumentException) {
+            // was not bound
+        }
+        // With auto connect enabled, the connection is expected to stay alive in the background so that the status
+        // notification and quick settings tile keep working after the app is closed.
+        if (!preferences.autoConnect) {
+            stopDeviceService()
+        }
     }
 
     fun stopDeviceService() {
