@@ -5,8 +5,9 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         state::Update,
         structures::{
-            DualBatteryLevel, DualFirmwareVersion, FirmwareVersion, LowBatteryPrompt, SerialNumber,
-            TwsStatus, button_configuration::ButtonStatusCollection,
+            DualBatteryLevel, DualConnections, DualFirmwareVersion, FirmwareVersion,
+            LowBatteryPrompt, SerialNumber, TwsStatus,
+            button_configuration::ButtonStatusCollection,
         },
     },
     d1301,
@@ -37,6 +38,9 @@ pub struct D1301State {
 
     auto_stop_timer: d1301::structures::AutoStopTimer,
     alarms: Vec<d1301::structures::Alarm>,
+    // Not part of the state update packet: the D1301 accepts the dual connections commands but never
+    // reports whether the feature is enabled, so this is tracked separately. See d1301/modules/dual_connections.rs
+    dual_connections: DualConnections,
 }
 
 impl D1301State {
@@ -44,6 +48,7 @@ impl D1301State {
         state_update_packet: D1301StateUpdatePacket,
         auto_stop_timer: d1301::structures::AutoStopTimer,
         alarms: Vec<d1301::structures::Alarm>,
+        dual_connections: DualConnections,
     ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,
@@ -67,6 +72,7 @@ impl D1301State {
             button_reset_pending: ResetButtonConfigurationPending::default(),
             auto_stop_timer,
             alarms,
+            dual_connections,
         }
     }
 }

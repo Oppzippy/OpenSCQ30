@@ -1,3 +1,4 @@
+mod device_model_setting;
 mod equalizer_profile;
 mod migration;
 mod paired_device;
@@ -249,4 +250,13 @@ commands!(
         name: Vec<(String, Vec<i16>)>,
     ) -> Result<()>;
     equalizer_profile::delete => fn delete_equalizer_profile(model: DeviceModel, name: String) -> Result<()>;
+    device_model_setting::fetch => fn fetch_device_model_setting(
+        model: DeviceModel,
+        setting_id: SettingId,
+    ) -> Result<Option<serde_json::Value>>;
+    device_model_setting::upsert => fn upsert_device_model_setting(
+        model: DeviceModel,
+        setting_id: SettingId,
+        value: serde_json::Value,
+    ) -> Result<()>;
 );
