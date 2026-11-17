@@ -7,13 +7,11 @@ use windows::core::GUID;
 use crate::api::connection;
 
 pub trait WindowsMacAddressExt {
-    #[cfg(test)]
     fn as_windows_u64(&self) -> u64;
     fn from_windows_u64(value: u64) -> Self;
 }
 
 impl WindowsMacAddressExt for MacAddr6 {
-    #[cfg(test)]
     fn as_windows_u64(&self) -> u64 {
         let bytes = self.into_array();
         let length = bytes.len();

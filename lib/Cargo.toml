@@ -62,6 +62,8 @@ windows = { workspace = true, features = [
     "Devices_Bluetooth_GenericAttributeProfile",
     "Devices_Bluetooth_Rfcomm",
     "Networking_Sockets",
+    "Win32_Devices_Bluetooth",
+    "Win32_Networking_WinSock",
 ] }
 
 [target.'cfg(target_os = "android")'.dependencies]

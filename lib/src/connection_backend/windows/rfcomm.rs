@@ -29,7 +29,10 @@ use crate::{
     connection_backend::windows::utils::UuidAsGuidExt,
 };
 
-use super::utils::{GuidAsUuidExt, WindowsMacAddressExt};
+use super::{
+    utils::{GuidAsUuidExt, WindowsMacAddressExt},
+    winsock::WinsockRfcommConnection,
+};
 
 #[derive(Default)]
 pub struct WindowsRfcommBackend;
@@ -79,7 +82,20 @@ impl RfcommBackend for WindowsRfcommBackend {
                 let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
 
                 debug!("selecting RFCOMM service");
-                let service = Self::select_service(&device, &service_selection_strategy)?;
+                let service = match Self::select_service(&device, &service_selection_strategy) {
+                    Ok(service) => service,
+                    Err(connection::Error::DeviceNotFound { .. })
+                        if let RfcommServiceSelectionStrategy::Constant(uuid) =
+                            service_selection_strategy =>
+                    {
+                        warn!("RFCOMM service {uuid} not listed by WinRT, falling back to winsock");
+                        return Ok(Arc::new(WinsockRfcommConnection::connect(
+                            mac_address,
+                            uuid,
+                        )?));
+                    }
+                    Err(err) => return Err(err),
+                };
 
                 debug!("creating socket");
                 let socket = AgileReference::new(&StreamSocket::new()?)?;

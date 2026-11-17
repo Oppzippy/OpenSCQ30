@@ -1,5 +1,6 @@
 mod rfcomm;
 mod utils;
+mod winsock;
 
 use crate::{api::connection, connection_backend::ConnectionBackends};
 
