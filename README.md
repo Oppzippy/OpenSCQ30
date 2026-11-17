@@ -56,6 +56,7 @@ If there's a device not in this list that you want to see supported, check if th
 | D1202C | Soundcore R60i NC            |
 | D1301  | Soundcore Sleep A30          |
 | D1402  | Soundcore Space 2            |
+| D1404  | Soundcore Q31i               |
 
 ## Installing
 
