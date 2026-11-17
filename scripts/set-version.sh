@@ -33,6 +33,10 @@ set_version_in_iss() {
     sed --in-place --regexp-extended --null-data "s/(\n#define AppVersion \")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
 }
 
+set_version_in_plist() {
+    sed --in-place --regexp-extended --null-data "s/(<key>(CFBundleVersion|CFBundleShortVersionString)<\/key>\n *<string>)([0-9\.]+)(<\/string>)/\1$2\4/g" "$1"
+}
+
 add_version_to_appstream_metainfo() {
     metainfo_file="$1"
     version="$2"
@@ -154,5 +158,6 @@ set_version_in_changelog CHANGELOG.md "$1"
 set_version_in_cargo_toml Cargo.toml "$1"
 version_code=$(set_version_in_build_gradle android/app/build.gradle.kts "$1")
 set_version_in_iss packaging/windows/setup.iss "$1"
+set_version_in_plist packaging/macos/Info.plist "$1"
 add_version_to_appstream_metainfo gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml "$1" CHANGELOG.md
 add_version_to_fastlane "fastlane/metadata/android/en-US/changelogs/$version_code.txt" "$1" CHANGELOG.md
