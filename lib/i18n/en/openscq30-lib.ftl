@@ -34,6 +34,7 @@ soundcore-a3968 = Soundcore Sport X20
 soundcore-a3954 = Soundcore Liberty 4 Pro
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
+soundcore-a3958 = Soundcore A30i
 soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
