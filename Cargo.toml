@@ -55,6 +55,11 @@ lto = "thin"
 [profile.release-android]
 inherits = "release"
 strip = false        # uniffi-bindgen requires debug info
+# Nothing performance sensitive runs here (it's mostly parsing and building small Bluetooth packets), so optimize for
+# size instead. This shrinks the native library, by far the largest part of the APK, by over 40%
+# (arm64-v8a: 8.3 MB -> 4.8 MB after stripping).
+opt-level = "z"
+codegen-units = 1
 
 [workspace.dependencies]
 openscq30-lib = { path = "./lib" }
@@ -94,7 +99,7 @@ bluer = "0.17"
 hex = "0.4"
 async-trait = "0.1"
 libcosmic = { git = "https://github.com/pop-os/libcosmic.git" }
-rusqlite = "0.40"
+rusqlite = "0.41"
 syn = "3"
 quote = "1"
 proc-macro2 = "1"

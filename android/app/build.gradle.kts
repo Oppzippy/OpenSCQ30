@@ -191,7 +191,7 @@ dependencies {
 
     // For instrumentation tests
     androidTestImplementation(libs.dagger.hilt.android.testing)
-    kspTest(libs.dagger.hilt.android.compiler)
+    kspAndroidTest(libs.dagger.hilt.android.compiler)
 
     // For local unit tests
     testImplementation(libs.dagger.hilt.android.testing)
