@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use openscq30_lib_has::Has;
+use openscq30_lib_has::{Has, MaybeHas};
 use std::sync::Arc;
 use tokio::sync::watch;
 
@@ -53,7 +53,7 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
 impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize, T> StateModifier<T>
     for ButtonConfigurationStateModifier<NUM_BUTTONS, NUM_PRESS_KINDS>
 where
-    T: Has<ButtonStatusCollection<NUM_BUTTONS>>
+    T: MaybeHas<ButtonStatusCollection<NUM_BUTTONS>>
         + Has<ResetButtonConfigurationPending>
         + Clone
         + Send
@@ -70,11 +70,21 @@ where
             return Ok(());
         }
 
-        let target_statuses: &ButtonStatusCollection<NUM_BUTTONS> = target_state.get();
+        // The device may not report this button configuration, in which case we have nothing to
+        // compare against, so don't send anything.
+        let Some(target_statuses) =
+            MaybeHas::<ButtonStatusCollection<NUM_BUTTONS>>::maybe_get(target_state)
+        else {
+            return Ok(());
+        };
 
         let num_changes: usize = {
             let state = state_sender.borrow();
-            let statuses: &ButtonStatusCollection<NUM_BUTTONS> = state.get();
+            let Some(statuses) =
+                MaybeHas::<ButtonStatusCollection<NUM_BUTTONS>>::maybe_get(&*state)
+            else {
+                return Ok(());
+            };
             statuses
                 .0
                 .iter()
@@ -98,12 +108,22 @@ where
                     .to_packet(),
                 )
                 .await?;
-            state_sender.send_modify(|state| *state.get_mut() = *target_statuses);
+            state_sender.send_modify(|state| {
+                if let Some(statuses) =
+                    MaybeHas::<ButtonStatusCollection<NUM_BUTTONS>>::maybe_get_mut(state)
+                {
+                    *statuses = *target_statuses;
+                }
+            });
         } else {
             for (i, target) in target_statuses.0.iter().enumerate() {
-                let current =
-                    <T as Has<ButtonStatusCollection<NUM_BUTTONS>>>::get(&state_sender.borrow()).0
-                        [i];
+                let Some(current) = MaybeHas::<ButtonStatusCollection<NUM_BUTTONS>>::maybe_get(
+                    &*state_sender.borrow(),
+                )
+                .map(|statuses| statuses.0[i]) else {
+                    // A state update removed the button configuration while we were sending
+                    return Ok(());
+                };
                 if current != *target {
                     let ButtonData {
                         button,
@@ -141,8 +161,11 @@ where
                             .await?;
                     }
                     state_sender.send_modify(|state| {
-                        <T as Has<ButtonStatusCollection<NUM_BUTTONS>>>::get_mut(state).0[i] =
-                            *target;
+                        if let Some(statuses) =
+                            MaybeHas::<ButtonStatusCollection<NUM_BUTTONS>>::maybe_get_mut(state)
+                        {
+                            statuses.0[i] = *target;
+                        }
                     });
                 }
             }
