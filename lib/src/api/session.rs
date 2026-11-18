@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{collections::HashSet, path::PathBuf, sync::Arc};
 
 use macaddr::MacAddr6;
 
@@ -9,7 +9,7 @@ use crate::{
 };
 
 use super::{
-    connection::ConnectionDescriptor,
+    connection::{ConnectionDescriptor, RfcommBackend},
     device::{self, OpenSCQ30Device},
     quick_presets::QuickPresetsHandler,
 };
@@ -59,6 +59,23 @@ impl OpenSCQ30Session {
             .fetch_all_paired_devices()
             .await
             .map_err(Into::into)
+    }
+
+    /// Lists all devices that are currently connected to the bluetooth adapter, regardless of model. This is not
+    /// supported for demo devices.
+    pub async fn list_connected_devices(&self) -> device::Result<HashSet<ConnectionDescriptor>> {
+        self.list_connected_devices_with_backends(
+            &connection_backend::default_backends().expect("no default backends available"),
+        )
+        .await
+    }
+
+    /// Lists all devices that are currently connected to the bluetooth adapter using the specified connection backends.
+    pub async fn list_connected_devices_with_backends(
+        &self,
+        backends: &(impl ConnectionBackends + 'static),
+    ) -> device::Result<HashSet<ConnectionDescriptor>> {
+        backends.rfcomm().await?.devices().await.map_err(Into::into)
     }
 
     /// Lists all potential devices that could be paired with.
