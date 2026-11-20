@@ -71,6 +71,7 @@ pub enum DeviceModel {
     SoundcoreD1202C,
     SoundcoreD1301,
     SoundcoreD1402,
+    SoundcoreD5103,
     SoundcoreDevelopment,
 }
 
@@ -135,6 +136,7 @@ impl DeviceModel {
             Self::SoundcoreD1202C => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1301 => new_soundcore_device!(soundcore::d1301),
             Self::SoundcoreD1402 => new_soundcore_device!(soundcore::d1402),
+            Self::SoundcoreD5103 => new_soundcore_device!(soundcore::d5103),
             Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }
@@ -194,6 +196,7 @@ impl DeviceModel {
             Self::SoundcoreD1202C => new_soundcore_device!(soundcore::d1202),
             Self::SoundcoreD1301 => new_soundcore_device!(soundcore::d1301),
             Self::SoundcoreD1402 => new_soundcore_device!(soundcore::d1402),
+            Self::SoundcoreD5103 => new_soundcore_device!(soundcore::d5103),
             Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }

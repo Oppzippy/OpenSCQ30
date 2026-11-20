@@ -8,6 +8,7 @@
 
 - Add macOS support (beta)
 - Add support for Soundcore Space 2 (D1402)
+- Add support for Soundcore Boom Go 3i (D5103)
 
 ## v2.13.0
 
