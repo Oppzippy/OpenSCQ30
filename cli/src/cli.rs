@@ -178,7 +178,12 @@ With `--no-categories` (only one setting shown as the contents of that object ar
                         .after_help(
 r#"`--get` and `--set` may be used multiple times to get/set multiple settings. Operations will be executed in the order of the arguments. A get before a set will print the original value, and a get after a set will print the value it was set to.
 
-Most value types are straight forward. For strings and numbers, enter the value as is. There are some exceptions:
+Most value types are straight forward. For strings and numbers, enter the value as is. The setting id and value may be separated with '=' or a space:
+
+- `--set volumeAdjustments=0,0,0,0,0,0,0,0,0`
+- `--set volumeAdjustments 0,0,0,0,0,0,0,0,0`
+
+There are some exceptions:
 
 Optional selects: To deselect the value, set it to an empty string: `--set example=`
 
@@ -188,7 +193,7 @@ Modifiable selects: Prefix with '+' to add an item to the list, or '-' to remove
 - `--set "customEqualizerProfile=\+new profile"` will activate an equalizer profile named "+new profile".
 
 Equalizers: All bands must be specified, and numbers should be separated with ','. Examples:
-- `--set volumeAdjustments -40,-30,-20,-10,0,1,2,3` when fractional digits is 1 (see `openscq30 device list-settings --help` for info on fractional digits) will assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
+- `--set volumeAdjustments=-40,-30,-20,-10,0,1,2,3` when fractional digits is 1 (see `openscq30 device list-settings --help` for info on fractional digits) will assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3]. Use `=` rather than a space when the value starts with a negative sign.
 "#
                         )
                         .arg(
@@ -196,8 +201,9 @@ Equalizers: All bands must be specified, and numbers should be separated with ',
                                 .action(ArgAction::Append),
                         )
                         .arg(
-                            arg!(-s --set <"SETTING_ID=VALUE"> "Sets the value of a setting.")
-                                .action(ArgAction::Append),
+                            arg!(-s --set <"SETTING_ID[=VALUE]"> "Sets the value of a setting.")
+                                .action(ArgAction::Append)
+                                .num_args(1..=2),
                         )
                         .arg(json_arg.clone()),
                 )

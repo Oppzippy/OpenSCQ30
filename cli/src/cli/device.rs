@@ -267,26 +267,39 @@ fn collect_commands(matches: &ArgMatches) -> anyhow::Result<Vec<ExecCommand>> {
             })
         });
 
-    let set_iter = matches
+    let mut set_iter = matches
         .indices_of("set")
         .unwrap_or_default()
         .zip(matches.get_many::<String>("set").unwrap_or_default())
-        .map(|(index, setting_id_to_value)| {
-            let (setting_id, unparsed_value) = setting_id_to_value.split_once("=").map_or(
-                (setting_id_to_value.as_str(), None),
-                |(setting_id, unparsed_value)| (setting_id, Some(unparsed_value)),
-            );
-            Ok(ExecCommandWithIndex {
+        .peekable();
+    let mut set_iter_commands = Vec::new();
+    while let Some((index, setting_id_to_value)) = set_iter.next() {
+        let (setting_id, unparsed_value) =
+            if let Some((setting_id, unparsed_value)) = setting_id_to_value.split_once('=') {
+                (setting_id, Some(unparsed_value.to_owned()))
+            } else {
+                let unparsed_value = if set_iter
+                    .peek()
+                    .is_some_and(|(next_index, _)| *next_index == index + 1)
+                {
+                    set_iter
+                        .next()
+                        .map(|(_, unparsed_value)| unparsed_value.to_owned())
+                } else {
+                    None
+                };
+                (setting_id_to_value.as_str(), unparsed_value)
+            };
+        set_iter_commands.push(setting_id_from_str(setting_id).map(|setting_id| {
+            ExecCommandWithIndex {
                 index,
-                command: ExecCommand::Set(
-                    setting_id_from_str(setting_id)?,
-                    unparsed_value.map(ToString::to_string),
-                ),
-            })
-        });
+                command: ExecCommand::Set(setting_id, unparsed_value),
+            }
+        }));
+    }
 
     let mut commands = get_iter
-        .chain(set_iter)
+        .chain(set_iter_commands)
         .collect::<anyhow::Result<Vec<_>>>()?;
     commands.sort();
     Ok(commands
