@@ -12,8 +12,8 @@ use crate::devices::soundcore::{
     },
 };
 
-mod packets;
-mod state;
+pub(crate) mod packets;
+pub(crate) mod state;
 
 soundcore_device!(
     A3933State,
