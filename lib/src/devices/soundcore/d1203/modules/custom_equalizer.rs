@@ -13,20 +13,13 @@
 //! band). The setting is exposed as a [`Setting::Equalizer`] so the CLI parses
 //! the comma-separated gains natively (see `cli/src/parse.rs::parse_equalizer`).
 //!
-//! ## How the write reaches the device (the length/checksum gotcha)
+//! ## How the write reaches the device
 //!
-//! The D1203 custom EQ packet has a length field that EXCLUDES the trailing
-//! checksum byte (0x7b = 123 for the 124-byte packet), and `set_eq()` already
-//! produces the COMPLETE, byte-for-byte-correct packet (header + length + body
-//! + checksum), validated against a real capture by a unit test.
-//!
-//! The generic serializer (`packet::Outbound::bytes()`, used by
-//! `send_with_response` / `send_without_response`) computes the length field
-//! INCLUDING the checksum, which would yield a different (wrong) length (0x7c)
-//! and a different checksum. So the state modifier below MUST NOT route the
-//! bytes through that serializer. Instead it sends the raw bytes directly with
-//! [`PacketIOController::send_raw`], which calls `connection.write(bytes)`
-//! verbatim with no re-framing.
+//! The write is sent in the shape the official app uses (see
+//! [`custom_eq_payload`]) through the generic serializer, and waits for the
+//! `03 8a` ACK. Firmware 06.54 ignores any other shape without replying, so a
+//! missing ACK is the only sign of failure. If the app shape gets no ACK, the
+//! older 124 byte frame captured on firmware 04.52 is sent once as a fallback.
 
 use std::sync::Arc;
 
@@ -41,11 +34,11 @@ use crate::{
     },
     devices::soundcore::{
         common::{
-            packet::PacketIOController,
+            packet::{self, PacketIOController},
             settings_manager::{SettingHandler, SettingHandlerResult},
             state_modifier::StateModifier,
         },
-        d1203::packets::outbound::{BAND_COUNT, BAND_FREQUENCIES, set_eq},
+        d1203::packets::outbound::{BAND_COUNT, BAND_FREQUENCIES, custom_eq_payload, set_eq_legacy},
     },
 };
 
@@ -114,7 +107,7 @@ where
     }
 }
 
-/// On change, builds the raw EQ packet with `set_eq` and sends it VERBATIM.
+/// On change, sends the custom EQ and waits for the device's ACK.
 struct CustomEqualizerStateModifier {
     packet_io: Arc<PacketIOController>,
 }
@@ -144,11 +137,23 @@ where
             *out = *gain as f32;
         }
 
-        // set_eq() returns the COMPLETE, correct packet (incl. the special
-        // length-excludes-checksum framing). Send it raw so the generic
-        // serializer never recomputes length/checksum and corrupts it.
-        let packet_bytes = set_eq(gains_db);
-        self.packet_io.send_raw(&packet_bytes).await?;
+        let app_shape = packet::Outbound::new(
+            packet::Command([0x03, 0x8a]),
+            custom_eq_payload(gains_db),
+        );
+        match self.packet_io.send_with_response(&app_shape).await {
+            Ok(_) => {}
+            Err(device::Error::ActionTimedOut { .. }) => {
+                // No ACK for the app shape. Try the frame captured on 04.52 once.
+                // It has no ACK we can wait on here, so this path cannot confirm
+                // that the earbuds applied it.
+                tracing::warn!(
+                    "no ACK for the custom EQ; falling back to the legacy 04.52 frame"
+                );
+                self.packet_io.send_raw(&set_eq_legacy(gains_db)).await?;
+            }
+            Err(err) => return Err(err),
+        }
 
         state_sender.send_modify(|state| {
             *state.get_mut() = target;

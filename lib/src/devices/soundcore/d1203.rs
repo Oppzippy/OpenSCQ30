@@ -1,12 +1,23 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    d1203::{packets::inbound::D1203StateUpdatePacket, state::D1203State},
-    common::{
-        self,
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        packet::outbound::{RequestState, ToPacket},
+use std::sync::Arc;
+
+use crate::{
+    api::device,
+    devices::soundcore::{
+        common::{
+            self,
+            device::fetch_state_from_state_update_packet,
+            macros::soundcore_device,
+            packet::{
+                self, PacketIOController,
+                outbound::{RequestState, ToPacket},
+            },
+        },
+        d1203::{
+            packets::inbound::D1203StateUpdatePacket,
+            state::{D1203State, SwitchFamily},
+        },
     },
 };
 
@@ -22,11 +33,54 @@ mod state;
 // about -- firmware versions (tags 5 and 6) and the serial number (tag 7) --
 // and tolerantly skips every other tag. See
 // `packets/inbound/state_update.rs` for the parser.
+/// Switches that are not part of the `01 01` state packet. Each is read with
+/// `41 07 <tag>` or `41 08 <tag>` and answered with `<tag> <0|1>`.
+const SWITCH_READS: [(SwitchFamily, u8); 7] = [
+    (SwitchFamily::Tones, 0x00),
+    (SwitchFamily::Tones, 0x01),
+    (SwitchFamily::Tones, 0x03),
+    (SwitchFamily::Switches, 0x00),
+    (SwitchFamily::Switches, 0x03),
+    (SwitchFamily::Switches, 0x08),
+    (SwitchFamily::Switches, 0x1d),
+];
+
+async fn fetch_state(packet_io: Arc<PacketIOController>) -> device::Result<D1203State> {
+    let mut state = fetch_state_from_state_update_packet::<D1203State, D1203StateUpdatePacket>(
+        packet_io.clone(),
+    )
+    .await?;
+    for (family, tag) in SWITCH_READS {
+        let request = packet::Outbound::new(family.command(), vec![tag]);
+        let mut answered = false;
+        // A read that gets no answer is not retried; the first miss means this
+        // firmware does not answer these reads, so the rest are skipped.
+        let result = packet_io
+            .send_with_multi_response(
+                &request,
+                |response| {
+                    if let [reply_tag, value, ..] = response.body[..] {
+                        if reply_tag == tag {
+                            state.apply_switch(family, tag, value != 0);
+                            answered = true;
+                        }
+                    }
+                    false
+                },
+                1,
+            )
+            .await;
+        if result.is_err() || !answered {
+            tracing::debug!("no answer to switch read {family:?} {tag:#04x}; skipping the rest");
+            break;
+        }
+    }
+    Ok(state)
+}
+
 soundcore_device!(
     D1203State,
-    async |packet_io| {
-        fetch_state_from_state_update_packet::<D1203State, D1203StateUpdatePacket>(packet_io).await
-    },
+    async |packet_io| { fetch_state(packet_io).await },
     async |builder| {
         builder.module_collection().add_state_update();
         // Earbud battery uses a 0-100 percentage scale (NOT the 0-10 scale
@@ -36,6 +90,13 @@ soundcore_device!(
             level_offset: 0,
         });
         builder.serial_number_and_dual_firmware_version();
+        // Case battery uses the same 0-100 scale; 255 hides it when unavailable.
+        builder.case_battery_level_custom(
+            common::modules::case_battery_level::CaseBatteryLevelConfiguration {
+                max_level: 100,
+                level_offset: 0,
+            },
+        );
         // Ambient sound mode (ANC / Transparency / Normal / Adaptive). The
         // D1203 write command is byte-for-byte identical to the A3957
         // (`Command([0x06, 0x81])` with a 7-byte payload), BUT the D1203 has a
@@ -47,10 +108,7 @@ soundcore_device!(
         // that sends the standard `06 81` packet through the generic
         // `packet::Outbound` serializer (no raw framing needed -- unlike the EQ
         // `03 8a` command, the `06 81` length field is standard).
-        //
-        // TODO(read): the current ambient sound mode is initialized to Default
-        // on connect because the D1203 state-packet TLV tag for it is not yet
-        // identified. Writes apply correctly regardless (including Adaptive=3).
+
         let sound_modes_packet_io = builder.packet_io_controller().clone();
         builder
             .module_collection()
@@ -70,10 +128,7 @@ soundcore_device!(
         // `41 88` packet uses standard framing (its length field, 0x0c, is the
         // total packet size INCLUDING the checksum), so it goes through the
         // generic `packet::Outbound` serializer, not the raw EQ path.
-        //
-        // TODO(read): the current wind-noise state is initialized to Default
-        // (OFF) on connect because its state-packet TLV tag is not yet
-        // identified. Writes apply correctly regardless.
+
         let wind_noise_packet_io = builder.packet_io_controller().clone();
         builder
             .module_collection()
@@ -84,10 +139,7 @@ soundcore_device!(
         // packet with payload `[side, b1, action, b3]` through the generic
         // `packet::Outbound` serializer (standard framing). See
         // `modules::button_configuration`.
-        //
-        // TODO(read): the D1203 state packet does not expose button
-        // configuration in any known form, so the 8 actions are initialized to
-        // Default (PlayPause) on connect. Writes apply correctly regardless.
+
         let button_configuration_packet_io = builder.packet_io_controller().clone();
         builder
             .module_collection()
@@ -101,10 +153,7 @@ soundcore_device!(
         //   - LDAC / Easy Chat / Soundstage: command 41 88, payload
         //     [sub_id, 0|1] (sub 2 / 14 / 29; sub 11 = wind noise is separate).
         //   - Auto Power Off: command 01 86, payload [enabled, duration_idx].
-        //
-        // TODO(read): the current value of each of these is initialized to
-        // Default on connect because their state-packet TLV tags are not yet
-        // identified. Writes apply correctly regardless. See modules::misc.
+
         let misc_packet_io = builder.packet_io_controller().clone();
         builder
             .module_collection()
@@ -130,6 +179,33 @@ mod tests {
         },
         settings::SettingId,
     };
+
+    /// Canned replies: the state packet plus answers to the `41 07` / `41 08`
+    /// switch reads. The stub replies the same body for every tag of a command,
+    /// so only the first read of each family matches and the rest are skipped.
+    fn responses(state_body: Vec<u8>) -> HashMap<packet::Command, packet::Inbound> {
+        responses_with_switch_value(state_body, 0)
+    }
+
+    fn responses_with_switch_value(
+        state_body: Vec<u8>,
+        switch_value: u8,
+    ) -> HashMap<packet::Command, packet::Inbound> {
+        HashMap::from([
+            (
+                packet::Command([1, 1]),
+                packet::Inbound::new(packet::Command([1, 1]), state_body),
+            ),
+            (
+                packet::Command([0x41, 0x07]),
+                packet::Inbound::new(packet::Command([0x41, 0x07]), vec![0, switch_value]),
+            ),
+            (
+                packet::Command([0x41, 0x08]),
+                packet::Inbound::new(packet::Command([0x41, 0x08]), vec![0, switch_value]),
+            ),
+        ])
+    }
 
     /// Body captured from a real Liberty 5 Pro (D1203), after the command [1, 1].
     /// 6 byte prefix [1,1,1,2,1,1] followed by TLV fields. This capture was
@@ -174,10 +250,7 @@ mod tests {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreD1203,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(packet::Command([1, 1]), body),
-            )]),
+            responses(body),
             SoundcoreDeviceConfig::default(),
         )
         .await;
@@ -319,10 +392,7 @@ mod tests {
             let mut device = TestSoundcoreDevice::new(
                 super::device_registry,
                 DeviceModel::SoundcoreD1203,
-                HashMap::from([(
-                    packet::Command([1, 1]),
-                    packet::Inbound::new(packet::Command([1, 1]), real_state_update_body()),
-                )]),
+                responses(real_state_update_body()),
                 SoundcoreDeviceConfig::default(),
             )
             .await;
@@ -339,10 +409,8 @@ mod tests {
                 .collect()
         }
 
-        // The device state is initialized to the default sound mode
-        // (NoiseCanceling), so setting NoiseCanceling again is a no-op and may
-        // emit no packet. When a 06 81 packet IS emitted it must carry ambient
-        // byte 0. (The deterministic byte test above already pins ANC -> 0.)
+        // NoiseCanceling differs from the fixture's Normal mode, so it emits a
+        // 06 81 packet that must carry ambient byte 0.
         let anc_packets = sent_06_81_payloads("NoiseCanceling").await;
         for pkt in &anc_packets {
             assert_eq!(pkt[9], 0x00, "ANC payload[0] must be 0");
@@ -361,16 +429,9 @@ mod tests {
         // Normal (2) and Adaptive (3) are the modes the old A3957 enum could
         // NOT represent. Driving the setting must emit a 06 81 packet whose
         // target ambient byte is 2 and 3 respectively.
+        // The fixture reports Normal (tag 36), so selecting it again is a no-op.
         let normal_packets = sent_06_81_payloads("Normal").await;
-        assert!(
-            !normal_packets.is_empty(),
-            "expected at least one 06 81 packet for Normal"
-        );
-        assert_eq!(
-            normal_packets.last().unwrap()[9],
-            0x02,
-            "Normal payload[0] must be 2"
-        );
+        assert!(normal_packets.is_empty(), "Normal is already active");
 
         let adaptive_packets = sent_06_81_payloads("Adaptive").await;
         assert!(
@@ -398,10 +459,7 @@ mod tests {
             let mut device = TestSoundcoreDevice::new(
                 super::device_registry,
                 DeviceModel::SoundcoreD1203,
-                HashMap::from([(
-                    packet::Command([1, 1]),
-                    packet::Inbound::new(packet::Command([1, 1]), real_state_update_body()),
-                )]),
+                responses(real_state_update_body()),
                 SoundcoreDeviceConfig::default(),
             )
             .await;
@@ -454,13 +512,13 @@ mod tests {
             &[0x41, 0x88, 0x0c, 0x00, 0x02, 0x01, 0xce]
         );
 
-        // Easy Chat ON (41 88 sub 14) -> ...41 88 0c 00 0e 01 da
-        // (default is OFF, so setting ON must emit a packet.)
-        let packets = sent_packets(SettingId::EasyChat, Value::Bool(true)).await;
+        // Easy Chat OFF (41 88 sub 14) -> ...41 88 0c 00 0e 00 d9
+        // (the 04.52 fixture reports it ON, so OFF must emit a packet.)
+        let packets = sent_packets(SettingId::EasyChat, Value::Bool(false)).await;
         let pkt = find_by_command(&packets, [0x41, 0x88]).expect("41 88 packet for EasyChat");
         assert_eq!(
             &pkt[pkt.len() - 7..],
-            &[0x41, 0x88, 0x0c, 0x00, 0x0e, 0x01, 0xda]
+            &[0x41, 0x88, 0x0c, 0x00, 0x0e, 0x00, 0xd9]
         );
 
         // Soundstage ON via SpatialAudio (41 88 sub 29) -> ...41 88 0c 00 1d 01 e9
@@ -485,5 +543,150 @@ mod tests {
             &pkt[pkt.len() - 7..],
             &[0x01, 0x86, 0x0c, 0x00, 0x01, 0x03, 0x8d]
         );
+    }
+
+    /// Firmware 04.52 (the capture above): tags the PR first skipped.
+    #[tokio::test(start_paused = true)]
+    async fn reads_state_tags_from_firmware_04_52_capture() {
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1203,
+            responses_with_switch_value(real_state_update_body(), 1),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::CaseBatteryLevel, "1/100".into()),
+            (SettingId::AmbientSoundMode, "Normal".into()),
+            (SettingId::NoiseCancelingMode, "Manual".into()),
+            (SettingId::TransportationMode, "Car".into()),
+            (SettingId::AutoPowerOff, "30m".into()),
+            (SettingId::EasyChat, true.into()),
+            (SettingId::Ldac, false.into()),
+            // First `41 07` read answered [0, 1]: tap tone on.
+            (SettingId::TouchTone, true.into()),
+            // Tag 15 is `[3, 6]`: left double press = next track.
+            (SettingId::LeftDoublePress, "NextTrack".into()),
+            (SettingId::RightSinglePress, "None".into()),
+            (SettingId::LeftLongPress, "AmbientSound".into()),
+        ]);
+    }
+
+    /// Appends one TLV field.
+    fn tlv(body: &mut Vec<u8>, tag: u8, value: &[u8]) {
+        body.push(tag);
+        body.push(value.len() as u8);
+        body.extend_from_slice(value);
+    }
+
+    /// Firmware 05.40, from the tag dump in PR #414 (serial and addresses were
+    /// redacted there, so only the decoded tags are rebuilt here). Tag 27 has 3
+    /// bytes and tag 58 is absent.
+    #[tokio::test(start_paused = true)]
+    async fn reads_state_tags_from_firmware_05_40_dump() {
+        let mut body = vec![1, 1, 1, 2, 1, 1];
+        tlv(&mut body, 3, &[0x00, 0x27]);
+        tlv(&mut body, 4, &[0x00, 0x28]);
+        tlv(&mut body, 5, b"05.40");
+        tlv(&mut body, 6, b"05.40");
+        tlv(&mut body, 8, &[0x00, 0x64]);
+        tlv(&mut body, 11, &[0, 0]);
+        tlv(&mut body, 12, &[0; 32]);
+        tlv(&mut body, 13, &[0x0f, 0x0f]);
+        tlv(&mut body, 14, &[0x0f, 0x0f]);
+        tlv(&mut body, 15, &[0x03, 0x06]);
+        tlv(&mut body, 16, &[0x06, 0x06]);
+        tlv(&mut body, 25, &[0x01, 0x00]);
+        tlv(&mut body, 27, &[0x08, 0x01, 0x00]);
+        tlv(&mut body, 36, &[0x02, 0x00, 0x00]);
+        tlv(&mut body, 37, &[0x05, 0x01]);
+        tlv(&mut body, 38, &[0x00, 0x00]);
+
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1203,
+            responses(body),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::BatteryLevelLeft, "39/100".into()),
+            (SettingId::CaseBatteryLevel, "100/100".into()),
+            (SettingId::AutoPowerOff, "10m".into()),
+            (SettingId::EasyChat, false.into()),
+            (SettingId::TransportationMode, "Airplane".into()),
+            (SettingId::LeftDoublePress, "NextTrack".into()),
+            (SettingId::RightDoublePress, "PlayPause".into()),
+        ]);
+    }
+
+    /// Firmware 06.54, built from the values PR #414's second comment reports:
+    /// custom EQ `+3 -2 +1.5 0 -4 +2.5 -1 +5` dB in tag 12 and tag 58 present.
+    /// This is a synthetic body, not a raw capture.
+    #[tokio::test(start_paused = true)]
+    async fn reads_custom_eq_and_touch_sensitivity_from_firmware_06_54_values() {
+        let mut gains = Vec::new();
+        for db in [3.0_f32, -2.0, 1.5, 0.0, -4.0, 2.5, -1.0, 5.0] {
+            gains.extend_from_slice(&db.to_le_bytes());
+        }
+        let mut body = vec![1, 1, 1, 2, 1, 1];
+        tlv(&mut body, 3, &[0x80, 0x50]);
+        tlv(&mut body, 5, b"06.54");
+        tlv(&mut body, 6, b"06.54");
+        tlv(&mut body, 11, &[0xfe, 0xfe]);
+        tlv(&mut body, 12, &gains);
+        tlv(&mut body, 27, &[0x08, 0x41, 0x00, 0x00]);
+        tlv(&mut body, 58, &[0x02]);
+
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1203,
+            responses(body),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::IsChargingLeft, "Yes".into()),
+            (SettingId::PressSensitivity, 2.into()),
+            (SettingId::EasyChat, true.into()),
+            (
+                SettingId::CustomEqualizerProfile,
+                crate::settings::Value::I16Vec(vec![3, -2, 2, 0, -4, 3, -1, 5].into()),
+            ),
+        ]);
+    }
+
+    /// The custom EQ goes out in the app's 123 byte shape and waits for the ACK.
+    #[tokio::test(start_paused = true)]
+    async fn custom_equalizer_write_uses_app_shape() {
+        let mut responses = responses(real_state_update_body());
+        responses.insert(
+            packet::Command([0x03, 0x8a]),
+            packet::Inbound::new(packet::Command([0x03, 0x8a]), vec![]),
+        );
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreD1203,
+            responses,
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+        let sent = device
+            .set_settings_and_gather_sent_packets(vec![(
+                SettingId::CustomEqualizerProfile,
+                crate::settings::Value::I16Vec(vec![1, 2, 3, 4, -1, -2, -3, -4].into()),
+            )])
+            .await;
+        let frame = sent
+            .iter()
+            .find(|bytes| bytes.len() > 7 && bytes[5] == 0x03 && bytes[6] == 0x8a)
+            .expect("03 8a packet");
+        assert_eq!(frame.len(), 123);
+        assert_eq!(u16::from_le_bytes([frame[7], frame[8]]), 123);
+        // Band type byte first, then the gain.
+        assert_eq!(&frame[18..23], &[0x01, 0x00, 0x00, 0x80, 0x3f]);
     }
 }

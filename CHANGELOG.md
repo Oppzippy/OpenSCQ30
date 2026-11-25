@@ -13,10 +13,13 @@
   manual ANC level and transportation airplane/car), wind noise reduction, button
   configuration (remap single/double/triple/long press per earbud), and miscellaneous
   toggles (touch tone, wearing tone, low battery prompt, LDAC, easy chat, spatial audio,
-  auto power off). The D1203 uses a TLV-based state packet and several device-specific
-  write commands, all decoded via reverse engineering. Note: the device does not report
-  these settings back in its state packet, so they are write-only (initialised to defaults
-  on connect).
+  auto power off), plus wear detection, multipoint, touch lock and touch sensitivity.
+  The D1203 uses a TLV-based state packet and several device-specific write commands,
+  all decoded via reverse engineering. Current values are read back on connect from the
+  state packet (sound modes, buttons, custom EQ, auto power off, case battery, LDAC,
+  easy chat, touch sensitivity) and from the `41 07` / `41 08` reads (tones, touch lock,
+  multipoint, wear detection, sound field). The custom EQ is written in the frame the
+  official app sends and waits for the device's ACK, which firmware 06.54 requires.
 
 ## v2.13.0
 

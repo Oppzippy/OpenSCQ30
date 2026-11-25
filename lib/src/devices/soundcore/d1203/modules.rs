@@ -12,10 +12,11 @@ pub use ambient_sound_mode::{
     D1203AmbientSoundMode, D1203ManualNoiseCanceling, D1203NoiseCancelingMode,
     D1203TransportationMode,
 };
-pub use button_configuration::D1203ButtonConfiguration;
+pub use button_configuration::{D1203Button, D1203ButtonAction, D1203ButtonConfiguration};
 pub use misc::{
-    D1203AutoPowerOff, D1203EasyChat, D1203Ldac, D1203LowBatteryPrompt, D1203Soundstage,
-    D1203TouchTone, D1203WearingTone,
+    D1203AutoPowerOff, D1203EasyChat, D1203Ldac, D1203LowBatteryPrompt, D1203Multipoint,
+    D1203Soundstage, D1203TouchLock, D1203TouchSensitivity, D1203TouchTone, D1203WearDetection,
+    D1203WearingTone,
 };
 // Re-exported for the device-level integration tests in `d1203.rs`; the
 // non-test code references them via their own module path, so they read as

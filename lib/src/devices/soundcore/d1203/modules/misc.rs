@@ -87,6 +87,14 @@ const SUB_WEARING_TONE: u8 = 3;
 const SUB_LDAC: u8 = 2;
 const SUB_EASY_CHAT: u8 = 14;
 const SUB_SOUNDSTAGE: u8 = 29;
+// Added after testing on firmware 06.54 (see PR #414 discussion).
+const SUB_TOUCH_LOCK: u8 = 0;
+const SUB_MULTIPOINT: u8 = 3;
+const SUB_WEAR_DETECTION: u8 = 8;
+
+/// Category `0x04`, command `0x85`: touch sensitivity, payload `[0|1|2]`
+/// (low, medium, high).
+const TOUCH_SENSITIVITY_COMMAND: packet::Command = packet::Command([0x04, 0x85]);
 
 /// Builds the 2-byte `[sub_id, state]` payload shared by the `41 87` / `41 88`
 /// toggle commands.
@@ -247,6 +255,109 @@ bool_toggle_state!(
     D1203Soundstage
 );
 
+bool_toggle_state!(
+    /// Touch controls locked (`41 88` sub-id 0). The wire value is inverted
+    /// relative to "enabled": `0` means the controls work, `1` means locked.
+    /// Defaults to `false` (controls work).
+    D1203TouchLock
+);
+bool_toggle_state!(
+    /// Multipoint / dual connections (`41 88` sub-id 3). Defaults to `false`.
+    D1203Multipoint
+);
+bool_toggle_state!(
+    /// Wear detection (`41 88` sub-id 8). Defaults to `false`.
+    D1203WearDetection
+);
+
+// ===========================================================================
+// Touch sensitivity (04 85)
+// ===========================================================================
+
+/// Touch sensitivity, `0` (low) to `2` (high). Read from state tag 58, which
+/// firmware 05.40 does not report; the value then stays at its default.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct D1203TouchSensitivity(pub u8);
+
+impl D1203TouchSensitivity {
+    pub const MAX: u8 = 2;
+
+    pub fn from_wire(value: u8) -> Self {
+        Self(value.min(Self::MAX))
+    }
+}
+
+struct TouchSensitivitySettingHandler;
+
+#[async_trait]
+impl<T> SettingHandler<T> for TouchSensitivitySettingHandler
+where
+    T: Has<D1203TouchSensitivity> + Send,
+{
+    fn settings(&self) -> Vec<SettingId> {
+        vec![SettingId::PressSensitivity]
+    }
+
+    fn get(&self, state: &T, _setting_id: &SettingId) -> Option<Setting> {
+        let current: &D1203TouchSensitivity = state.get();
+        Some(Setting::I32Range {
+            setting: crate::api::settings::Range {
+                range: 0..=i32::from(D1203TouchSensitivity::MAX),
+                step: 1,
+            },
+            value: i32::from(current.0),
+        })
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        _setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let level = value
+            .try_as_i32()?
+            .clamp(0, i32::from(D1203TouchSensitivity::MAX));
+        *state.get_mut() = D1203TouchSensitivity(u8::try_from(level).expect("clamped"));
+        Ok(())
+    }
+}
+
+struct TouchSensitivityStateModifier {
+    packet_io: Arc<PacketIOController>,
+}
+
+#[async_trait]
+impl<T> StateModifier<T> for TouchSensitivityStateModifier
+where
+    T: Has<D1203TouchSensitivity> + Clone + Send + Sync,
+{
+    async fn move_to_state(
+        &self,
+        state_sender: &watch::Sender<T>,
+        target_state: &T,
+    ) -> device::Result<()> {
+        let target: D1203TouchSensitivity = *target_state.get();
+        {
+            let current = state_sender.borrow();
+            let current_value: &D1203TouchSensitivity = current.get();
+            if *current_value == target {
+                return Ok(());
+            }
+        }
+        self.packet_io
+            .send_with_response(&packet::Outbound::new(
+                TOUCH_SENSITIVITY_COMMAND,
+                vec![target.0],
+            ))
+            .await?;
+        state_sender.send_modify(|state| {
+            *state.get_mut() = target;
+        });
+        Ok(())
+    }
+}
+
 // ===========================================================================
 // Auto power off selector
 // ===========================================================================
@@ -291,6 +402,20 @@ impl D1203AutoPowerOff {
     /// `(enabled, duration_idx)` for the `01 86` payload. `Never` disables the
     /// timer and resets the index to 0 (matching the real capture
     /// `08 ee 00 00 00 01 86 0c 00 00 00 89`).
+    /// Decodes the state tag 25 value `[enabled, duration_idx]`.
+    pub fn from_wire(enabled: bool, duration_idx: u8) -> Option<Self> {
+        if !enabled {
+            return Some(Self::Never);
+        }
+        match duration_idx {
+            0 => Some(Self::TenMinutes),
+            1 => Some(Self::TwentyMinutes),
+            2 => Some(Self::ThirtyMinutes),
+            3 => Some(Self::SixtyMinutes),
+            _ => None,
+        }
+    }
+
     pub fn to_wire(self) -> (bool, u8) {
         match self {
             Self::TenMinutes => (true, 0),
@@ -416,6 +541,29 @@ impl ModuleCollection<D1203State> {
             sub_id: SUB_SOUNDSTAGE,
         });
 
+        self.add_d1203_toggle::<D1203TouchLock>(ToggleSpec {
+            setting_id: SettingId::TouchLock,
+            command: TOGGLE_41_88_COMMAND,
+            sub_id: SUB_TOUCH_LOCK,
+        });
+        self.add_d1203_toggle::<D1203Multipoint>(ToggleSpec {
+            setting_id: SettingId::DualConnections,
+            command: TOGGLE_41_88_COMMAND,
+            sub_id: SUB_MULTIPOINT,
+        });
+        self.add_d1203_toggle::<D1203WearDetection>(ToggleSpec {
+            setting_id: SettingId::WearingDetection,
+            command: TOGGLE_41_88_COMMAND,
+            sub_id: SUB_WEAR_DETECTION,
+        });
+
+        self.setting_manager
+            .add_handler(CategoryId::Miscellaneous, TouchSensitivitySettingHandler);
+        self.state_modifiers
+            .push(Box::new(TouchSensitivityStateModifier {
+                packet_io: packet_io.clone(),
+            }));
+
         // Auto power off selector (01 86).
         self.setting_manager
             .add_handler(CategoryId::Miscellaneous, AutoPowerOffSettingHandler);
@@ -469,6 +617,9 @@ impl ModuleCollection<D1203State> {
         push_modifier!(D1203Ldac, TOGGLE_41_88_COMMAND, SUB_LDAC);
         push_modifier!(D1203EasyChat, TOGGLE_41_88_COMMAND, SUB_EASY_CHAT);
         push_modifier!(D1203Soundstage, TOGGLE_41_88_COMMAND, SUB_SOUNDSTAGE);
+        push_modifier!(D1203TouchLock, TOGGLE_41_88_COMMAND, SUB_TOUCH_LOCK);
+        push_modifier!(D1203Multipoint, TOGGLE_41_88_COMMAND, SUB_MULTIPOINT);
+        push_modifier!(D1203WearDetection, TOGGLE_41_88_COMMAND, SUB_WEAR_DETECTION);
     }
 }
 
@@ -563,6 +714,29 @@ mod tests {
         assert_eq!(D1203AutoPowerOff::ThirtyMinutes.to_wire(), (true, 2));
         assert_eq!(D1203AutoPowerOff::SixtyMinutes.to_wire(), (true, 3));
         assert_eq!(D1203AutoPowerOff::Never.to_wire(), (false, 0));
+    }
+
+    #[test]
+    fn auto_power_off_from_wire() {
+        assert_eq!(D1203AutoPowerOff::from_wire(false, 0), Some(D1203AutoPowerOff::Never));
+        assert_eq!(D1203AutoPowerOff::from_wire(true, 0), Some(D1203AutoPowerOff::TenMinutes));
+        assert_eq!(D1203AutoPowerOff::from_wire(true, 3), Some(D1203AutoPowerOff::SixtyMinutes));
+        assert_eq!(D1203AutoPowerOff::from_wire(true, 9), None);
+    }
+
+    #[test]
+    fn new_toggles_and_touch_sensitivity_framing() {
+        // Wear detection ON: 41 88 payload [8, 1].
+        assert_eq!(
+            framed(TOGGLE_41_88_COMMAND, build_toggle_payload(SUB_WEAR_DETECTION, true)),
+            &[0x08, 0xee, 0x00, 0x00, 0x00, 0x41, 0x88, 0x0c, 0x00, 0x08, 0x01, 0xd4]
+        );
+        // Touch sensitivity high: 04 85 payload [2].
+        assert_eq!(
+            packet::Outbound::new(TOUCH_SENSITIVITY_COMMAND, vec![2]).bytes_with_checksum(),
+            &[0x08, 0xee, 0x00, 0x00, 0x00, 0x04, 0x85, 0x0b, 0x00, 0x02, 0x8c]
+        );
+        assert_eq!(D1203TouchSensitivity::from_wire(9), D1203TouchSensitivity(2));
     }
 
     /// Payload layouts.

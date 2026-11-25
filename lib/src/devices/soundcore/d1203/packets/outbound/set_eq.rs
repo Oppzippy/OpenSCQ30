@@ -5,18 +5,16 @@
 //! `02 81` with integer-byte gains). This EQ was decoded by reverse
 //! engineering (see `D1203_REVERSE_ENGINEERING.md`): category `0x03`, command
 //! `0x8a`, with each band carrying a float gain (dB), float frequency (Hz),
-//! float Q and an `enabled` byte.
+//! float Q and a one byte band type.
 //!
-//! Because the on-wire length field and checksum semantics differ slightly
-//! from the generic `packet::Outbound::bytes()` (the device's length field
-//! EXCLUDES the trailing checksum byte, whereas the generic serializer
-//! includes it), this module builds the full packet bytes itself rather than
-//! reusing the common packet serializer. The checksum rule is identical to the
-//! project's (`sum(all preceding bytes) mod 256`).
+//! Two frame shapes exist:
 //!
-//! The public API here is not yet wired into an interactive setting, so it is
-//! allowed to be unused for now.
-#![allow(dead_code)]
+//! - [`custom_eq_payload`]: what the official app sends (and firmware 06.54
+//!   ACKs). It goes through the generic serializer, whose length rule
+//!   (checksum included) is the right one, and the write waits for the ACK.
+//! - [`set_eq_legacy`]: the 124 byte frame captured on 04.52, whose length
+//!   field excludes the checksum. Kept as a fallback for firmware that does not
+//!   ACK the app shape.
 
 /// Number of EQ bands on the D1203.
 pub const BAND_COUNT: usize = 8;
@@ -42,15 +40,49 @@ pub const BAND_FREQUENCIES: [f32; BAND_COUNT] =
 /// Fixed Q factor used for every band.
 pub const BAND_Q: f32 = 0.70;
 
-/// Each band is 13 bytes: `[gain f32 LE][freq f32 LE][Q f32 LE][enabled u8]`.
+/// Each band is 13 bytes: `[type u8][gain f32 LE][freq f32 LE][Q f32 LE]` in the app shape
+/// (the legacy shape had the extra byte last).
 const BAND_LEN: usize = 13;
 
-/// Build the raw bytes of the D1203 "set custom EQ" packet from 8 gains (dB).
+/// Band type byte the official app sends in front of every custom band.
+const BAND_TYPE_CUSTOM: u8 = 0x01;
+
+/// Payload (everything after the length field, before the checksum) of the
+/// custom EQ write in the shape the official app sends, which firmware 06.54
+/// ACKs. Send it with the generic serializer as command `03 8a`; the resulting
+/// frame is `9 + 9 + 13 * 8 + 1 = 123` bytes with a length field of 123.
+///
+/// ```text
+/// fe fe              custom preset id (same as state tag 11)
+/// 00 x 6             zero in every frame the app sent
+/// 08                 band count
+/// 8 x 13 bytes:      [type 01][gain f32 LE][freq f32 LE][Q f32 LE]
+/// ```
+pub fn custom_eq_payload(gains_db: [f32; BAND_COUNT]) -> Vec<u8> {
+    let mut payload = Vec::with_capacity(CUSTOM_PRESET.len() + 6 + 1 + BAND_COUNT * BAND_LEN);
+    payload.extend_from_slice(&CUSTOM_PRESET);
+    payload.extend_from_slice(&[0; 6]);
+    payload.push(BAND_COUNT as u8);
+    for (gain, freq) in gains_db.iter().zip(BAND_FREQUENCIES.iter()) {
+        payload.push(BAND_TYPE_CUSTOM);
+        payload.extend_from_slice(&gain.to_le_bytes());
+        payload.extend_from_slice(&freq.to_le_bytes());
+        payload.extend_from_slice(&BAND_Q.to_le_bytes());
+    }
+    payload
+}
+
+/// Build the raw bytes of the D1203 "set custom EQ" packet in the LEGACY shape.
+///
+/// This is the frame captured from the first firmware we saw (04.52): 124 bytes
+/// with a length field of 123 and a trailing per-band `enabled` byte. Firmware
+/// 06.54 ignores it silently (see [`custom_eq_payload`] for the shape the
+/// official app sends). Only used as a fallback when the app shape gets no ACK.
 ///
 /// The frequencies, Q and enabled flag are fixed (100..12800 Hz, Q=0.70,
 /// enabled=1). The returned `Vec<u8>` is the complete soundcore packet from the
 /// `08` header through the trailing checksum byte, ready to send.
-pub fn set_eq(gains_db: [f32; BAND_COUNT]) -> Vec<u8> {
+pub fn set_eq_legacy(gains_db: [f32; BAND_COUNT]) -> Vec<u8> {
     // Body that follows the length field: preset marker + meta + bands.
     let mut body: Vec<u8> = Vec::with_capacity(CUSTOM_PRESET.len() + META.len() + BAND_COUNT * BAND_LEN);
     body.extend_from_slice(&CUSTOM_PRESET);
@@ -94,6 +126,36 @@ pub fn set_eq(gains_db: [f32; BAND_COUNT]) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::devices::soundcore::common::packet;
+
+    #[test]
+    fn app_shape_flat_curve_is_123_bytes_with_length_123() {
+        let frame = packet::Outbound::new(
+            packet::Command([CATEGORY, COMMAND]),
+            custom_eq_payload([0.0; BAND_COUNT]),
+        )
+        .bytes_with_checksum();
+        assert_eq!(frame.len(), 123);
+        assert_eq!(u16::from_le_bytes([frame[7], frame[8]]), 123);
+        assert_eq!(&frame[..11], &[0x08, 0xee, 0, 0, 0, 0x03, 0x8a, 0x7b, 0, 0xfe, 0xfe]);
+        // First band: type 01, gain 0.0, 100 Hz, Q 0.7.
+        assert_eq!(
+            &frame[18..31],
+            &[0x01, 0, 0, 0, 0, 0x00, 0x00, 0xc8, 0x42, 0x33, 0x33, 0x33, 0x3f]
+        );
+        // Checksum captured from the app for a flat curve.
+        assert_eq!(*frame.last().unwrap(), 0x2a);
+    }
+
+    #[test]
+    fn app_shape_differs_from_legacy_by_one_byte() {
+        let app = packet::Outbound::new(
+            packet::Command([CATEGORY, COMMAND]),
+            custom_eq_payload([-6.0; BAND_COUNT]),
+        )
+        .bytes_with_checksum();
+        assert_eq!(set_eq_legacy([-6.0; BAND_COUNT]).len(), app.len() + 1);
+    }
 
     /// The real captured packet (bytes `08` .. last band byte) for 8 bands all
     /// at -6.0 dB. The checksum is computed in the test and appended.
@@ -133,7 +195,7 @@ mod tests {
         let mut expected: Vec<u8> = EXPECTED_WITHOUT_CHECKSUM.to_vec();
         expected.push(expected_checksum);
 
-        let actual = set_eq([-6.0; BAND_COUNT]);
+        let actual = set_eq_legacy([-6.0; BAND_COUNT]);
         assert_eq!(expected, actual);
 
         // Sanity: length field is 123 (0x7b), total packet is 124 bytes.
@@ -143,7 +205,7 @@ mod tests {
 
     #[test]
     fn length_field_excludes_checksum() {
-        let packet = set_eq([0.0; BAND_COUNT]);
+        let packet = set_eq_legacy([0.0; BAND_COUNT]);
         let length = u16::from_le_bytes([packet[7], packet[8]]) as usize;
         assert_eq!(length, packet.len() - 1);
     }

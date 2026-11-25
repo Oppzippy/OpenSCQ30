@@ -6,13 +6,21 @@ use nom::{
 };
 
 use crate::devices::soundcore::{
-    d1203::state::D1203State,
+    d1203::{
+        modules::{
+            D1203AmbientSoundMode, D1203AutoPowerOff, D1203Button, D1203ButtonAction,
+            D1203ButtonConfiguration, D1203CustomEqualizer, D1203EasyChat, D1203Ldac,
+            D1203ManualNoiseCanceling, D1203NoiseCancelingMode, D1203TouchSensitivity,
+            D1203TransportationMode,
+        },
+        state::D1203State,
+    },
     common::{
         macros::state_update_packet_module,
         packet::{self, Command, inbound::FromPacketBody, outbound::ToPacket},
         structures::{
-            BatteryLevel, DualBattery, DualFirmwareVersion, FirmwareVersion, IsBatteryCharging,
-            SerialNumber, SingleBattery,
+            BatteryLevel, CaseBatteryLevel, DualBattery, DualFirmwareVersion, FirmwareVersion,
+            IsBatteryCharging, SerialNumber, SingleBattery,
         },
     },
 };
@@ -20,19 +28,42 @@ use crate::devices::soundcore::{
 /// 6 byte prefix that precedes the TLV fields in a D1203 state packet.
 const PREFIX: [u8; 6] = [1, 1, 1, 2, 1, 1];
 
-/// Battery tags. Each value is `[charging_flag, battery_level]` where the level
+/// Battery tags. Each value is `[status, battery_level]` where the level
 /// is a 0-100 percentage (NOT the 0-10 scale used by the A3957). Confirmed by
 /// cross-referencing captures against the real hardware: tag 3 is the LEFT
-/// earbud, tag 4 is the RIGHT earbud. The first byte is a charging flag
-/// (0 = not charging, non-zero = charging).
+/// earbud, tag 4 is the RIGHT earbud. The first byte is a status, not a bool:
+/// `0x00` out of the case, `0x01` briefly when placed in the case, `0x80`
+/// charging. Only `0x80` counts as charging.
 const TAG_BATTERY_LEFT: u8 = 3;
 const TAG_BATTERY_RIGHT: u8 = 4;
 const TAG_FIRMWARE_LEFT: u8 = 5;
 const TAG_FIRMWARE_RIGHT: u8 = 6;
 const TAG_SERIAL_NUMBER: u8 = 7;
-// TODO: tag 8 is believed to be the charging-case battery, but its encoding
-// stayed ambiguous across captures, so case battery is intentionally not
-// decoded yet.
+/// Case battery: `[status, percent]`, e.g. `00 64` is 100% (matches the app).
+/// The charging flag has not been observed yet (the case was full).
+const TAG_CASE_BATTERY: u8 = 8;
+/// 8 x f32 LE custom EQ gains, one per band on the fixed grid.
+const TAG_EQ_GAINS: u8 = 12;
+/// Button actions: `<action> <fixed byte>`, left then right for each gesture
+/// (single 13/14, double 15/16, triple 17/18, long 19/20). Tags 21 to 24 are
+/// the fixed swipe gestures and are not remappable.
+const TAG_BUTTONS_FIRST: u8 = 13;
+const TAG_BUTTONS_LAST: u8 = 20;
+/// Auto power off: `[enabled, duration_idx]`.
+const TAG_AUTO_POWER_OFF: u8 = 25;
+/// Byte 0 bit `0x04` is LDAC, byte 1 bit `0x40` is Easy Chat. The tag is 3 bytes
+/// on firmware 05.40 and 4 bytes on 04.52, 05.54 and 06.54.
+const TAG_FEATURE_FLAGS: u8 = 27;
+const LDAC_BIT: u8 = 0x04;
+const EASY_CHAT_BIT: u8 = 0x40;
+/// `[ambient mode, nc sub-mode, ?]`, same values as bytes 0 and 1 of `06 81`.
+const TAG_SOUND_MODE: u8 = 36;
+/// `[manual NC level 1-5, 1]`.
+const TAG_MANUAL_NC: u8 = 37;
+/// Byte 0 is the transport type, `0` airplane and `1` car.
+const TAG_TRANSPORTATION: u8 = 38;
+/// Touch sensitivity, `0` low to `2` high. Missing on firmware 05.40.
+const TAG_TOUCH_SENSITIVITY: u8 = 58;
 
 /// EQ preset tag. Value is `[preset_id, 0]`. The second byte is always 0 for
 /// the named presets; the "Custom" preset is encoded as `[0xFE, 0xFE]`.
@@ -47,15 +78,19 @@ const TAG_EQ_PRESET: u8 = 11;
 /// have not mapped yet.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum D1203PresetEqualizer {
+    /// `0` — Anker Balanced.
+    Balanced,
     /// `1` — Clear Voice ("Vozes nítidas" in the pt-BR app).
     ClearVoice,
     /// `2` — Bass Booster.
     BassBooster,
+    /// `3` — Calm and Soothing.
+    CalmAndSoothing,
     /// `4` — Soundcore / Anker Signature.
     SoundcoreSignature,
     /// `0xFE, 0xFE` — a user-defined parametric EQ (see the outbound `set_eq`).
     Custom,
-    /// Any preset id we have not mapped yet (e.g. `3`).
+    /// Any preset id we have not mapped yet.
     Unknown(u8),
 }
 
@@ -65,8 +100,10 @@ impl D1203PresetEqualizer {
         match value {
             [0xFE, 0xFE] => Some(Self::Custom),
             [id, _] => Some(match id {
+                0 => Self::Balanced,
                 1 => Self::ClearVoice,
                 2 => Self::BassBooster,
+                3 => Self::CalmAndSoothing,
                 4 => Self::SoundcoreSignature,
                 other => Self::Unknown(*other),
             }),
@@ -77,8 +114,10 @@ impl D1203PresetEqualizer {
     /// Raw 2-byte tag 11 value for this preset.
     pub fn to_tag_value(self) -> [u8; 2] {
         match self {
+            Self::Balanced => [0, 0],
             Self::ClearVoice => [1, 0],
             Self::BassBooster => [2, 0],
+            Self::CalmAndSoothing => [3, 0],
             Self::SoundcoreSignature => [4, 0],
             Self::Custom => [0xFE, 0xFE],
             Self::Unknown(id) => [id, 0],
@@ -88,8 +127,10 @@ impl D1203PresetEqualizer {
     /// Human-readable name of the preset, matching the Soundcore app.
     pub fn name(self) -> String {
         match self {
+            Self::Balanced => "Balanced".to_string(),
             Self::ClearVoice => "Clear Voice".to_string(),
             Self::BassBooster => "Bass Booster".to_string(),
+            Self::CalmAndSoothing => "Calm and Soothing".to_string(),
             Self::SoundcoreSignature => "Soundcore Signature".to_string(),
             Self::Custom => "Custom".to_string(),
             Self::Unknown(id) => format!("Unknown({id})"),
@@ -185,11 +226,16 @@ pub struct D1203StateUpdatePacket {
     /// TODO: read-back not yet decoded; always `Default` (OFF) after a parse.
     /// The write path is fully functional.
     pub soundstage: crate::devices::soundcore::d1203::modules::D1203Soundstage,
-    /// Auto power off selector (`01 86`).
-    ///
-    /// TODO: read-back not yet decoded; always `Default` (Never) after a parse.
-    /// The write path is fully functional.
+    /// Auto power off selector (`01 86`), read from tag 25.
     pub auto_power_off: crate::devices::soundcore::d1203::modules::D1203AutoPowerOff,
+    /// Case battery from tag 8.
+    pub case_battery_level: CaseBatteryLevel,
+    /// Custom EQ gains from tag 12, rounded to whole dB.
+    pub custom_equalizer: D1203CustomEqualizer,
+    /// Button actions from tags 13 to 20.
+    pub button_configuration: D1203ButtonConfiguration,
+    /// Touch sensitivity from tag 58.
+    pub touch_sensitivity: D1203TouchSensitivity,
 }
 
 impl Default for D1203StateUpdatePacket {
@@ -211,6 +257,10 @@ impl Default for D1203StateUpdatePacket {
             easy_chat: Default::default(),
             soundstage: Default::default(),
             auto_power_off: Default::default(),
+            case_battery_level: Default::default(),
+            custom_equalizer: Default::default(),
+            button_configuration: Default::default(),
+            touch_sensitivity: Default::default(),
         }
     }
 }
@@ -230,6 +280,17 @@ impl FromPacketBody for D1203StateUpdatePacket {
             let mut firmware_right: Option<FirmwareVersion> = None;
             let mut serial_number: Option<SerialNumber> = None;
             let mut preset_equalizer = D1203PresetEqualizer::default();
+            let mut case_battery_level = CaseBatteryLevel::default();
+            let mut custom_equalizer = D1203CustomEqualizer::default();
+            let mut button_configuration = D1203ButtonConfiguration::default();
+            let mut auto_power_off = D1203AutoPowerOff::default();
+            let mut ldac = D1203Ldac::default();
+            let mut easy_chat = D1203EasyChat::default();
+            let mut ambient_sound_mode = D1203AmbientSoundMode::default();
+            let mut nc_mode = D1203NoiseCancelingMode::default();
+            let mut manual_nc_level = D1203ManualNoiseCanceling::default();
+            let mut transportation_mode = D1203TransportationMode::default();
+            let mut touch_sensitivity = D1203TouchSensitivity::default();
 
             // Iterate TLV fields until the input is consumed. Be tolerant:
             // unknown tags are skipped, and a value we can't decode (e.g. an
@@ -246,7 +307,7 @@ impl FromPacketBody for D1203StateUpdatePacket {
                         // [charging_flag, battery_level] where level is 0-100.
                         if value.len() >= 2 {
                             dual_battery.left = SingleBattery {
-                                is_charging: IsBatteryCharging::from(value[0] != 0),
+                                is_charging: IsBatteryCharging::from(value[0] & 0x80 != 0),
                                 level: BatteryLevel(value[1]),
                             };
                         }
@@ -254,7 +315,7 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     TAG_BATTERY_RIGHT => {
                         if value.len() >= 2 {
                             dual_battery.right = SingleBattery {
-                                is_charging: IsBatteryCharging::from(value[0] != 0),
+                                is_charging: IsBatteryCharging::from(value[0] & 0x80 != 0),
                                 level: BatteryLevel(value[1]),
                             };
                         }
@@ -284,6 +345,75 @@ impl FromPacketBody for D1203StateUpdatePacket {
                             preset_equalizer = preset;
                         }
                     }
+                    TAG_CASE_BATTERY => {
+                        if value.len() >= 2 {
+                            case_battery_level = CaseBatteryLevel(BatteryLevel(value[1]));
+                        }
+                    }
+                    TAG_EQ_GAINS => {
+                        if value.len() >= 32 {
+                            let mut gains = [0_i16; 8];
+                            for (gain, chunk) in gains.iter_mut().zip(value.chunks_exact(4)) {
+                                let db = f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
+                                // NaN casts to 0; clamp keeps the value inside the UI range.
+                                *gain = db.round().clamp(-6.0, 6.0) as i16;
+                            }
+                            custom_equalizer = D1203CustomEqualizer(gains);
+                        }
+                    }
+                    TAG_BUTTONS_FIRST..=TAG_BUTTONS_LAST => {
+                        let index = usize::from(tag - TAG_BUTTONS_FIRST);
+                        // Tags alternate left, right per gesture, which is the
+                        // order of `D1203Button::ALL`.
+                        if let (Some(button), Some(action)) = (
+                            D1203Button::ALL.get(index),
+                            value.first().and_then(|id| D1203ButtonAction::from_repr(*id)),
+                        ) {
+                            button_configuration.set_action(*button, action);
+                        }
+                    }
+                    TAG_AUTO_POWER_OFF => {
+                        if value.len() >= 2 {
+                            if let Some(setting) =
+                                D1203AutoPowerOff::from_wire(value[0] != 0, value[1])
+                            {
+                                auto_power_off = setting;
+                            }
+                        }
+                    }
+                    TAG_FEATURE_FLAGS => {
+                        if let Some(byte) = value.first() {
+                            ldac = D1203Ldac(byte & LDAC_BIT != 0);
+                        }
+                        if let Some(byte) = value.get(1) {
+                            easy_chat = D1203EasyChat(byte & EASY_CHAT_BIT != 0);
+                        }
+                    }
+                    TAG_SOUND_MODE => {
+                        if value.len() >= 2 {
+                            if let Some(mode) = D1203AmbientSoundMode::from_repr(value[0]) {
+                                ambient_sound_mode = mode;
+                            }
+                            if let Some(mode) = D1203NoiseCancelingMode::from_repr(value[1]) {
+                                nc_mode = mode;
+                            }
+                        }
+                    }
+                    TAG_MANUAL_NC => {
+                        if let Some(level) = value.first() {
+                            manual_nc_level = D1203ManualNoiseCanceling::new(*level);
+                        }
+                    }
+                    TAG_TRANSPORTATION => {
+                        if let Some(mode) = value.first().and_then(|b| D1203TransportationMode::from_repr(*b)) {
+                            transportation_mode = mode;
+                        }
+                    }
+                    TAG_TOUCH_SENSITIVITY => {
+                        if let Some(level) = value.first() {
+                            touch_sensitivity = D1203TouchSensitivity::from_wire(*level);
+                        }
+                    }
                     _ => {
                         // Unknown tag: already skipped by consuming its value.
                     }
@@ -304,35 +434,35 @@ impl FromPacketBody for D1203StateUpdatePacket {
                     dual_firmware_version,
                     serial_number: serial_number.unwrap_or_default(),
                     preset_equalizer,
-                    // TODO: decode the real ambient sound mode once its TLV
-                    // tag is known. Defaulting here means the state reads as
-                    // the default mode; writing is unaffected.
-                    ambient_sound_mode: Default::default(),
-                    // TODO: decode the NC sub-mode and manual level once their
-                    // TLV tags are known. Defaulting here; writing is
-                    // unaffected.
-                    nc_mode: Default::default(),
-                    manual_nc_level: Default::default(),
-                    // TODO: decode the transport type once its TLV tag is
-                    // known. Defaulting here (Airplane); writing is unaffected.
-                    transportation_mode: Default::default(),
-                    // TODO: decode the wind-noise state once its TLV tag is
-                    // known. Defaulting here (OFF); writing is unaffected.
+                    ambient_sound_mode,
+                    nc_mode,
+                    manual_nc_level,
+                    transportation_mode,
+                    // Tags for these are not in the state packet; they are read
+                    // with `41 07` / `41 08` after connecting (see `d1203.rs`).
                     wind_noise: Default::default(),
-                    // TODO: decode the miscellaneous toggles / auto power off
-                    // once their TLV tags are known. Defaulting here; writing
-                    // is unaffected (each uses its own dedicated command).
                     touch_tone: Default::default(),
                     low_battery_prompt: Default::default(),
                     wearing_tone: Default::default(),
-                    ldac: Default::default(),
-                    easy_chat: Default::default(),
+                    ldac,
+                    easy_chat,
                     soundstage: Default::default(),
-                    auto_power_off: Default::default(),
+                    auto_power_off,
+                    case_battery_level,
+                    custom_equalizer,
+                    button_configuration,
+                    touch_sensitivity,
                 },
             ))
         })
         .parse_complete(input)
+    }
+}
+
+fn charging_status(is_charging: IsBatteryCharging) -> u8 {
+    match is_charging {
+        IsBatteryCharging::Yes => 0x80,
+        IsBatteryCharging::No => 0,
     }
 }
 
@@ -353,12 +483,12 @@ impl ToPacket for D1203StateUpdatePacket {
         // Earbud battery (tags 3/4): value is [charging_flag, level].
         body.push(TAG_BATTERY_LEFT);
         body.push(2);
-        body.push(self.dual_battery.left.is_charging as u8);
+        body.push(charging_status(self.dual_battery.left.is_charging));
         body.push(self.dual_battery.left.level.0);
 
         body.push(TAG_BATTERY_RIGHT);
         body.push(2);
-        body.push(self.dual_battery.right.is_charging as u8);
+        body.push(charging_status(self.dual_battery.right.is_charging));
         body.push(self.dual_battery.right.level.0);
 
         if let Some(left) = self.dual_firmware_version.left() {
@@ -423,7 +553,8 @@ mod tests {
             D1203PresetEqualizer::from_tag_value(&[0xFE, 0xFE]),
             Some(Custom)
         );
-        assert_eq!(D1203PresetEqualizer::from_tag_value(&[3, 0]), Some(Unknown(3)));
+        assert_eq!(D1203PresetEqualizer::from_tag_value(&[0, 0]), Some(Balanced));
+        assert_eq!(D1203PresetEqualizer::from_tag_value(&[3, 0]), Some(CalmAndSoothing));
         assert_eq!(D1203PresetEqualizer::from_tag_value(&[7, 0]), Some(Unknown(7)));
     }
 
@@ -436,7 +567,8 @@ mod tests {
             "Soundcore Signature"
         );
         assert_eq!(D1203PresetEqualizer::Custom.name(), "Custom");
-        assert_eq!(D1203PresetEqualizer::Unknown(3).name(), "Unknown(3)");
+        assert_eq!(D1203PresetEqualizer::CalmAndSoothing.name(), "Calm and Soothing");
+        assert_eq!(D1203PresetEqualizer::Unknown(9).name(), "Unknown(9)");
     }
 
     #[test]
