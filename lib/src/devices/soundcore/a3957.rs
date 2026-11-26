@@ -63,6 +63,7 @@ soundcore_device!(
         builder.wearing_detection();
         builder.sound_leak_compensation();
         builder.a3957_gaming_mode();
+        builder.a3957_pressure_sensitivity();
 
         builder.tws_status();
         builder.dual_battery_custom(common::modules::dual_battery::DualBatteryConfiguration {
@@ -160,7 +161,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_liberty5_packet_from_issue_226() {
-        let device = TestSoundcoreDevice::new(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3957,
             HashMap::from([(
@@ -224,8 +225,15 @@ mod tests {
             (SettingId::DualConnections, true.into()),
             // (SettingId::DolbyAudio, Value::OptionalString(None)),
             // (SettingId::InCallSoundAwareness, true.into()),
-            // (SettingId::EarbudPressureSensitivity, "Medium".into()),
+            (SettingId::PressureSensitivity, "Medium".into()),
         ]);
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::PressureSensitivity, "Firmest".into())],
+                vec![packet::Outbound::new(packet::Command([4, 133]), vec![2])],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]
