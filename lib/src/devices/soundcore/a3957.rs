@@ -40,6 +40,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3957_sound_modes();
+        builder.a3957_immersive_experience();
         builder
             .a3957_equalizer(common::modules::equalizer::common_settings_type_2())
             .await;
@@ -222,10 +223,48 @@ mod tests {
             (SettingId::LimitHighVolumeRefreshRate, "RealTime".into()),
             (SettingId::LimitHighVolumeDbLimit, 90.into()),
             (SettingId::DualConnections, true.into()),
-            // (SettingId::DolbyAudio, Value::OptionalString(None)),
+            (SettingId::DolbyAudio, "Disabled".into()),
             // (SettingId::InCallSoundAwareness, true.into()),
             // (SettingId::EarbudPressureSensitivity, "Medium".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn dolby_mode_uses_correct_command() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3957,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 1, 7, 6, 0, 0, 48, 52, 46, 57, 48, 48, 52, 46, 57, 48, 51, 57, 53, 55,
+                        48, 48, 55, 70, 49, 68, 53, 54, 52, 54, 52, 54, 48, 48, 46, 48, 48, 9, 254,
+                        254, 49, 193, 88, 132, 104, 122, 131, 133, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 0, 150, 136, 123, 126, 143, 146, 138, 145,
+                        60, 60, 150, 136, 123, 126, 143, 146, 138, 145, 60, 60, 106, 199, 159, 51,
+                        2, 150, 136, 123, 126, 143, 146, 138, 145, 60, 60, 150, 136, 123, 126, 143,
+                        146, 138, 145, 60, 60, 2, 0, 10, 102, 102, 50, 51, 241, 240, 68, 68, 51, 0,
+                        80, 1, 0, 1, 0, 3, 50, 0, 1, 1, 1, 1, 0, 1, 85, 0, 1, 1, 0, 0, 255, 0, 0,
+                        1, 1, 1, 0, 0, 255, 255, 255, 3, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values([(SettingId::DolbyAudio, "Music".into())]);
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::DolbyAudio, "Podcast".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([16, 129]),
+                    vec![1, 1, 1],
+                )],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]

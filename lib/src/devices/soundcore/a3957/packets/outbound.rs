@@ -1,6 +1,18 @@
 use itertools::Itertools;
 
-use crate::devices::soundcore::common::{self, packet, structures::OptionalVolumeAdjustmentsExt};
+use crate::devices::soundcore::{
+    a3957::structures::ImmersiveExperience,
+    common::{self, packet, structures::OptionalVolumeAdjustmentsExt},
+};
+
+// Command verified on a Liberty 5. Payload layout matches a3953/a3954/d1202:
+// [enabled, effect mode, mode].
+pub fn set_immersive_experience(immersive_experience: ImmersiveExperience) -> packet::Outbound {
+    packet::Outbound::new(
+        packet::Command([16, 129]),
+        immersive_experience.bytes().collect(),
+    )
+}
 
 pub fn set_equalizer_configuration<
     const CHANNELS: usize,
