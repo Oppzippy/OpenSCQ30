@@ -67,6 +67,10 @@ fn main() -> anyhow::Result<()> {
         config::AppTheme::Light => cosmic::app::Settings::default().theme(cosmic::Theme::light()),
         config::AppTheme::Dark => cosmic::app::Settings::default().theme(cosmic::Theme::dark()),
     };
+    // Use the native macOS title bar (with the standard close/minimize/zoom buttons) instead of
+    // libcosmic's client-side decorations, which look out of place on macOS.
+    #[cfg(target_os = "macos")]
+    let cosmic_settings = cosmic_settings.client_decorations(false);
     cosmic::app::run::<app::AppModel>(cosmic_settings, app::AppFlags { config, config_dir })?;
 
     Ok(())
