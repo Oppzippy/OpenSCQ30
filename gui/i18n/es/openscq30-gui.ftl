@@ -50,3 +50,7 @@ am = AM
 pm = PM
 hour = Hora
 minute = Minuto
+theme = Aspecto
+system-theme = Predeterminado del sistema
+light-theme = Claro
+dark-theme = Oscuro

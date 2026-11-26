@@ -75,7 +75,7 @@
     <string name="preset">Preajuste</string>
     <string name="custom">Personalizado</string>
     <string name="selected">Seleccionado</string>
-    <string name="theme">Tema</string>
+    <string name="theme">Aspecto</string>
     <string name="system_theme">Del sistema</string>
     <string name="light">Claro</string>
     <string name="dark">Oscuro</string>
@@ -85,4 +85,5 @@
     <string name="visible_settings">Parámetros visibles</string>
     <string name="appearance">Apariencia</string>
     <string name="compact_layout">Diseño reducido</string>
+    <string name="location_permission_is_required">Esta versión de Android necesita el permiso de ubicación para poder activar el Bluetooth</string>
 </resources>

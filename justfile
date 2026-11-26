@@ -18,12 +18,14 @@ list:
 [group("build")]
 build-gui features='': create-build-output-dir
     just gui::build release '{{ features }}'
+    rm -f '{{ build-output-dir }}/openscq30-gui'
     cp target/release/openscq30-gui '{{ build-output-dir }}/'
 
 [doc("Run a release build with excessively slow optimizations disabled")]
 [group("build")]
 build-gui-fast features='': create-build-output-dir
     just gui::build release-fast '{{ features }}'
+    rm -f '{{ build-output-dir }}/openscq30-gui'
     cp target/release-fast/openscq30-gui '{{ build-output-dir }}/'
 
 [doc("Build the windows installer. The gui must be built first.")]
@@ -33,16 +35,24 @@ build-gui-installer: create-build-output-dir
     ./packaging/windows/build.sh
     cp packaging/windows/Output/openscq30-gui-installer.exe '{{ build-output-dir }}/'
 
+[doc("Build the macos app bundle. The gui must be built first.")]
+[group("build")]
+[macos]
+build-gui-bundle: create-build-output-dir
+    ./packaging/macos/build.sh
+
 [doc("Run a fully optimized release build")]
 [group("build")]
 build-cli features='': create-build-output-dir
     just cli::build release '{{ features }}'
+    rm -f '{{ build-output-dir }}/openscq30'
     cp target/release/openscq30 '{{ build-output-dir }}/'
 
 [doc("Run a release build with excessively slow optimizations disabled")]
 [group("build")]
 build-cli-fast features='': create-build-output-dir
     just cli::build release-fast '{{ features }}'
+    rm -f '{{ build-output-dir }}/openscq30'
     cp target/release-fast/openscq30 '{{ build-output-dir }}/'
 
 android-apk-path := "./android/app/build/outputs/apk"

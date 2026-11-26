@@ -85,4 +85,5 @@
     <string name="appearance">Görünüm</string>
     <string name="compact_layout">Kompakt Düzen</string>
     <string name="visible_settings">Görünebilir Ayarlar</string>
+    <string name="location_permission_is_required">Bu Android sürümünde Bluetooth için Konum İzni Gereklidir</string>
 </resources>

@@ -117,6 +117,10 @@ embed-resource = "3"
 pathfinding = "4"
 palette = "0.7"
 bitflags = "2"
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-core-foundation = "0.3"
+objc2-io-bluetooth = "0.3"
 
 [patch.'https://github.com/wash2/accesskit']
 accesskit = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-0.14" }

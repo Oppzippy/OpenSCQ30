@@ -8,6 +8,9 @@ cfg_select! {
     target_os = "windows" => {
         mod windows;
     }
+    target_os = "macos" => {
+        mod macos;
+    }
     _ => {
         mod none;
     }
@@ -29,6 +32,9 @@ pub fn default_backends() -> Option<impl ConnectionBackends> {
         }
         target_os = "windows" => {
             Some(windows::PlatformConnectionBackends)
+        }
+        target_os = "macos" => {
+            Some(macos::PlatformConnectionBackends)
         }
         _ => {
             None::<none::NoneConnectionBackends>
