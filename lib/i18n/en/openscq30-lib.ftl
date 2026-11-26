@@ -1,3 +1,4 @@
+soundcore-a3983 = Soundcore Life Note 3i
 soundcore-a3004 = Soundcore Q20I
 soundcore-a3005 = Soundcore Q11i
 soundcore-a3027 = Soundcore Life Q35
