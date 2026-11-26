@@ -14,6 +14,8 @@
     <string>2.13.0</string>
     <key>CFBundleExecutable</key>
     <string>openscq30-gui</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
