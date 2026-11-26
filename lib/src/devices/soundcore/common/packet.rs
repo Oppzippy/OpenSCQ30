@@ -195,9 +195,20 @@ impl Direction {
         self,
     ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], Self, E> {
         move |input| {
+            // The fifth header byte of an inbound packet is not always 0x01.
+            // The Liberty 5 Pro (D1203) echoes `41 87` writes with 0x03, and
+            // rejecting those made the write look like it never got an ACK.
+            let significant = match self {
+                Self::Outbound => &self.bytes()[..],
+                Self::Inbound => &self.bytes()[..4],
+            };
+            let rest_len = self.bytes().len() - significant.len();
             context(
                 "packet direction",
-                map(tag(self.bytes().as_slice()), |_| self),
+                map(
+                    (tag(significant), take(rest_len)),
+                    |_| self,
+                ),
             )
             .parse(input)
         }
@@ -232,6 +243,22 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use super::*;
+
+    #[test]
+    fn inbound_accepts_any_fifth_header_byte() {
+        // `41 87` echo captured from a Liberty 5 Pro, header ends in 0x03.
+        let bytes = [9, 255, 0, 0, 3, 65, 135, 12, 0, 0, 1, 224];
+        let (remainder, packet) = Inbound::take_with_checksum::<VerboseError<_>>(&bytes).unwrap();
+        assert!(remainder.is_empty());
+        assert_eq!(packet.command, Command([0x41, 0x87]));
+        assert_eq!(packet.body, vec![0, 1]);
+    }
+
+    #[test]
+    fn outbound_still_requires_exact_header() {
+        let bytes = [8, 0xee, 0, 0, 1, 0, 1, 10, 0, 2, 0];
+        assert!(Outbound::take_with_checksum::<VerboseError<_>>(&bytes).is_err());
+    }
 
     #[test]
     fn to_and_from_bytes() {
