@@ -162,7 +162,21 @@ impl Application for AppModel {
         &mut self.core
     }
 
-    fn init(core: Core, flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
+    fn init(
+        #[cfg_attr(not(target_os = "macos"), allow(unused_mut))] mut core: Core,
+        flags: Self::Flags,
+    ) -> (Self, cosmic::app::Task<Self::Message>) {
+        // The native macOS title bar already provides window controls (see main.rs), so hide
+        // libcosmic's own controls from the header bar, and don't round the corners of content
+        // inside the native window frame.
+        #[cfg(target_os = "macos")]
+        {
+            core.window.show_close = false;
+            core.window.show_maximize = false;
+            core.window.show_minimize = false;
+            core.window.sharp_corners = true;
+        }
+
         let about = widget::about::About::default()
             .name(fl!("openscq30"))
             .icon(crate::icons::openscq30())
