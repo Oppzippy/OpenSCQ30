@@ -266,6 +266,7 @@ pub enum SettingId {
     #[translate("alarm-n-snooze-duration-minutes", number = 5)]
     Alarm5SnoozeDuration,
     HeyAnkaWakeWord,
+    InCallSoundAwareness,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
