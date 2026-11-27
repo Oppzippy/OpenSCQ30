@@ -85,4 +85,5 @@
     <string name="visible_settings">Configurações visíveis</string>
     <string name="appearance">Aparência</string>
     <string name="compact_layout">Layout compacto</string>
+    <string name="location_permission_is_required">Esta versão do Android requer permissão de localização para usar o Bluetooth</string>
 </resources>

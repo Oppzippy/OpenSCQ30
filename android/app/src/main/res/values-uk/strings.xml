@@ -106,4 +106,9 @@
     <string name="custom">Власні</string>
     <string name="selected">Вибрано</string>
     <string name="preset">Задані</string>
+    <string name="appearance">Вигляд</string>
+    <string name="compact_layout">Компактний вигляд</string>
+    <string name="location_permission_is_required">Потрібен доступ до геоданих для Bluetooth у цій версії Android</string>
+    <string name="in_effect">Діє</string>
+    <string name="visible_settings">Видимі налаштування</string>
 </resources>
