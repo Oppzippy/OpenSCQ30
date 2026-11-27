@@ -1,3 +1,5 @@
+#[cfg(target_os = "linux")]
+pub mod adaptive_eq;
 mod completions;
 mod device;
 mod list_models;
@@ -15,81 +17,14 @@ pub fn build() -> Command {
         .required(true)
         .value_parser(value_parser!(DeviceModel));
     let json_arg = arg!(-j --json "Output as JSON");
-    Command::new(env!("CARGO_BIN_NAME"))
-        .version(env!("CARGO_PKG_VERSION"))
-        .about("Application for managing Soundcore's bluetooth headphones, earbuds, and speakers")
-        .max_term_width(100) // Width is 100 by default in clap v5, so remove this when it releases
-        .after_help(
-"A device must first be paired with openscq30. This is not the same as bluetooth pairing. This refers to informing openscq30 of the mac address and model of the device. See `openscq30 paired-devices`.
-
-Once the device is paired, see `openscq30 device` to interact with device settings."
-        )
-        .arg(
-            arg!(--"debug-errors" "Displays additional information with errors for debugging purposes. Deprecated, use --verbose instead.")
-                .hide(true)
-        )
-        .arg(
-            arg!(-v --verbose "Enables logging with warn log level. Using this argument multiple times will decrease min log level, up to -vvvv.")
-                .action(ArgAction::Count),
-        )
+    let device_subcommand = Command::new("device")
+        .about("Device settings")
+        .arg(mac_address_arg.to_owned())
         .subcommand_required(true)
         .subcommand(
-            Command::new("paired-devices")
-                .about("Pair bluetooth devices with openscq30")
-                .subcommand_required(true)
-                .subcommand(
-                    Command::new("add")
-                        .about("Pair a device with openscq30")
-                        .after_help(
-"openscq30 needs to know what model your device is. This is where you provide the necessary information to be able to connect to a device. It should already be paired using bluetooth at this point.
-
-See `openscq30 list-models` for a list of supported device models. This should also be used to find the model id if you only know the name. Soundcore Life Q30 is SoundcoreA3028 for example."
-                        )
-                        .arg(mac_address_arg.to_owned())
-                        .arg(device_model_arg.to_owned())
-                        .arg(arg!(--"demo" "Enable demo mode for the device")),
-                )
-                .subcommand(
-                    Command::new("remove")
-                        .alias("delete")
-                        .about("Remove a paired device")
-                        .arg(mac_address_arg.to_owned())
-                )
-                .subcommand(
-                    Command::new("list")
-                        .alias("ls")
-                        .about("List all currently paired devices")
-                        .after_help(
-r#"By default, this will output a table with a column for device model, mac address, and if it's a demo or real device.
-
-JSON output (--json) is recommended for scripts. It will instead output an array of objects with the previously mentioned columns as keys instead.
-
-Here is example output with the --json flag:
-[
-  {
-    "macAddress": "00:00:00:00:00:02",
-    "model": "SoundcoreA3028",
-    "isDemo": true
-  },
-  {
-    "macAddress": "00:00:00:00:00:0D",
-    "model": "SoundcoreA3936",
-    "isDemo": true
-  }
-]"#
-                        )
-                        .arg(json_arg.clone())
-                ),
-        )
-        .subcommand(
-            Command::new("device")
-                .about("Device settings")
-                .arg(mac_address_arg.to_owned())
-                .subcommand_required(true)
-                .subcommand(
-                    Command::new("list-settings")
-                        .about("List all currently available settings")
-                        .after_help(
+            Command::new("list-settings")
+                .about("List all currently available settings")
+                .after_help(
 r#"All controls exposed by openscq30 have a unique setting id. Those settings can be of varying types, such as a toggle, select, range, etc. Setting categories are only used for showing related settings together to the user. They aren't used otherwise.
 
 This will list all settings that are currently available. Available settings may change depending on the device's state. As an example, some devices only support some features on newer firmware versions.
@@ -167,15 +102,15 @@ With `--no-categories` (only one setting shown as the contents of that object ar
   }
 }
 "#
-                        )
-                        .arg(arg!(--"no-categories" "Don't display category headers"))
-                        .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id"))
-                        .arg(json_arg.clone())
                 )
-                .subcommand(
-                    Command::new("setting")
-                        .about("get/set setting values")
-                        .after_help(
+                .arg(arg!(--"no-categories" "Don't display category headers"))
+                .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id"))
+                .arg(json_arg.clone())
+        )
+        .subcommand(
+            Command::new("setting")
+                .about("get/set setting values")
+                .after_help(
 r#"`--get` and `--set` may be used multiple times to get/set multiple settings. Operations will be executed in the order of the arguments. A get before a set will print the original value, and a get after a set will print the value it was set to.
 
 Most value types are straight forward. For strings and numbers, enter the value as is. There are some exceptions:
@@ -190,19 +125,91 @@ Modifiable selects: Prefix with '+' to add an item to the list, or '-' to remove
 Equalizers: All bands must be specified, and numbers should be separated with ','. Examples:
 - `--set volumeAdjustments -40,-30,-20,-10,0,1,2,3` when fractional digits is 1 (see `openscq30 device list-settings --help` for info on fractional digits) will assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
 "#
-                        )
-                        .arg(
-                            arg!(-g --get <SETTING_ID> "Gets the value of a setting")
-                                .action(ArgAction::Append),
-                        )
-                        .arg(
-                            arg!(-s --set <"SETTING_ID=VALUE"> "Sets the value of a setting.")
-                                .action(ArgAction::Append),
-                        )
-                        .arg(json_arg.clone()),
                 )
+                .arg(
+                    arg!(-g --get <SETTING_ID> "Gets the value of a setting")
+                        .action(ArgAction::Append),
+                )
+                .arg(
+                    arg!(-s --set <"SETTING_ID=VALUE"> "Sets the value of a setting.")
+                        .action(ArgAction::Append),
+                )
+                .arg(json_arg.clone()),
+        );
+    #[cfg(target_os = "linux")]
+    let device_subcommand = device_subcommand.subcommand(adaptive_eq::build_subcommand());
+
+    let cmd = Command::new(env!("CARGO_BIN_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .about("Application for managing Soundcore's bluetooth headphones, earbuds, and speakers")
+        .max_term_width(100) // Width is 100 by default in clap v5, so remove this when it releases
+        .after_help(
+"A device must first be paired with openscq30. This is not the same as bluetooth pairing. This refers to informing openscq30 of the mac address and model of the device. See `openscq30 paired-devices`.
+
+Once the device is paired, see `openscq30 device` to interact with device settings."
         )
+        .arg(
+            arg!(--"debug-errors" "Displays additional information with errors for debugging purposes. Deprecated, use --verbose instead.")
+                .hide(true)
+        )
+        .arg(
+            arg!(-v --verbose "Enables logging with warn log level. Using this argument multiple times will decrease min log level, up to -vvvv.")
+                .action(ArgAction::Count),
+        )
+        .subcommand_required(true)
         .subcommand(
+            Command::new("paired-devices")
+                .about("Pair bluetooth devices with openscq30")
+                .subcommand_required(true)
+                .subcommand(
+                    Command::new("add")
+                        .about("Pair a device with openscq30")
+                        .after_help(
+"openscq30 needs to know what model your device is. This is where you provide the necessary information to be able to connect to a device. It should already be paired using bluetooth at this point.
+
+See `openscq30 list-models` for a list of supported device models. This should also be used to find the model id if you only know the name. Soundcore Life Q30 is SoundcoreA3028 for example."
+                        )
+                        .arg(mac_address_arg.to_owned())
+                        .arg(device_model_arg.to_owned())
+                        .arg(arg!(--"demo" "Enable demo mode for the device")),
+                )
+                .subcommand(
+                    Command::new("remove")
+                        .alias("delete")
+                        .about("Remove a paired device")
+                        .arg(mac_address_arg.to_owned())
+                )
+                .subcommand(
+                    Command::new("list")
+                        .alias("ls")
+                        .about("List all currently paired devices")
+                        .after_help(
+r#"By default, this will output a table with a column for device model, mac address, and if it's a demo or real device.
+
+JSON output (--json) is recommended for scripts. It will instead output an array of objects with the previously mentioned columns as keys instead.
+
+Here is example output with the --json flag:
+[
+  {
+    "macAddress": "00:00:00:00:00:02",
+    "model": "SoundcoreA3028",
+    "isDemo": true
+  },
+  {
+    "macAddress": "00:00:00:00:00:0D",
+    "model": "SoundcoreA3936",
+    "isDemo": true
+  }
+]"#
+                        )
+                        .arg(json_arg.clone())
+                ),
+        )
+        .subcommand(device_subcommand);
+    #[cfg(target_os = "linux")]
+    let cmd = cmd.subcommand(adaptive_eq::build_subcommand());
+
+    cmd.subcommand(
             Command::new("list-models")
                 .about("List all supported device models and their names")
                 .after_help(
@@ -225,6 +232,8 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
     match matches.subcommand().unwrap() {
         ("paired-devices", matches) => pair::handle(matches).await?,
         ("device", matches) => device::handle(matches).await?,
+        #[cfg(target_os = "linux")]
+        ("adaptive-eq", matches) => adaptive_eq::handle(matches, None).await?,
         ("completions", matches) => completions::handle(matches)?,
         ("list-models", matches) => list_models::handle(matches)?,
         _ => (),
